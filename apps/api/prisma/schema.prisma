@@ -1,0 +1,347 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  roles     String   // stored as JSON string array
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  skills         UserSkill[]
+  learningGoals  LearningGoal[]
+  availabilities Availability[]
+  education      Education[]
+  experience     WorkExperience[]
+  certifications Certification[]
+  resumes        Resume[]
+  projectsOwned  Project[]       @relation("ProjectOwner")
+  memberships    ProjectMember[]
+  invitations    ProjectInvitation[]
+  joinRequests   JoinRequest[]
+  portfolio      PortfolioProject[]
+  contributions  ContributionEvent[]
+}
+
+model Skill {
+  id         String       @id @default(uuid())
+  name       String       @unique
+  category   String
+  aliases    SkillAlias[]
+  userSkills UserSkill[]
+}
+
+model SkillAlias {
+  id      String @id @default(uuid())
+  alias   String
+  skillId String
+  skill   Skill  @relation(fields: [skillId], references: [id])
+}
+
+model UserSkill {
+  id      String @id @default(uuid())
+  userId  String
+  skillId String
+  level   String
+  user    User   @relation(fields: [userId], references: [id])
+  skill   Skill  @relation(fields: [skillId], references: [id])
+}
+
+model LearningGoal {
+  id      String @id @default(uuid())
+  userId  String
+  goal    String
+  user    User   @relation(fields: [userId], references: [id])
+}
+
+model Availability {
+  id      String @id @default(uuid())
+  userId  String
+  status  String
+  user    User   @relation(fields: [userId], references: [id])
+}
+
+model Education {
+  id          String @id @default(uuid())
+  userId      String
+  institution String
+  degree      String
+  user        User   @relation(fields: [userId], references: [id])
+}
+
+model WorkExperience {
+  id      String @id @default(uuid())
+  userId  String
+  company String
+  role    String
+  user    User   @relation(fields: [userId], references: [id])
+}
+
+model Certification {
+  id      String @id @default(uuid())
+  userId  String
+  name    String
+  user    User   @relation(fields: [userId], references: [id])
+}
+
+model Resume {
+  id          String   @id @default(uuid())
+  userId      String
+  url         String
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+  extractions ResumeExtraction[]
+}
+
+model ResumeExtraction {
+  id       String @id @default(uuid())
+  resumeId String
+  data     String // JSON string
+  resume   Resume @relation(fields: [resumeId], references: [id])
+}
+
+model Project {
+  id        String   @id @default(uuid())
+  ownerId   String
+  title     String
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  owner        User                 @relation("ProjectOwner", fields: [ownerId], references: [id])
+  requirements ProjectRequirement[]
+  roles        ProjectRole[]
+  members      ProjectMember[]
+  invitations  ProjectInvitation[]
+  joinRequests JoinRequest[]
+  tasks        Task[]
+  milestones   Milestone[]
+  resources    ProjectResource[]
+  notes        MeetingNote[]
+  chatRooms    ChatRoom[]
+  completions  ProjectCompletion[]
+  verifications ProjectVerification[]
+}
+
+model ProjectRequirement {
+  id        String  @id @default(uuid())
+  projectId String
+  detail    String
+  project   Project @relation(fields: [projectId], references: [id])
+}
+
+model ProjectRole {
+  id        String  @id @default(uuid())
+  projectId String
+  title     String
+  project   Project @relation(fields: [projectId], references: [id])
+}
+
+model ProjectMember {
+  id        String  @id @default(uuid())
+  projectId String
+  userId    String
+  role      String
+  project   Project @relation(fields: [projectId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+}
+
+model ProjectInvitation {
+  id        String  @id @default(uuid())
+  projectId String
+  userId    String
+  status    String
+  project   Project @relation(fields: [projectId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+}
+
+model JoinRequest {
+  id        String  @id @default(uuid())
+  projectId String
+  userId    String
+  status    String
+  project   Project @relation(fields: [projectId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+}
+
+model Task {
+  id        String        @id @default(uuid())
+  projectId String
+  title     String
+  status    String
+  project   Project       @relation(fields: [projectId], references: [id])
+  comments  TaskComment[]
+  history   TaskHistory[]
+}
+
+model TaskComment {
+  id      String @id @default(uuid())
+  taskId  String
+  content String
+  task    Task   @relation(fields: [taskId], references: [id])
+}
+
+model TaskHistory {
+  id     String @id @default(uuid())
+  taskId String
+  event  String
+  task   Task   @relation(fields: [taskId], references: [id])
+}
+
+model Milestone {
+  id        String  @id @default(uuid())
+  projectId String
+  title     String
+  status    String
+  project   Project @relation(fields: [projectId], references: [id])
+}
+
+model ProjectResource {
+  id        String  @id @default(uuid())
+  projectId String
+  url       String
+  project   Project @relation(fields: [projectId], references: [id])
+}
+
+model MeetingNote {
+  id        String  @id @default(uuid())
+  projectId String
+  content   String
+  project   Project @relation(fields: [projectId], references: [id])
+}
+
+model ChatRoom {
+  id        String    @id @default(uuid())
+  projectId String
+  project   Project   @relation(fields: [projectId], references: [id])
+  messages  Message[]
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  roomId     String
+  content    String
+  createdAt  DateTime @default(now())
+  room       ChatRoom @relation(fields: [roomId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model GitHubIntegration {
+  id     String @id @default(uuid())
+  userId String
+  token  String
+}
+
+model ContributionEvent {
+  id        String   @id @default(uuid())
+  userId    String
+  projectId String
+  detail    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model ProjectCompletion {
+  id        String   @id @default(uuid())
+  projectId String
+  status    String
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id])
+}
+
+model ProjectVerification {
+  id        String   @id @default(uuid())
+  projectId String
+  status    String
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id])
+}
+
+model Certificate {
+  id        String   @id @default(uuid())
+  userId    String
+  projectId String
+  url       String
+  createdAt DateTime @default(now())
+}
+
+model PortfolioProject {
+  id        String   @id @default(uuid())
+  userId    String
+  projectId String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Company {
+  id          String             @id @default(uuid())
+  name        String
+  recruiters  RecruiterMember[]
+  jobs        Job[]
+}
+
+model RecruiterMember {
+  id        String  @id @default(uuid())
+  companyId String
+  userId    String
+  company   Company @relation(fields: [companyId], references: [id])
+}
+
+model Job {
+  id          String            @id @default(uuid())
+  companyId   String
+  title       String
+  status      String
+  company     Company           @relation(fields: [companyId], references: [id])
+  matches     CandidateMatch[]
+  shortlists  Shortlist[]
+  applications Application[]
+}
+
+model CandidateMatch {
+  id        String @id @default(uuid())
+  jobId     String
+  userId    String
+  score     Float
+  job       Job    @relation(fields: [jobId], references: [id])
+}
+
+model Shortlist {
+  id        String @id @default(uuid())
+  jobId     String
+  userId    String
+  job       Job    @relation(fields: [jobId], references: [id])
+}
+
+model Application {
+  id        String @id @default(uuid())
+  jobId     String
+  userId    String
+  status    String
+  job       Job    @relation(fields: [jobId], references: [id])
+}
+
+model Report {
+  id        String   @id @default(uuid())
+  type      String
+  status    String
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  createdAt DateTime @default(now())
+}

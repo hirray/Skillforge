@@ -1,0 +1,747 @@
+openapi: 3.0.0
+info:
+  title: SkillForge API
+  version: 1.0.0
+servers:
+  - url: /api/v1
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []
+paths:
+  /auth/register:
+    post:
+      summary: POST /auth/register
+      responses:
+        '200':
+          description: Successful response
+  /auth/login:
+    post:
+      summary: POST /auth/login
+      responses:
+        '200':
+          description: Successful response
+  /auth/dev-login/{userId}:
+    post:
+      summary: POST /auth/dev-login/{userId}
+      responses:
+        '200':
+          description: Successful response
+  /auth/refresh:
+    post:
+      summary: POST /auth/refresh
+      responses:
+        '200':
+          description: Successful response
+  /auth/logout:
+    post:
+      summary: POST /auth/logout
+      responses:
+        '200':
+          description: Successful response
+  /auth/me:
+    get:
+      summary: GET /auth/me
+      responses:
+        '200':
+          description: Successful response
+  /users/me:
+    get:
+      summary: GET /users/me
+      responses:
+        '200':
+          description: Successful response
+    patch:
+      summary: PATCH /users/me
+      responses:
+        '200':
+          description: Successful response
+  /users/{id}:
+    get:
+      summary: GET /users/{id}
+      responses:
+        '200':
+          description: Successful response
+  /users/me/availability:
+    put:
+      summary: PUT /users/me/availability
+      responses:
+        '200':
+          description: Successful response
+  /users/me/visibility:
+    put:
+      summary: PUT /users/me/visibility
+      responses:
+        '200':
+          description: Successful response
+  /users/me/skills:
+    post:
+      summary: POST /users/me/skills
+      responses:
+        '200':
+          description: Successful response
+    delete:
+      summary: DELETE /users/me/skills
+      responses:
+        '200':
+          description: Successful response
+  /users/me/education:
+    post:
+      summary: POST /users/me/education
+      responses:
+        '200':
+          description: Successful response
+    delete:
+      summary: DELETE /users/me/education
+      responses:
+        '200':
+          description: Successful response
+  /users/me/experience:
+    post:
+      summary: POST /users/me/experience
+      responses:
+        '200':
+          description: Successful response
+    delete:
+      summary: DELETE /users/me/experience
+      responses:
+        '200':
+          description: Successful response
+  /users/me/certifications:
+    post:
+      summary: POST /users/me/certifications
+      responses:
+        '200':
+          description: Successful response
+    delete:
+      summary: DELETE /users/me/certifications
+      responses:
+        '200':
+          description: Successful response
+  /users/me/learning-goals:
+    put:
+      summary: PUT /users/me/learning-goals
+      responses:
+        '200':
+          description: Successful response
+  /skills:
+    get:
+      summary: GET /skills
+      responses:
+        '200':
+          description: Successful response
+  /skills/proposals:
+    post:
+      summary: POST /skills/proposals
+      responses:
+        '200':
+          description: Successful response
+  /skills/{id}:
+    get:
+      summary: GET /skills/{id}
+      responses:
+        '200':
+          description: Successful response
+  /resumes:
+    post:
+      summary: POST /resumes
+      responses:
+        '200':
+          description: Successful response
+  /resumes/{id}:
+    get:
+      summary: GET /resumes/{id}
+      responses:
+        '200':
+          description: Successful response
+  /resumes/{id}/extraction:
+    get:
+      summary: GET /resumes/{id}/extraction
+      responses:
+        '200':
+          description: Successful response
+  /resumes/{id}/confirm:
+    post:
+      summary: POST /resumes/{id}/confirm
+      responses:
+        '200':
+          description: Successful response
+  /projects:
+    get:
+      summary: GET /projects
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: POST /projects
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}:
+    get:
+      summary: GET /projects/{id}
+      responses:
+        '200':
+          description: Successful response
+    patch:
+      summary: PATCH /projects/{id}
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/transition:
+    post:
+      summary: POST /projects/{id}/transition
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/requirements:
+    get:
+      summary: GET /projects/{id}/requirements
+      responses:
+        '200':
+          description: Successful response
+    put:
+      summary: PUT /projects/{id}/requirements
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/roles:
+    get:
+      summary: GET /projects/{id}/roles
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/invitations:
+    post:
+      summary: POST /projects/{id}/invitations
+      responses:
+        '200':
+          description: Successful response
+  /invitations/{id}/respond:
+    post:
+      summary: POST /invitations/{id}/respond
+      responses:
+        '200':
+          description: Successful response
+  /users/me/invitations:
+    get:
+      summary: GET /users/me/invitations
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/join-requests:
+    post:
+      summary: POST /projects/{id}/join-requests
+      responses:
+        '200':
+          description: Successful response
+  /join-requests/{id}:
+    patch:
+      summary: PATCH /join-requests/{id}
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/members:
+    get:
+      summary: GET /projects/{id}/members
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/members/{userId}:
+    patch:
+      summary: PATCH /projects/{id}/members/{userId}
+      responses:
+        '200':
+          description: Successful response
+    delete:
+      summary: DELETE /projects/{id}/members/{userId}
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/transfer-ownership:
+    post:
+      summary: POST /projects/{id}/transfer-ownership
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/tasks:
+    get:
+      summary: GET /projects/{id}/tasks
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: POST /projects/{id}/tasks
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/tasks/{taskId}:
+    get:
+      summary: GET /projects/{id}/tasks/{taskId}
+      responses:
+        '200':
+          description: Successful response
+    patch:
+      summary: PATCH /projects/{id}/tasks/{taskId}
+      responses:
+        '200':
+          description: Successful response
+    delete:
+      summary: DELETE /projects/{id}/tasks/{taskId}
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/milestones:
+    get:
+      summary: GET /projects/{id}/milestones
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: POST /projects/{id}/milestones
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/milestones/{milestoneId}:
+    get:
+      summary: GET /projects/{id}/milestones/{milestoneId}
+      responses:
+        '200':
+          description: Successful response
+    patch:
+      summary: PATCH /projects/{id}/milestones/{milestoneId}
+      responses:
+        '200':
+          description: Successful response
+    delete:
+      summary: DELETE /projects/{id}/milestones/{milestoneId}
+      responses:
+        '200':
+          description: Successful response
+  /tasks/{id}/history:
+    get:
+      summary: GET /tasks/{id}/history
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/messages:
+    get:
+      summary: GET /projects/{id}/messages
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: POST /projects/{id}/messages
+      responses:
+        '200':
+          description: Successful response
+  /chats:
+    get:
+      summary: GET /chats
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: POST /chats
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/resources:
+    get:
+      summary: GET /projects/{id}/resources
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: POST /projects/{id}/resources
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/resources/{resourceId}:
+    get:
+      summary: GET /projects/{id}/resources/{resourceId}
+      responses:
+        '200':
+          description: Successful response
+    patch:
+      summary: PATCH /projects/{id}/resources/{resourceId}
+      responses:
+        '200':
+          description: Successful response
+    delete:
+      summary: DELETE /projects/{id}/resources/{resourceId}
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/meeting-notes:
+    get:
+      summary: GET /projects/{id}/meeting-notes
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: POST /projects/{id}/meeting-notes
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/meeting-notes/{noteId}:
+    get:
+      summary: GET /projects/{id}/meeting-notes/{noteId}
+      responses:
+        '200':
+          description: Successful response
+    patch:
+      summary: PATCH /projects/{id}/meeting-notes/{noteId}
+      responses:
+        '200':
+          description: Successful response
+    delete:
+      summary: DELETE /projects/{id}/meeting-notes/{noteId}
+      responses:
+        '200':
+          description: Successful response
+  /notifications:
+    get:
+      summary: GET /notifications
+      responses:
+        '200':
+          description: Successful response
+  /notifications/{id}/read:
+    patch:
+      summary: PATCH /notifications/{id}/read
+      responses:
+        '200':
+          description: Successful response
+  /notifications/read-all:
+    post:
+      summary: POST /notifications/read-all
+      responses:
+        '200':
+          description: Successful response
+  /notifications/preferences:
+    get:
+      summary: GET /notifications/preferences
+      responses:
+        '200':
+          description: Successful response
+    put:
+      summary: PUT /notifications/preferences
+      responses:
+        '200':
+          description: Successful response
+  /search:
+    get:
+      summary: GET /search
+      responses:
+        '200':
+          description: Successful response
+  /ai/resume/parse:
+    post:
+      summary: POST /ai/resume/parse
+      responses:
+        '200':
+          description: Successful response
+  /ai/requirements:
+    post:
+      summary: POST /ai/requirements
+      responses:
+        '200':
+          description: Successful response
+  /ai/match:
+    post:
+      summary: POST /ai/match
+      responses:
+        '200':
+          description: Successful response
+  /ai/job-match:
+    post:
+      summary: POST /ai/job-match
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/health:
+    get:
+      summary: GET /projects/{id}/health
+      responses:
+        '200':
+          description: Successful response
+  /integrations/github/connect:
+    get:
+      summary: GET /integrations/github/connect
+      responses:
+        '200':
+          description: Successful response
+  /integrations/github/callback:
+    get:
+      summary: GET /integrations/github/callback
+      responses:
+        '200':
+          description: Successful response
+  /integrations/github:
+    delete:
+      summary: DELETE /integrations/github
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/repos:
+    get:
+      summary: GET /projects/{id}/repos
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: POST /projects/{id}/repos
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/contributions:
+    get:
+      summary: GET /projects/{id}/contributions
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/contributions/{userId}:
+    get:
+      summary: GET /projects/{id}/contributions/{userId}
+      responses:
+        '200':
+          description: Successful response
+  /contributions/{id}/dispute:
+    post:
+      summary: POST /contributions/{id}/dispute
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/completion:
+    post:
+      summary: POST /projects/{id}/completion
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/completion/confirm:
+    post:
+      summary: POST /projects/{id}/completion/confirm
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/verify:
+    post:
+      summary: POST /projects/{id}/verify
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/verification:
+    get:
+      summary: GET /projects/{id}/verification
+      responses:
+        '200':
+          description: Successful response
+  /users/me/certificates:
+    get:
+      summary: GET /users/me/certificates
+      responses:
+        '200':
+          description: Successful response
+  /verify/{certId}:
+    get:
+      summary: GET /verify/{certId}
+      responses:
+        '200':
+          description: Successful response
+  /certificates/{id}/revoke:
+    post:
+      summary: POST /certificates/{id}/revoke
+      responses:
+        '200':
+          description: Successful response
+  /portfolio/{username}:
+    get:
+      summary: GET /portfolio/{username}
+      responses:
+        '200':
+          description: Successful response
+  /users/me/portfolio:
+    get:
+      summary: GET /users/me/portfolio
+      responses:
+        '200':
+          description: Successful response
+    put:
+      summary: PUT /users/me/portfolio
+      responses:
+        '200':
+          description: Successful response
+  /users/me/verified-experience:
+    get:
+      summary: GET /users/me/verified-experience
+      responses:
+        '200':
+          description: Successful response
+  /companies:
+    post:
+      summary: POST /companies
+      responses:
+        '200':
+          description: Successful response
+  /companies/{id}:
+    get:
+      summary: GET /companies/{id}
+      responses:
+        '200':
+          description: Successful response
+    patch:
+      summary: PATCH /companies/{id}
+      responses:
+        '200':
+          description: Successful response
+  /companies/{id}/recruiters:
+    post:
+      summary: POST /companies/{id}/recruiters
+      responses:
+        '200':
+          description: Successful response
+  /jobs:
+    get:
+      summary: GET /jobs
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: POST /jobs
+      responses:
+        '200':
+          description: Successful response
+  /jobs/{id}:
+    get:
+      summary: GET /jobs/{id}
+      responses:
+        '200':
+          description: Successful response
+    patch:
+      summary: PATCH /jobs/{id}
+      responses:
+        '200':
+          description: Successful response
+    delete:
+      summary: DELETE /jobs/{id}
+      responses:
+        '200':
+          description: Successful response
+  /jobs/{id}/interest:
+    post:
+      summary: POST /jobs/{id}/interest
+      responses:
+        '200':
+          description: Successful response
+  /talent/search:
+    post:
+      summary: POST /talent/search
+      responses:
+        '200':
+          description: Successful response
+  /talent/saved-searches:
+    get:
+      summary: GET /talent/saved-searches
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: POST /talent/saved-searches
+      responses:
+        '200':
+          description: Successful response
+  /pipeline:
+    get:
+      summary: GET /pipeline
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: POST /pipeline
+      responses:
+        '200':
+          description: Successful response
+  /pipeline/{id}:
+    patch:
+      summary: PATCH /pipeline/{id}
+      responses:
+        '200':
+          description: Successful response
+  /pipeline/compare:
+    post:
+      summary: POST /pipeline/compare
+      responses:
+        '200':
+          description: Successful response
+  /admin/reports:
+    get:
+      summary: GET /admin/reports
+      responses:
+        '200':
+          description: Successful response
+  /admin/reports/{id}:
+    patch:
+      summary: PATCH /admin/reports/{id}
+      responses:
+        '200':
+          description: Successful response
+  /admin/audit-logs:
+    get:
+      summary: GET /admin/audit-logs
+      responses:
+        '200':
+          description: Successful response
+  /admin/verification-queue:
+    get:
+      summary: GET /admin/verification-queue
+      responses:
+        '200':
+          description: Successful response
+  /admin/skills:
+    get:
+      summary: GET /admin/skills
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: POST /admin/skills
+      responses:
+        '200':
+          description: Successful response
+    patch:
+      summary: PATCH /admin/skills
+      responses:
+        '200':
+          description: Successful response
+  /analytics/summary:
+    get:
+      summary: GET /analytics/summary
+      responses:
+        '200':
+          description: Successful response
+  /mentors:
+    get:
+      summary: GET /mentors
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: POST /mentors
+      responses:
+        '200':
+          description: Successful response
+  /hackathons:
+    get:
+      summary: GET /hackathons
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: POST /hackathons
+      responses:
+        '200':
+          description: Successful response

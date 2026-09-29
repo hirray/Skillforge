@@ -1,0 +1,18 @@
+{
+  "users": [
+    { "id": "user-001", "email": "student@example.com", "roles": "[\"user\"]" },
+    { "id": "user-002", "email": "freelancer@example.com", "roles": "[\"user\"]" },
+    { "id": "user-003", "email": "pro@example.com", "roles": "[\"user\"]" },
+    { "id": "user-004", "email": "founder@example.com", "roles": "[\"user\"]" },
+    { "id": "user-005", "email": "designer@example.com", "roles": "[\"user\"]" },
+    { "id": "user-006", "email": "ml@example.com", "roles": "[\"user\"]" },
+    { "id": "user-007", "email": "cloud@example.com", "roles": "[\"user\"]" },
+    { "id": "user-008", "email": "seeker@example.com", "roles": "[\"user\"]" },
+    { "id": "recruiter-001", "email": "recruiter@example.com", "roles": "[\"recruiter\"]" },
+    { "id": "admin-001", "email": "admin@example.com", "roles": "[\"admin\"]" }
+  ],
+  "skills": [
+    { "id": "skill-001", "name": "React", "category": "Frontend" },
+    { "id": "skill-002", "name": "Node.js", "category": "Backend" }
+  ]
+}

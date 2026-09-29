@@ -1,0 +1,25 @@
+{
+  "name": "skillforge",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "setup": "npm install && node scripts/setup.js",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\" \"npm run dev:ai\"",
+    "dev:api": "npm run dev -w apps/api",
+    "dev:web": "npm run dev -w apps/web",
+    "dev:ai": "node scripts/run-ai.js",
+    "db:reset": "npm run db:reset -w apps/api",
+    "seed": "npm run seed -w apps/api",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present && node scripts/test-ai.js",
+    "check:contract": "npm run check:contract -w apps/api"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

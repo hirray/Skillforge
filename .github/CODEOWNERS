@@ -1,0 +1,7 @@
+* @member1 @member2 @member3 @member4
+/packages/contract/ @member1 @member2 @member3 @member4
+/services/ai/ @member2
+/apps/api/src/modules/auth/ @member1
+/apps/api/src/modules/users/ @member1
+/apps/api/src/modules/skills/ @member1
+/apps/api/src/modules/projects/ @member3
