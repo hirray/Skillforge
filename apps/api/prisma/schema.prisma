@@ -27,6 +27,8 @@ model User {
   joinRequests   JoinRequest[]
   portfolio      PortfolioProject[]
   contributions  ContributionEvent[]
+  tasksAssigned  Task[]              @relation("TaskAssignee")
+  taskComments   TaskComment[]
 }
 
 model Skill {
@@ -107,134 +109,249 @@ model ResumeExtraction {
 }
 
 model Project {
-  id        String   @id @default(uuid())
-  ownerId   String
-  title     String
-  status    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String   @id @default(uuid())
+  ownerId            String
+  title              String
+  description        String   @default("")
+  problemStatement   String?
+  category           String   @default("Web App")
+  type               String?
+  outcome            String?
+  coverImage         String?
+  visibility         String   @default("Public")
+  joinMode           String   @default("both")
+  memberApprovalMode String   @default("owner")
+  minTeamSize        Int      @default(1)
+  maxTeamSize        Int      @default(5)
+  duration           String?
+  targetDate         DateTime?
+  status             String   @default("Draft")
+  stage              String   @default("Idea")
+  budget             Float?
+  paid               Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
   
-  owner        User                 @relation("ProjectOwner", fields: [ownerId], references: [id])
-  requirements ProjectRequirement[]
-  roles        ProjectRole[]
-  members      ProjectMember[]
-  invitations  ProjectInvitation[]
-  joinRequests JoinRequest[]
-  tasks        Task[]
-  milestones   Milestone[]
-  resources    ProjectResource[]
-  notes        MeetingNote[]
-  chatRooms    ChatRoom[]
-  completions  ProjectCompletion[]
-  verifications ProjectVerification[]
+  owner              User                 @relation("ProjectOwner", fields: [ownerId], references: [id])
+  requirements       ProjectRequirement[]
+  roles              ProjectRole[]
+  members            ProjectMember[]
+  invitations        ProjectInvitation[]
+  joinRequests       JoinRequest[]
+  tasks              Task[]
+  milestones         Milestone[]
+  resources          ProjectResource[]
+  notes              MeetingNote[]
+  chatRooms          ChatRoom[]
+  completions        ProjectCompletion[]
+  verifications      ProjectVerification[]
+  activityFeed       ActivityFeedEntry[]
 }
 
 model ProjectRequirement {
-  id        String  @id @default(uuid())
-  projectId String
-  detail    String
-  project   Project @relation(fields: [projectId], references: [id])
+  id         String   @id @default(uuid())
+  projectId  String
+  skillName  String
+  level      String   @default("intermediate")
+  isOptional Boolean  @default(false)
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model ProjectRole {
-  id        String  @id @default(uuid())
+  id        String   @id @default(uuid())
   projectId String
   title     String
-  project   Project @relation(fields: [projectId], references: [id])
+  openings  Int      @default(1)
+  filled    Int      @default(0)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model ProjectMember {
-  id        String  @id @default(uuid())
+  id        String    @id @default(uuid())
   projectId String
   userId    String
-  role      String
-  project   Project @relation(fields: [projectId], references: [id])
-  user      User    @relation(fields: [userId], references: [id])
+  role      String    @default("Contributor")
+  status    String    @default("active") // "active" | "left" | "removed"
+  joinedAt  DateTime  @default(now())
+  leftAt    DateTime?
+  reason    String?
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id])
 }
 
 model ProjectInvitation {
-  id        String  @id @default(uuid())
+  id        String   @id @default(uuid())
   projectId String
-  userId    String
-  status    String
-  project   Project @relation(fields: [projectId], references: [id])
-  user      User    @relation(fields: [userId], references: [id])
+  inviterId String
+  inviteeId String
+  role      String   @default("Contributor")
+  status    String   @default("pending") // "pending" | "accepted" | "declined" | "expired"
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [inviteeId], references: [id])
 }
 
 model JoinRequest {
-  id        String  @id @default(uuid())
+  id        String   @id @default(uuid())
   projectId String
   userId    String
-  status    String
-  project   Project @relation(fields: [projectId], references: [id])
-  user      User    @relation(fields: [userId], references: [id])
+  role      String   @default("Contributor")
+  status    String   @default("pending") // "pending" | "approved" | "rejected" | "withdrawn"
+  message         String?
+  rejectionReason String?
+  version         Int      @default(1)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Task {
-  id        String        @id @default(uuid())
-  projectId String
-  title     String
-  status    String
-  project   Project       @relation(fields: [projectId], references: [id])
-  comments  TaskComment[]
-  history   TaskHistory[]
+  id                 String        @id @default(uuid())
+  projectId          String
+  title              String
+  description        String?
+  priority           String        @default("Medium") // "Low" | "Medium" | "High" | "Critical"
+  status             String        @default("To Do")   // "To Do" | "In Progress" | "In Review" | "Done"
+  assigneeId         String?
+  creatorId          String
+  dueDate            DateTime?
+  estimatedHours     Float?
+  needsReassignment  Boolean       @default(false)
+  milestoneId        String?
+  dependsOn          String        @default("[]") // JSON string array of task IDs
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  completedAt        DateTime?
+  project            Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  milestone          Milestone?    @relation(fields: [milestoneId], references: [id])
+  assignee           User?         @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  comments           TaskComment[]
+  history            TaskHistory[]
 }
 
 model TaskComment {
-  id      String @id @default(uuid())
-  taskId  String
-  content String
-  task    Task   @relation(fields: [taskId], references: [id])
+  id        String   @id @default(uuid())
+  taskId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model TaskHistory {
-  id     String @id @default(uuid())
-  taskId String
-  event  String
-  task   Task   @relation(fields: [taskId], references: [id])
+  id        String   @id @default(uuid())
+  taskId    String
+  userId    String
+  field     String
+  oldValue  String?
+  newValue  String?
+  createdAt DateTime @default(now())
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
 }
 
 model Milestone {
-  id        String  @id @default(uuid())
-  projectId String
-  title     String
-  status    String
-  project   Project @relation(fields: [projectId], references: [id])
+  id                  String             @id @default(uuid())
+  projectId           String
+  title               String
+  description         String?
+  dueDate             DateTime?
+  status              String             @default("To Do") // "To Do" | "In Progress" | "Done" | "Overdue"
+  progressPercentage  Float              @default(0.0)
+  isManualCompletion  Boolean            @default(false)
+  completedBy         String?
+  completedAt         DateTime?
+  completionRationale String?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  project             Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks               Task[]
+  history             MilestoneHistory[]
+}
+
+model MilestoneHistory {
+  id          String    @id @default(uuid())
+  milestoneId String
+  field       String
+  oldValue    String?
+  newValue    String?
+  changedBy   String
+  changedAt   DateTime  @default(now())
+  milestone   Milestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
 }
 
 model ProjectResource {
-  id        String  @id @default(uuid())
+  id        String   @id @default(uuid())
   projectId String
-  url       String
-  project   Project @relation(fields: [projectId], references: [id])
+  title     String
+  type      String   @default("link") // "link" | "file"
+  category  String   @default("Other")
+  url       String?
+  fileKey   String?
+  fileName  String?
+  fileSize  Int?
+  mimeType  String?
+  addedBy   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model MeetingNote {
-  id        String  @id @default(uuid())
+  id        String   @id @default(uuid())
   projectId String
   content   String
-  project   Project @relation(fields: [projectId], references: [id])
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model ChatRoom {
-  id        String    @id @default(uuid())
-  projectId String
-  project   Project   @relation(fields: [projectId], references: [id])
-  messages  Message[]
+  id             String    @id @default(uuid())
+  projectId      String
+  name           String?
+  type           String    @default("group") // "group" | "direct"
+  participant1Id String?
+  participant2Id String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  project        Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  messages       Message[]
 }
 
 model Message {
-  id         String   @id @default(uuid())
-  roomId     String
-  content    String
-  createdAt  DateTime @default(now())
-  room       ChatRoom @relation(fields: [roomId], references: [id])
+  id          String    @id @default(uuid())
+  roomId      String
+  senderId    String
+  content     String
+  parentId    String?
+  isEdited    Boolean   @default(false)
+  isDeleted   Boolean   @default(false)
+  attachments String?   // JSON string
+  mentions    String?   // JSON string array
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  room        ChatRoom  @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+
+model ActivityFeedEntry {
+  id        String   @id @default(uuid())
+  projectId String
+  userId    String
+  action    String
+  details   String?  // JSON metadata
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model Notification {
   id        String   @id @default(uuid())
   userId    String
   message   String
+  type      String   @default("info")
+  link      String?
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 }

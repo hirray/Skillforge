@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const openapiPath = path.join(__dirname, '../../../../packages/contract/openapi.yaml');
+const openapiPath = path.join(__dirname, '../../../packages/contract/openapi.yaml');
 if (!fs.existsSync(openapiPath)) {
   console.error('openapi.yaml not found');
   process.exit(1);

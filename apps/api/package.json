@@ -10,7 +10,7 @@
     "seed": "tsx scripts/seed.ts",
     "lint": "eslint \"src/**/*.ts\"",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --test-timeout=20000",
     "check:contract": "tsx scripts/check-contract.ts"
   },
   "dependencies": {

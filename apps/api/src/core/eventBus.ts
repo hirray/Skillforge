@@ -9,6 +9,14 @@ class EventBus extends EventEmitter {
   onEvent<T extends DomainEvent>(event: T, listener: (payload: EventPayloads[T]) => void) {
     this.on(event, listener);
   }
+
+  publish<T extends DomainEvent>(event: T, payload: EventPayloads[T]) {
+    this.emit(event, payload);
+  }
+
+  subscribe<T extends DomainEvent>(event: T, listener: (payload: EventPayloads[T]) => void) {
+    this.on(event, listener);
+  }
 }
 
 export const eventBus = new EventBus();

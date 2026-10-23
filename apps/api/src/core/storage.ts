@@ -1,28 +1,43 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 
 export interface StorageProvider {
-  upload(fileName: string, buffer: Buffer): Promise<string>;
-  getSignedUrl(fileId: string): Promise<string>;
+  upload(fileKey: string, data: Buffer | string, mimeType: string): Promise<string>;
+  getSignedUrl(fileKey: string, expiresInMinutes?: number): Promise<string>;
+  delete(fileKey: string): Promise<void>;
 }
 
 export class LocalStorageProvider implements StorageProvider {
-  private storageDir = path.join(__dirname, '../../../../storage');
+  private baseDir: string;
 
   constructor() {
-    if (!fs.existsSync(this.storageDir)) {
-      fs.mkdirSync(this.storageDir, { recursive: true });
-    }
+    this.baseDir = path.join(process.cwd(), 'uploads');
   }
 
-  async upload(fileName: string, buffer: Buffer): Promise<string> {
-    const id = Math.random().toString(36).substring(7) + '-' + fileName;
-    fs.writeFileSync(path.join(this.storageDir, id), buffer);
-    return id;
+  private async ensureDir() {
+    try {
+      await fs.mkdir(this.baseDir, { recursive: true });
+    } catch {}
   }
 
-  async getSignedUrl(fileId: string): Promise<string> {
-    return \`http://localhost:\${process.env.PORT || 4000}/api/v1/storage/\${fileId}\`;
+  async upload(fileKey: string, data: Buffer | string, mimeType: string): Promise<string> {
+    await this.ensureDir();
+    const filePath = path.join(this.baseDir, fileKey);
+    const buffer = typeof data === 'string' ? Buffer.from(data, 'base64') : data;
+    await fs.writeFile(filePath, buffer);
+    return fileKey;
+  }
+
+  async getSignedUrl(fileKey: string, expiresInMinutes: number = 60): Promise<string> {
+    const token = Math.random().toString(36).substring(7);
+    return `/api/v1/storage/${fileKey}?token=${token}`;
+  }
+
+  async delete(fileKey: string): Promise<void> {
+    const filePath = path.join(this.baseDir, fileKey);
+    try {
+      await fs.unlink(filePath);
+    } catch {}
   }
 }
 

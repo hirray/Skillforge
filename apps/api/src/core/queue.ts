@@ -1,33 +1,42 @@
-export interface Job {
+export interface QueueJob<T = any> {
   id: string;
   name: string;
-  payload: any;
+  data: T;
 }
 
-export interface QueueProvider {
-  enqueue(name: string, payload: any): Promise<void>;
-  process(name: string, handler: (job: Job) => Promise<void>): void;
+export interface JobQueue {
+  add<T>(name: string, data: T): Promise<QueueJob<T>>;
+  process<T>(name: string, handler: (job: QueueJob<T>) => Promise<void>): void;
 }
 
-export class MemoryQueueProvider implements QueueProvider {
-  private handlers = new Map<string, (job: Job) => Promise<void>>();
+export class InMemoryJobQueue implements JobQueue {
+  private handlers: Map<string, (job: QueueJob<any>) => Promise<void>> = new Map();
 
-  async enqueue(name: string, payload: any): Promise<void> {
-    const handler = this.handlers.get(name);
-    if (handler) {
-      setTimeout(async () => {
+  async add<T>(name: string, data: T): Promise<QueueJob<T>> {
+    const job: QueueJob<T> = {
+      id: Math.random().toString(36).substring(7),
+      name,
+      data,
+    };
+    
+    // Process asynchronously in memory
+    setTimeout(async () => {
+      const handler = this.handlers.get(name);
+      if (handler) {
         try {
-          await handler({ id: Math.random().toString(), name, payload });
+          await handler(job);
         } catch (err) {
-          console.error(\`Job \${name} failed\`, err);
+          console.error(`Error processing job ${name}:`, err);
         }
-      }, 0);
-    }
+      }
+    }, 0);
+
+    return job;
   }
 
-  process(name: string, handler: (job: Job) => Promise<void>): void {
+  process<T>(name: string, handler: (job: QueueJob<T>) => Promise<void>): void {
     this.handlers.set(name, handler);
   }
 }
 
-export const queueProvider = new MemoryQueueProvider();
+export const jobQueue = new InMemoryJobQueue();

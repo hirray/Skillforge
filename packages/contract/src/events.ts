@@ -12,6 +12,7 @@ export enum DomainEvent {
   TaskCreated = 'TaskCreated',
   TaskCompleted = 'TaskCompleted',
   MilestoneReached = 'MilestoneReached',
+  ResourceAdded = 'ResourceAdded',
   ProjectCompletionRequested = 'ProjectCompletionRequested',
   ProjectVerified = 'ProjectVerified',
   CertificateIssued = 'CertificateIssued',
@@ -19,7 +20,8 @@ export enum DomainEvent {
   JobPosted = 'JobPosted',
   JobClosed = 'JobClosed',
   CandidateShortlisted = 'CandidateShortlisted',
-  MessageSent = 'MessageSent'
+  MessageSent = 'MessageSent',
+  ProjectDeleted = 'ProjectDeleted'
 }
 
 export type EventPayloads = {
@@ -29,6 +31,7 @@ export type EventPayloads = {
   [DomainEvent.ResumeParsed]: { resumeId: string; extractionId: string };
   [DomainEvent.ProjectCreated]: { projectId: string; ownerId: string };
   [DomainEvent.ProjectUpdated]: { projectId: string };
+  [DomainEvent.ProjectDeleted]: { projectId: string };
   [DomainEvent.InvitationSent]: { invitationId: string; projectId: string; userId: string };
   [DomainEvent.InvitationResponded]: { invitationId: string; status: string };
   [DomainEvent.MemberJoined]: { projectId: string; userId: string };
@@ -36,6 +39,7 @@ export type EventPayloads = {
   [DomainEvent.TaskCreated]: { taskId: string; projectId: string };
   [DomainEvent.TaskCompleted]: { taskId: string; projectId: string };
   [DomainEvent.MilestoneReached]: { milestoneId: string; projectId: string };
+  [DomainEvent.ResourceAdded]: { resourceId: string; projectId: string; addedBy: string; title: string; type: string };
   [DomainEvent.ProjectCompletionRequested]: { projectId: string };
   [DomainEvent.ProjectVerified]: { projectId: string };
   [DomainEvent.CertificateIssued]: { certificateId: string; userId: string; projectId: string };

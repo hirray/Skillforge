@@ -1,9 +1,9 @@
 import { config } from '../../config';
-import { MockService } from './mock';
-import { RealService } from './real';
+import { realMilestonesService } from './real';
+import { mockMilestonesService } from './mock';
 
-export const getService = () => {
-  const sourceKey = 'AUTH_SOURCE';
-  const isReal = config[sourceKey as keyof typeof config] === 'real';
-  return isReal ? new RealService() : new MockService();
+export const getMilestonesService = () => {
+  return config.MILESTONES_SOURCE === 'real' ? realMilestonesService : mockMilestonesService;
 };
+
+export const getService = getMilestonesService;
