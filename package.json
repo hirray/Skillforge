@@ -17,9 +17,19 @@
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present && node scripts/test-ai.js",
-    "check:contract": "npm run check:contract -w apps/api"
+    "check:contract": "npm run check:contract -w apps/api",
+    "setup:member2": "node scripts/setup-member2.js",
+    "seed:member2": "npm run seed:member2 -w apps/api",
+    "dev:fake-activity": "npm run dev:fake-activity -w apps/api",
+    "eval:matching": "node scripts/eval-matching.js",
+    "test:member2": "npm run test:member2 -w apps/api && node scripts/test-ai.js",
+    "check:member2-contract": "npm run check:member2-contract -w apps/api",
+    "check:member2-migrations": "node scripts/check-migrations.js"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "@typescript-eslint/parser": "^8.72.2",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.57.1",
+    "prettier": "^3.10.1"
   }
 }

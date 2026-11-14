@@ -1,0 +1,17 @@
+domains:
+  - {name: computer vision, phrases: [face recognition, facial recognition, computer vision, image recognition, attendance], skills: [Python, Computer Vision, Machine Learning], role: ML Engineer, modules: [Image processing, Model evaluation]}
+  - {name: web applications, phrases: [web app, website, web platform, dashboard], skills: [React, TypeScript, Node.js], role: Frontend Developer, modules: [Web interface, API]}
+  - {name: mobile, phrases: [mobile app, android, ios, react native], skills: [React Native, TypeScript], role: Mobile Developer, modules: [Mobile client, Notifications]}
+  - {name: ecommerce, phrases: [online store, ecommerce, e-commerce, shopping cart], skills: [React, Node.js, SQL], role: Backend Developer, modules: [Catalog, Checkout, Orders]}
+  - {name: payments, phrases: [payments, billing, subscription], skills: [Node.js, SQL, Security], role: Backend Developer, modules: [Payment ledger, Billing]}
+  - {name: cloud, phrases: [cloud, deploy, aws, infrastructure], skills: [AWS, Docker, CI/CD], role: Cloud Engineer, modules: [Deployment, Monitoring]}
+  - {name: data analysis, phrases: [data analysis, analytics, reporting], skills: [Python, SQL, Data Analysis], role: Data Analyst, modules: [Data pipeline, Reporting]}
+  - {name: natural language, phrases: [chatbot, natural language, text classification], skills: [Python, NLP, Machine Learning], role: ML Engineer, modules: [Text processing, Evaluation]}
+  - {name: realtime communication, phrases: [chat app, messaging, real-time, realtime], skills: [Node.js, WebSockets, React], role: Backend Developer, modules: [Messaging, Presence]}
+  - {name: design, phrases: [user experience, ui design, design system, figma], skills: [Figma, UI/UX Design], role: UI/UX Designer, modules: [Prototypes, Usability testing]}
+  - {name: security, phrases: [security, authentication, encryption], skills: [Security, Node.js], role: Security Engineer, modules: [Access control, Security review]}
+  - {name: games, phrases: [video game, game engine, multiplayer game], skills: [Unity, C#], role: Game Developer, modules: [Gameplay, Game testing]}
+  - {name: iot, phrases: [iot, embedded, sensor], skills: [C++, Python, IoT], role: Embedded Engineer, modules: [Device integration, Telemetry]}
+  - {name: healthcare, phrases: [healthcare, patient, hospital], skills: [Security, SQL, React], role: Backend Developer, modules: [Records, Consent, Scheduling]}
+  - {name: education, phrases: [learning platform, course, education, classroom], skills: [React, Node.js, SQL], role: Frontend Developer, modules: [Courses, Assessment]}
+  - {name: maps, phrases: [maps, location tracking, delivery tracking], skills: [TypeScript, SQL, React], role: Frontend Developer, modules: [Mapping, Tracking]}

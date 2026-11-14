@@ -115,3 +115,17 @@
 
 
 
+
+## Member 2 intelligence workspace
+
+- The user explicitly replaced the original palette for Member 2 with the Giga-inspired dark charcoal/lavender direction. The new theme is scoped to the intelligence workspace; existing tokens and teammates’ page styles are unchanged.
+- The workspace has desktop and narrow layouts, reduced-motion support, editable suggestions, evidence drawers, and deliberate loading/empty/error/permission/success states.
+- Real Python engines are stateless and deterministic. Per-endpoint AI flags fall back to AI_SOURCE. No external LLM or paid key is required. The optional TF-IDF blend remains behind MATCH_RANKER; baseline is the default.
+- Typed request/response proposals stay under Member 2 rather than changing the frozen shared contract. Local utility routes require MEMBER2_EXTENSIONS. See docs/member2/CONTRACT_ADDENDUM.md.
+- Resume originals use generated keys through StorageProvider. Their download handler checks ownership, an HMAC bound to user/resume/expiry, and a five-minute lifetime. Review and original access are logged. The existing project-resource storage implementation is unchanged.
+- Resume confirmation is a transaction with extraction-bound item IDs, per-item choices, edited provenance, preserved manual skills, and idempotency. Links/projects are explicitly retained in the review until their profile integration exists.
+- AiCandidateProfile and AiJobRequirements are Member 2 adapters for missing profile/job detail. Discovery defaults to opt-out; recruiter opt-out is rechecked when reading stored matches. SkillEvidence is additive. Replace adapters through agreed contracts when Members 1/4 merge.
+- Recruiter explanations are append-only by run; an empty latest run does not resurrect older results. CandidateMatch retains the input snapshot.
+- Analytics excludes event payloads from automatic capture, aggregates in SQL, labels synthetic history, and suppresses small cohorts. Job-match run headers store only safe run/job metadata and empty-result summaries; candidate evidence stays in protected CandidateMatch rows.
+- ProjectDetail receives one URL-query initialization line so health actions open the existing Tasks or Milestones tab. Default navigation is unchanged; Member 3 should review this integration line.
+- PDF parser dependencies: pypdf, rapidfuzz and PyYAML. Optional hybrid: scikit-learn. Multer handles bounded multipart uploads. ESLint/parser and Prettier provide repository checks; no shared component was reformatted.

@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { Sidebar } from '../design-system/components';
 import { Card } from '../design-system/components';
 import ProjectsModule from '../modules/projects';
 import MyInvitations from '../modules/team/MyInvitations';
 import TasksModule from '../modules/tasks';
 import ChatModule from '../modules/chat';
+import Member2Workspace from '../modules/ai/Workspace';
 
 const modules = ["auth", "users", "skills", "resumes", "projects", "team", "tasks", "milestones", "chat", "resources", "notifications", "search", "ai", "github", "contribution", "verification", "certificates", "portfolio", "companies", "jobs", "talent", "pipeline", "admin", "analytics", "mentors", "hackathons"];
 
@@ -70,9 +71,8 @@ const UserSwitcherHeader = () => {
   );
 };
 
-const App = () => {
+const LegacyShell = () => {
   return (
-    <BrowserRouter>
       <div className="flex h-screen bg-bg">
         <Sidebar modules={modules} />
         <div className="flex-1 flex flex-col overflow-hidden">
@@ -91,8 +91,13 @@ const App = () => {
           </main>
         </div>
       </div>
-    </BrowserRouter>
   );
 };
+
+const AppSurface = () => {
+  const { pathname } = useLocation();
+  return /^\/(ai|resumes|analytics)(\/|$)/.test(pathname) ? <Member2Workspace /> : <LegacyShell />;
+};
+const App = () => <BrowserRouter><AppSurface /></BrowserRouter>;
 
 export default App;

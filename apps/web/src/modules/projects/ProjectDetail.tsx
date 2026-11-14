@@ -372,7 +372,7 @@ export const ProjectDetail = () => {
   const currentUserId = localStorage.getItem('token') || 'user-001';
 
   const [project, setProject] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState('Overview');
+  const [activeTab, setActiveTab] = useState(() => { const tab = new URLSearchParams(window.location.search).get('tab') || 'Overview'; return ['Overview', 'Team', 'Tasks', 'Milestones', 'Resources', 'Discussions', 'Analytics'].includes(tab) ? tab : 'Overview'; });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [myPendingInvitation, setMyPendingInvitation] = useState<any>(null);

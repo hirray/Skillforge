@@ -1,0 +1,4 @@
+inactivity_days: 7
+at_risk: 3
+needs_attention: 7
+weights: {critical_overdue: 4, high_overdue: 2, milestone_delay: 2, inactive: 2, blocked: 1, reassignment: 2, low_completion: 2}

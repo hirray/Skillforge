@@ -7,5 +7,8 @@ venv/
 dist/
 coverage/
 .DS_Store
+.env.member2.local
+__pycache__/
+*.pyc
 apps/api/uploads/*
 !apps/api/uploads/.gitkeep

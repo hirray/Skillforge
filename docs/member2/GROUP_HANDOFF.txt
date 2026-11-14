@@ -1,0 +1,28 @@
+Member 2 workspace is ready for local review on branch member2/intelligence-workspace.
+
+1. Checkout member2/intelligence-workspace after it is pushed.
+2. Run: npm ci
+3. Run: npm run setup:member2
+4. Run: npm run dev
+5. Open: http://localhost:5173/ai
+
+Setup creates .env.member2.local automatically. It preserves your existing flags and database rows. No paid AI keys are required.
+
+Local development settings:
+RESUMES_SOURCE=real
+AI_RESUME_SOURCE=real
+AI_REQUIREMENTS_SOURCE=real
+AI_MATCH_SOURCE=real
+AI_HEALTH_SOURCE=real
+AI_JOBMATCH_SOURCE=real
+ANALYTICS_SOURCE=real
+AI_SERVICE_URL=http://127.0.0.1:8000
+MATCH_RANKER=baseline
+LLM_PROVIDER=none
+MEMBER2_EXTENSIONS=true
+
+The extension flag enables proposed utility endpoints for local testing pending team contract review. Leave secrets out of Git/group messages. The app still uses the existing development user switcher until Member 1's auth is merged.
+
+Use Project owner for requirements/matching, Recruiter for job matching, and Admin for analytics. Sample resumes are in services/ai/tests/fixtures/. Run npm run dev:fake-activity to generate labelled demo chart history.
+
+Validation details and inherited test failures: docs/member2/VALIDATION.md.

@@ -1,0 +1,4 @@
+required: 0.68
+preferred: 0.17
+experience: 0.15
+soft_constraint_penalty: 0.12

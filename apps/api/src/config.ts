@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import dotenv from 'dotenv';
+dotenv.config({ path: '../../.env.member2.local' });
 dotenv.config({ path: '../../.env' });
 
 const envSchema = z.object({
@@ -12,6 +13,19 @@ const envSchema = z.object({
   MILESTONES_SOURCE: z.enum(['mock', 'real']).default('real'),
   RESOURCES_SOURCE: z.enum(['mock', 'real']).default('real'),
   AI_SOURCE: z.enum(['mock', 'real']).default('mock'),
+  RESUMES_SOURCE: z.enum(['mock', 'real']).default('mock'),
+  AI_RESUME_SOURCE: z.enum(['mock', 'real']).optional(),
+  AI_REQUIREMENTS_SOURCE: z.enum(['mock', 'real']).optional(),
+  AI_MATCH_SOURCE: z.enum(['mock', 'real']).optional(),
+  AI_HEALTH_SOURCE: z.enum(['mock', 'real']).optional(),
+  AI_JOBMATCH_SOURCE: z.enum(['mock', 'real']).optional(),
+  ANALYTICS_SOURCE: z.enum(['mock', 'real']).default('mock'),
+  MATCH_RANKER: z.enum(['baseline', 'hybrid']).default('baseline'),
+  LLM_PROVIDER: z.enum(['none']).default('none'),
+  AI_REQUEST_TIMEOUT_MS: z.coerce.number().int().min(100).max(120000).default(15000),
+  RESUME_RETRY_DELAY_MS: z.coerce.number().int().min(10).default(1000),
+  RESUME_SIGNING_SECRET: z.string().min(24).optional(),
+  MEMBER2_EXTENSIONS: z.enum(['true', 'false']).default('false'),
   GITHUB_SOURCE: z.enum(['mock', 'real']).default('mock'),
   STORAGE_PROVIDER: z.enum(['local']).default('local'),
   QUEUE_PROVIDER: z.enum(['memory']).default('memory'),

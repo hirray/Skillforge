@@ -53,6 +53,10 @@ model UserSkill {
   level   String
   user    User   @relation(fields: [userId], references: [id])
   skill   Skill  @relation(fields: [skillId], references: [id])
+
+  // Additive Member 2 fields
+  origin   String  @default("manual")
+  sourceId String?
 }
 
 model LearningGoal {
@@ -75,6 +79,11 @@ model Education {
   institution String
   degree      String
   user        User   @relation(fields: [userId], references: [id])
+
+  // Additive Member 2 fields
+  origin      String  @default("manual")
+  sourceId    String?
+  detailsJson String?
 }
 
 model WorkExperience {
@@ -83,6 +92,11 @@ model WorkExperience {
   company String
   role    String
   user    User   @relation(fields: [userId], references: [id])
+
+  // Additive Member 2 fields
+  origin      String  @default("manual")
+  sourceId    String?
+  detailsJson String?
 }
 
 model Certification {
@@ -90,6 +104,11 @@ model Certification {
   userId  String
   name    String
   user    User   @relation(fields: [userId], references: [id])
+
+  // Additive Member 2 fields
+  origin      String  @default("manual")
+  sourceId    String?
+  detailsJson String?
 }
 
 model Resume {
@@ -99,6 +118,18 @@ model Resume {
   createdAt   DateTime @default(now())
   user        User     @relation(fields: [userId], references: [id])
   extractions ResumeExtraction[]
+
+  // Additive Member 2 fields
+  fileKey       String?
+  fileName      String?
+  fileSize      Int?
+  hash          String?
+  status        String             @default("pending")
+  attempts      Int                @default(0)
+  lastError     String?
+  statusHistory String             @default("[]")
+  updatedAt     DateTime           @default(now()) @updatedAt
+  @@unique([userId, hash])
 }
 
 model ResumeExtraction {
@@ -106,6 +137,12 @@ model ResumeExtraction {
   resumeId String
   data     String // JSON string
   resume   Resume @relation(fields: [resumeId], references: [id])
+
+  // Additive Member 2 fields
+  confirmedAt   DateTime?
+  decisionsHash String?
+  decisionsJson String?
+  createdAt     DateTime  @default(now())
 }
 
 model Project {
@@ -155,6 +192,9 @@ model ProjectRequirement {
   level      String   @default("intermediate")
   isOptional Boolean  @default(false)
   project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Additive Member 2 fields
+  source     String  @default("manual")
 }
 
 model ProjectRole {
@@ -433,6 +473,12 @@ model CandidateMatch {
   userId    String
   score     Float
   job       Job    @relation(fields: [jobId], references: [id])
+
+  // Additive Member 2 fields
+  explanationJson String   @default("{}")
+  runId String?
+  inputsSnapshot  String   @default("{}")
+  createdAt       DateTime @default(now())
 }
 
 model Shortlist {
@@ -459,6 +505,91 @@ model Report {
 
 model AuditLog {
   id        String   @id @default(uuid())
+  action    String
+  createdAt DateTime @default(now())
+}
+
+
+// Member 2-owned additive adapters and evidence records.
+model AiCandidateProfile {
+  userId           String   @id
+  name             String
+  headline         String   @default("")
+  matchingOptIn    Boolean  @default(false)
+  recruiterVisible Boolean  @default(false)
+  publicSkills     Boolean  @default(true)
+  hoursPerWeek     Float    @default(0)
+  workMode         String   @default("flexible")
+  duration         String   @default("")
+  location         String   @default("")
+  experienceYears  Float    @default(0)
+  profileText      String   @default("")
+  updatedAt        DateTime @default(now()) @updatedAt
+}
+
+model SkillEvidence {
+  id         String   @id @default(uuid())
+  userId     String
+  skillId    String
+  type       String
+  sourceType String
+  sourceId   String
+  occurredAt DateTime @default(now())
+
+  @@unique([userId, skillId, sourceType, sourceId])
+  @@index([userId, skillId])
+}
+
+model AiJobRequirements {
+  jobId             String   @id
+  requirementsJson  String   @default("[]")
+  minimumExperience Float    @default(0)
+  location          String   @default("")
+  workMode          String   @default("flexible")
+  updatedAt         DateTime @default(now()) @updatedAt
+}
+
+model AiMatchRun {
+  id             String   @id @default(uuid())
+  projectId      String
+  actorId        String
+  ranker         String   @default("baseline")
+  inputsSnapshot String
+  resultJson     String
+  createdAt      DateTime @default(now())
+
+  @@index([projectId, createdAt])
+}
+
+model MatchOutcome {
+  id        String   @id @default(uuid())
+  projectId String
+  userId    String
+  roleId    String?
+  event     String
+  eventKey  String   @unique
+  sourceRunId String?
+  createdAt DateTime @default(now())
+
+  @@index([projectId, userId])
+}
+
+model MetricEvent {
+  id          String   @id @default(uuid())
+  type        String
+  actorId     String?
+  projectId   String?
+  payloadJson String   @default("{}")
+  synthetic   Boolean  @default(false)
+  occurredAt  DateTime @default(now())
+
+  @@index([type, occurredAt])
+}
+
+model ResumeAccessLog {
+  id        String   @id @default(uuid())
+  userId    String
+  resumeId  String
   action    String
   createdAt DateTime @default(now())
 }

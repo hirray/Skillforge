@@ -7,6 +7,7 @@ import path from 'path';
 // Module routers
 import adminRouter from './modules/admin/routes';
 import aiRouter from './modules/ai/routes';
+import { integrationRouter as member2Router } from './modules/ai/routes';
 import analyticsRouter from './modules/analytics/routes';
 import authRouter from './modules/auth/routes';
 import certificatesRouter from './modules/certificates/routes';
@@ -75,6 +76,7 @@ app.use('/api/v1', milestonesRouter);
 app.use('/api/v1', resourcesRouter);
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/verification', verificationRouter);
+app.use('/api/v1', member2Router);
 
 // 404 handler for API routes
 app.use('/api/*', (req, res) => {

@@ -1,0 +1,97 @@
+{
+  "generatedAt": "2026-11-14T18:19:24.796798+00:00",
+  "scenarios": 6,
+  "synthetic": true,
+  "baseline": {
+    "precisionAt5": 0.6,
+    "ndcg": 0.9270734942885372
+  },
+  "hybrid": {
+    "precisionAt5": 0.7999999999999999,
+    "ndcg": 0.9635367471442686
+  },
+  "outcomes": {
+    "sent": 0,
+    "accepted": 0,
+    "joined": 0,
+    "sampleSize": 0,
+    "acceptanceRate": null,
+    "joinRate": null,
+    "suppressed": true
+  },
+  "verdict": "Hybrid improved this synthetic set; retain baseline until larger, real-outcome evaluation confirms the result.",
+  "details": [
+    {
+      "case": "golden-1",
+      "ranker": "baseline",
+      "precisionAt5": 0.6,
+      "ndcg": 0.9270734942885372
+    },
+    {
+      "case": "golden-2",
+      "ranker": "baseline",
+      "precisionAt5": 0.6,
+      "ndcg": 0.9270734942885372
+    },
+    {
+      "case": "golden-3",
+      "ranker": "baseline",
+      "precisionAt5": 0.6,
+      "ndcg": 0.9270734942885372
+    },
+    {
+      "case": "golden-4",
+      "ranker": "baseline",
+      "precisionAt5": 0.6,
+      "ndcg": 0.9270734942885372
+    },
+    {
+      "case": "golden-5",
+      "ranker": "baseline",
+      "precisionAt5": 0.6,
+      "ndcg": 0.9270734942885372
+    },
+    {
+      "case": "golden-6",
+      "ranker": "baseline",
+      "precisionAt5": 0.6,
+      "ndcg": 0.9270734942885372
+    },
+    {
+      "case": "golden-1",
+      "ranker": "hybrid",
+      "precisionAt5": 0.6,
+      "ndcg": 0.9270734942885372
+    },
+    {
+      "case": "golden-2",
+      "ranker": "hybrid",
+      "precisionAt5": 1.0,
+      "ndcg": 1.0
+    },
+    {
+      "case": "golden-3",
+      "ranker": "hybrid",
+      "precisionAt5": 1.0,
+      "ndcg": 1.0
+    },
+    {
+      "case": "golden-4",
+      "ranker": "hybrid",
+      "precisionAt5": 0.6,
+      "ndcg": 0.9270734942885372
+    },
+    {
+      "case": "golden-5",
+      "ranker": "hybrid",
+      "precisionAt5": 0.6,
+      "ndcg": 0.9270734942885372
+    },
+    {
+      "case": "golden-6",
+      "ranker": "hybrid",
+      "precisionAt5": 1.0,
+      "ndcg": 1.0
+    }
+  ]
+}
