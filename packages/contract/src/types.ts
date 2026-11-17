@@ -58,6 +58,7 @@ export interface ProjectInvitation {
   userId?: string;
   role: string;
   note?: string;
+  gapId?: string | null;
   status: 'Pending' | 'Accepted' | 'Declined' | 'Expired' | 'pending' | 'accepted' | 'declined' | 'expired' | string;
   createdAt: string;
   expiresAt: string;
@@ -219,4 +220,38 @@ export interface ProjectResource {
   isFormerMember?: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ProjectGap {
+  id: string;
+  projectId: string;
+  roleId?: string | null;
+  roleTitle?: string | null;
+  skillsJson: string;
+  skills?: string[];
+  targetProficiency: 'beginner' | 'intermediate' | 'advanced' | 'expert' | string;
+  hoursPerWeek: number;
+  status: 'open' | 'filled' | 'cancelled' | string;
+  origin: 'member_left' | 'inactive' | 'manual' | string;
+  departedUserId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  handoverNote?: HandoverNote | null;
+  project?: Project;
+}
+
+export interface HandoverNote {
+  id: string;
+  projectId: string;
+  gapId?: string | null;
+  authorId: string;
+  workState: string;
+  unfinishedTasksJson: string;
+  unfinishedTasks?: string[];
+  repoInfo?: string | null;
+  decisions?: string | null;
+  candidateSummary: string;
+  createdAt: string;
+  updatedAt: string;
+  author?: User;
 }

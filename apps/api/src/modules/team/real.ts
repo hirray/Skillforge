@@ -8,7 +8,7 @@ export class RealService {
   // -------------------------------------------------------------
   // 8.1 INVITATIONS
   // -------------------------------------------------------------
-  async createInvitation(projectId: string, inviterId: string, data: { userId: string; role: string; note?: string | null; expiresDays?: number }) {
+  async createInvitation(projectId: string, inviterId: string, data: { userId: string; role: string; note?: string | null; gapId?: string | null; expiresDays?: number }) {
     const project = await prisma.project.findUnique({
       where: { id: projectId },
       include: { roles: true, members: { where: { status: 'active' } } }
@@ -26,12 +26,30 @@ export class RealService {
       throw { status: 400, code: 'INVALID_TARGET', message: 'Cannot invite project owner' };
     }
 
-    // Role check
-    const role = project.roles.find(r => r.title.toLowerCase() === data.role.toLowerCase());
-    if (!role) {
-      throw { status: 400, code: 'ROLE_NOT_FOUND', message: `Role "${data.role}" does not exist on this project` };
+    if (data.gapId) {
+      const gap = await prisma.projectGap.findUnique({ where: { id: data.gapId } });
+      if (!gap || gap.projectId !== projectId) {
+        throw { status: 404, code: 'GAP_NOT_FOUND', message: 'Linked project gap not found' };
+      }
     }
-    if (role.openings <= role.filled) {
+
+    // Role check
+    let role = project.roles.find(r => r.title.toLowerCase() === data.role.toLowerCase());
+    if (!role) {
+      if (data.gapId) {
+        role = await prisma.projectRole.create({
+          data: {
+            projectId,
+            title: data.role,
+            openings: 1,
+            filled: 0
+          }
+        });
+      } else {
+        throw { status: 400, code: 'ROLE_NOT_FOUND', message: `Role "${data.role}" does not exist on this project` };
+      }
+    }
+    if (role.openings <= role.filled && !data.gapId) {
       throw { status: 400, code: 'ROLE_FULL', message: `No open positions available for role "${data.role}"` };
     }
 
@@ -51,6 +69,7 @@ export class RealService {
         inviterId: inviterId,
         inviteeId: data.userId,
         role: role.title,
+        gapId: data.gapId || null,
         status: 'pending',
         expiresAt
       }
@@ -73,36 +92,40 @@ export class RealService {
       }
     });
     if (!invitation) throw { status: 404, code: ErrorCode.NOT_FOUND, message: 'Invitation not found' };
-    if (invitation.inviteeId !== userId) throw { status: 403, code: ErrorCode.FORBIDDEN, message: 'Cannot respond to another user\'s invitation' };
+    const inviteeId = invitation.inviteeId || (invitation as any).userId;
+    if (inviteeId !== userId) throw { status: 403, code: ErrorCode.FORBIDDEN, message: 'Cannot respond to another user\'s invitation' };
     if (invitation.status !== 'pending' && invitation.status !== 'Pending') {
       throw { status: 400, code: 'INVALID_ACTION', message: `Invitation is already ${invitation.status}` };
     }
 
     // Expiry check
     if (new Date() > new Date(invitation.expiresAt)) {
+      const expiredStatus = invitation.status === 'Pending' ? 'Expired' : 'expired';
       await prisma.projectInvitation.update({
         where: { id: invitationId },
-        data: { status: 'expired' }
+        data: { status: expiredStatus }
       });
-      eventBus.emitEvent(DomainEvent.InvitationResponded, { invitationId, status: 'expired' });
+      eventBus.emitEvent(DomainEvent.InvitationResponded, { invitationId, status: expiredStatus });
       throw { status: 400, code: 'INVITATION_EXPIRED', message: 'Invitation has expired' };
     }
 
     // Check if role still exists on the project
     const role = invitation.project.roles.find(r => r.title.toLowerCase() === invitation.role.toLowerCase());
     if (!role || role.openings <= role.filled) {
+      const declinedStatus = invitation.status === 'Pending' ? 'Declined' : 'declined';
       await prisma.projectInvitation.update({
         where: { id: invitationId },
-        data: { status: 'declined' }
+        data: { status: declinedStatus }
       });
-      eventBus.emitEvent(DomainEvent.InvitationResponded, { invitationId, status: 'declined' });
+      eventBus.emitEvent(DomainEvent.InvitationResponded, { invitationId, status: declinedStatus });
       throw { status: 400, code: 'ROLE_NO_LONGER_EXISTS', message: 'This role is no longer available' };
     }
 
     if (data.response === 'accept') {
+      const acceptedStatus = invitation.status === 'Pending' ? 'Accepted' : 'accepted';
       const updatedInv = await prisma.projectInvitation.update({
         where: { id: invitationId },
-        data: { status: 'accepted' }
+        data: { status: acceptedStatus }
       });
 
       // Add to ProjectMember
@@ -121,6 +144,19 @@ export class RealService {
         where: { id: role.id },
         data: { filled: { increment: 1 } }
       });
+
+      // Fill gap if this was a gap-linked invitation
+      if (invitation.gapId) {
+        await prisma.projectGap.update({
+          where: { id: invitation.gapId },
+          data: { status: 'filled' }
+        });
+        eventBus.emitEvent(DomainEvent.GapFilled, {
+          gapId: invitation.gapId,
+          projectId: invitation.projectId,
+          replacementUserId: userId
+        });
+      }
 
       eventBus.emitEvent(DomainEvent.InvitationResponded, { invitationId, status: 'accepted' });
       eventBus.emitEvent(DomainEvent.MemberJoined, { projectId: invitation.projectId, userId });
@@ -141,6 +177,17 @@ export class RealService {
     const invitations = await prisma.projectInvitation.findMany({
       where: { inviteeId: userId },
       include: {
+        gap: {
+          include: {
+            handoverNotes: {
+              select: {
+                id: true,
+                candidateSummary: true,
+                createdAt: true
+              }
+            }
+          }
+        },
         project: {
           select: {
             id: true,
@@ -287,6 +334,26 @@ export class RealService {
         });
       }
 
+      // Automatically fill open gap for this role if any
+      const matchingGap = await prisma.projectGap.findFirst({
+        where: {
+          projectId: joinRequest.projectId,
+          status: 'open',
+          roleTitle: { equals: joinRequest.role }
+        }
+      });
+      if (matchingGap) {
+        await prisma.projectGap.update({
+          where: { id: matchingGap.id },
+          data: { status: 'filled' }
+        });
+        eventBus.emitEvent(DomainEvent.GapFilled, {
+          gapId: matchingGap.id,
+          projectId: joinRequest.projectId,
+          replacementUserId: joinRequest.userId
+        });
+      }
+
       eventBus.emitEvent(DomainEvent.MemberJoined, { projectId: joinRequest.projectId, userId: joinRequest.userId });
       return { data: { joinRequest: updatedReq, member } };
     } else {
@@ -379,12 +446,54 @@ export class RealService {
       data: {
         status: 'removed',
         leftAt: new Date(),
-        reason: data.reason
-      }
+        reason: data.reason,
+        removalReason: data.reason
+      } as any
     });
 
+    // Mark departing member's unfinished tasks as needsReassignment
+    if ((prisma as any).task?.updateMany) {
+      await (prisma as any).task.updateMany({
+        where: {
+          projectId,
+          assigneeId: targetUserId,
+          status: { in: ['To Do', 'In Progress', 'In Review'] }
+        },
+        data: { needsReassignment: true }
+      }).catch(() => {});
+    }
+
+    // Automatically create a draft open gap pre-filled with role & requirements
+    let draftGap: any = null;
+    if ((prisma as any).projectGap?.create) {
+      const reqs = ((prisma as any).projectRequirement?.findMany
+        ? await (prisma as any).projectRequirement.findMany({ where: { projectId } }).catch(() => [])
+        : []) || [];
+      const reqSkills = reqs.map((r: any) => r.skillName || r.skill).filter(Boolean);
+      draftGap = await (prisma as any).projectGap.create({
+        data: {
+          projectId,
+          roleTitle: member.role,
+          skillsJson: JSON.stringify(reqSkills.length > 0 ? reqSkills : [member.role]),
+          targetProficiency: 'intermediate',
+          hoursPerWeek: 10,
+          status: 'open',
+          origin: 'member_left',
+          departedUserId: targetUserId
+        }
+      }).catch(() => null);
+
+      if (draftGap) {
+        eventBus.emitEvent(DomainEvent.GapOpened, {
+          gapId: draftGap.id,
+          projectId,
+          origin: 'member_left'
+        });
+      }
+    }
+
     eventBus.emitEvent(DomainEvent.MemberLeft, { projectId, userId: targetUserId });
-    return { data: { message: 'Member removed successfully', member: updated } };
+    return { data: { message: 'Member removed successfully', member: updated, gap: draftGap } };
   }
 
   async leaveProject(projectId: string, userId: string, data: { reason?: string | null }) {
@@ -405,12 +514,52 @@ export class RealService {
       data: {
         status: 'left',
         leftAt: new Date(),
-        reason: data.reason || null
-      }
+        reason: data.reason || null,
+        leaveReason: data.reason || null
+      } as any
     });
 
+    if ((prisma as any).task?.updateMany) {
+      await (prisma as any).task.updateMany({
+        where: {
+          projectId,
+          assigneeId: userId,
+          status: { in: ['To Do', 'In Progress', 'In Review'] }
+        },
+        data: { needsReassignment: true }
+      }).catch(() => {});
+    }
+
+    let draftGap: any = null;
+    if ((prisma as any).projectGap?.create) {
+      const reqs = ((prisma as any).projectRequirement?.findMany
+        ? await (prisma as any).projectRequirement.findMany({ where: { projectId } }).catch(() => [])
+        : []) || [];
+      const reqSkills = reqs.map((r: any) => r.skillName || r.skill).filter(Boolean);
+      draftGap = await (prisma as any).projectGap.create({
+        data: {
+          projectId,
+          roleTitle: member.role,
+          skillsJson: JSON.stringify(reqSkills.length > 0 ? reqSkills : [member.role]),
+          targetProficiency: 'intermediate',
+          hoursPerWeek: 10,
+          status: 'open',
+          origin: 'member_left',
+          departedUserId: userId
+        }
+      }).catch(() => null);
+
+      if (draftGap) {
+        eventBus.emitEvent(DomainEvent.GapOpened, {
+          gapId: draftGap.id,
+          projectId,
+          origin: 'member_left'
+        });
+      }
+    }
+
     eventBus.emitEvent(DomainEvent.MemberLeft, { projectId, userId });
-    return { data: { message: 'Left project successfully', member: updated } };
+    return { data: { message: 'Left project successfully', member: updated, gap: draftGap } };
   }
 
   private transfers: Record<string, any> = {};
@@ -429,27 +578,51 @@ export class RealService {
       throw { status: 400, code: 'TARGET_NOT_MEMBER', message: 'Designated new owner must be an active member of the project' };
     }
 
-    const transfer = {
-      id: `trans-${Date.now()}`,
-      projectId,
-      currentOwnerId: callerId,
-      newOwnerId: data.newOwnerId,
-      status: 'Pending',
-      createdAt: new Date()
-    };
+    let transfer: any = null;
+    if ((prisma as any).ownershipTransfer?.create) {
+      transfer = await (prisma as any).ownershipTransfer.create({
+        data: {
+          projectId,
+          currentOwnerId: callerId,
+          newOwnerId: data.newOwnerId,
+          status: 'Pending'
+        }
+      });
+    } else {
+      transfer = {
+        id: `trans-${Date.now()}`,
+        projectId,
+        currentOwnerId: callerId,
+        newOwnerId: data.newOwnerId,
+        status: 'Pending',
+        createdAt: new Date()
+      };
+    }
     this.transfers[projectId] = transfer;
 
     return { data: transfer };
   }
 
   async respondOwnershipTransfer(projectId: string, userId: string, data: { action: 'accept' | 'decline' }) {
-    const transfer = this.transfers[projectId];
+    let transfer = this.transfers[projectId];
+    if ((prisma as any).ownershipTransfer?.findFirst) {
+      const dbTransfer = await (prisma as any).ownershipTransfer.findFirst({
+        where: { projectId, newOwnerId: userId, status: 'Pending' }
+      });
+      if (dbTransfer) transfer = dbTransfer;
+    }
     if (!transfer || transfer.newOwnerId !== userId || transfer.status !== 'Pending') {
       throw { status: 404, code: ErrorCode.NOT_FOUND, message: 'No pending ownership transfer found for you' };
     }
 
     if (data.action === 'accept') {
       transfer.status = 'Accepted';
+      if ((prisma as any).ownershipTransfer?.update) {
+        await (prisma as any).ownershipTransfer.update({
+          where: { id: transfer.id },
+          data: { status: 'Accepted' }
+        });
+      }
 
       // Transfer owner on Project
       await prisma.project.update({
@@ -477,6 +650,12 @@ export class RealService {
       return { data: { message: 'Ownership transfer accepted', transfer } };
     } else {
       transfer.status = 'Declined';
+      if ((prisma as any).ownershipTransfer?.update) {
+        await (prisma as any).ownershipTransfer.update({
+          where: { id: transfer.id },
+          data: { status: 'Declined' }
+        });
+      }
       return { data: { message: 'Ownership transfer declined', transfer } };
     }
   }
@@ -484,6 +663,358 @@ export class RealService {
   async getPendingTransfer(projectId: string) {
     const transfer = this.transfers[projectId];
     return { data: transfer && transfer.status === 'Pending' ? transfer : null };
+  }
+
+  // -------------------------------------------------------------
+  // 16. PROJECT RESCUE & REPLACEMENT (PRD 16)
+  // -------------------------------------------------------------
+
+  async listGaps(projectId: string, callerId?: string) {
+    const project = await prisma.project.findUnique({ where: { id: projectId } });
+    if (!project) throw { status: 404, code: ErrorCode.NOT_FOUND, message: 'Project not found' };
+
+    const gaps = await prisma.projectGap.findMany({
+      where: { projectId },
+      include: {
+        handoverNotes: true,
+        invitations: {
+          include: { user: { select: { id: true, email: true } } }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return {
+      data: gaps.map(g => ({
+        ...g,
+        skills: JSON.parse(g.skillsJson || '[]')
+      }))
+    };
+  }
+
+  async createGap(projectId: string, callerId: string, data: {
+    roleId?: string | null;
+    roleTitle: string;
+    skills: string[];
+    targetProficiency?: string;
+    hoursPerWeek?: number;
+    origin?: string;
+    departedUserId?: string | null;
+    merge?: boolean;
+  }) {
+    const project = await prisma.project.findUnique({ where: { id: projectId } });
+    if (!project) throw { status: 404, code: ErrorCode.NOT_FOUND, message: 'Project not found' };
+    if (project.ownerId !== callerId) throw { status: 403, code: ErrorCode.FORBIDDEN, message: 'Only project owner can define gaps' };
+
+    // Check for existing open gap for the same role
+    const existingSameRoleGap = await prisma.projectGap.findFirst({
+      where: {
+        projectId,
+        status: 'open',
+        roleTitle: { equals: data.roleTitle }
+      }
+    });
+
+    if (existingSameRoleGap && !data.merge) {
+      throw {
+        status: 409,
+        code: 'DUPLICATE_GAP_WARNING',
+        message: `An open gap already exists for role "${data.roleTitle}". Confirm merge to combine them.`,
+        existingGapId: existingSameRoleGap.id
+      };
+    }
+
+    if (existingSameRoleGap && data.merge) {
+      const existingSkills = JSON.parse(existingSameRoleGap.skillsJson || '[]');
+      const mergedSkills = Array.from(new Set([...existingSkills, ...(data.skills || [])]));
+      const updated = await prisma.projectGap.update({
+        where: { id: existingSameRoleGap.id },
+        data: {
+          skillsJson: JSON.stringify(mergedSkills),
+          hoursPerWeek: Math.max(existingSameRoleGap.hoursPerWeek, data.hoursPerWeek || 10),
+          targetProficiency: data.targetProficiency || existingSameRoleGap.targetProficiency
+        }
+      });
+      return { data: { ...updated, skills: mergedSkills, merged: true } };
+    }
+
+    const gap = await prisma.projectGap.create({
+      data: {
+        projectId,
+        roleId: data.roleId || null,
+        roleTitle: data.roleTitle,
+        skillsJson: JSON.stringify(data.skills || []),
+        targetProficiency: data.targetProficiency || 'intermediate',
+        hoursPerWeek: data.hoursPerWeek || 10,
+        status: 'open',
+        origin: data.origin || 'manual',
+        departedUserId: data.departedUserId || null
+      }
+    });
+
+    eventBus.emitEvent(DomainEvent.GapOpened, {
+      gapId: gap.id,
+      projectId,
+      origin: gap.origin
+    });
+
+    return { data: { ...gap, skills: data.skills || [] } };
+  }
+
+  async updateGap(projectId: string, gapId: string, callerId: string, data: {
+    roleTitle?: string;
+    skills?: string[];
+    targetProficiency?: string;
+    hoursPerWeek?: number;
+    status?: string;
+  }) {
+    const project = await prisma.project.findUnique({ where: { id: projectId } });
+    if (!project) throw { status: 404, code: ErrorCode.NOT_FOUND, message: 'Project not found' };
+    if (project.ownerId !== callerId) throw { status: 403, code: ErrorCode.FORBIDDEN, message: 'Only project owner can update gaps' };
+
+    const gap = await prisma.projectGap.findUnique({ where: { id: gapId } });
+    if (!gap || gap.projectId !== projectId) throw { status: 404, code: ErrorCode.NOT_FOUND, message: 'Gap not found' };
+
+    const updateData: any = {};
+    if (data.roleTitle !== undefined) updateData.roleTitle = data.roleTitle;
+    if (data.skills !== undefined) updateData.skillsJson = JSON.stringify(data.skills);
+    if (data.targetProficiency !== undefined) updateData.targetProficiency = data.targetProficiency;
+    if (data.hoursPerWeek !== undefined) updateData.hoursPerWeek = data.hoursPerWeek;
+    if (data.status !== undefined) {
+      updateData.status = data.status;
+      if (data.status === 'filled') {
+        eventBus.emitEvent(DomainEvent.GapFilled, { gapId, projectId });
+      } else if (data.status === 'cancelled') {
+        eventBus.emitEvent(DomainEvent.GapCancelled, { gapId, projectId });
+      }
+    }
+
+    const updated = await prisma.projectGap.update({
+      where: { id: gapId },
+      data: updateData
+    });
+
+    return { data: { ...updated, skills: JSON.parse(updated.skillsJson || '[]') } };
+  }
+
+  async getCandidatesForGap(projectId: string, gapId: string, callerId: string) {
+    const project = await prisma.project.findUnique({
+      where: { id: projectId },
+      include: { members: { where: { status: 'active' } } }
+    });
+    if (!project) throw { status: 404, code: ErrorCode.NOT_FOUND, message: 'Project not found' };
+
+    const gap = await prisma.projectGap.findUnique({ where: { id: gapId } });
+    if (!gap || gap.projectId !== projectId) throw { status: 404, code: ErrorCode.NOT_FOUND, message: 'Gap not found' };
+
+    const memberUserIds = new Set(project.members.map(m => m.userId));
+    memberUserIds.add(project.ownerId);
+
+    const requiredSkills: string[] = JSON.parse(gap.skillsJson || '[]');
+    const lowerSkills = requiredSkills.map(s => s.toLowerCase());
+
+    const candidateUsers = await prisma.user.findMany({
+      where: {
+        id: { notIn: Array.from(memberUserIds) }
+      },
+      include: {
+        skills: { include: { skill: true } }
+      },
+      take: 10
+    });
+
+    const matches = candidateUsers.map(u => {
+      const userSkillNames = (u.skills || []).map(s => s.skill?.name || '').filter(Boolean);
+      const matchedSkills = userSkillNames.filter(us =>
+        lowerSkills.some(ls => ls.includes(us.toLowerCase()) || us.toLowerCase().includes(ls))
+      );
+      const overlapRatio = lowerSkills.length > 0 ? matchedSkills.length / lowerSkills.length : 0.5;
+      const baseScore = Math.min(98, Math.max(65, Math.round(70 + overlapRatio * 25)));
+
+      const reasons = [
+        matchedSkills.length > 0
+          ? `Matches required skills: ${matchedSkills.slice(0, 3).join(', ')}`
+          : `Strong candidate for ${gap.roleTitle || 'role'}`,
+        `Expected commitment: ${gap.hoursPerWeek} hrs/week matches profile availability`,
+        `Target proficiency: ${gap.targetProficiency}`
+      ];
+
+      return {
+        candidate: {
+          userId: u.id,
+          name: u.email.split('@')[0],
+          email: u.email,
+          headline: `${gap.roleTitle || 'Developer'} • ${gap.targetProficiency}`,
+          skills: userSkillNames.length > 0 ? userSkillNames : requiredSkills,
+          matchScore: baseScore
+        },
+        matchScore: baseScore,
+        reasons,
+        strengths: matchedSkills.length > 0 ? [`Direct expertise in ${matchedSkills[0]}`] : ['Fast learner'],
+        gaps: lowerSkills.filter(ls => !matchedSkills.some(ms => ms.toLowerCase() === ls)).slice(0, 2)
+      };
+    });
+
+    matches.sort((a, b) => b.matchScore - a.matchScore);
+
+    return {
+      data: {
+        gapId,
+        roleTitle: gap.roleTitle,
+        stage: project.stage,
+        matches,
+        total: matches.length
+      }
+    };
+  }
+
+  async getHandover(projectId: string, callerId?: string, gapId?: string) {
+    const project = await prisma.project.findUnique({
+      where: { id: projectId },
+      include: { members: { where: { status: 'active' } } }
+    });
+    if (!project) throw { status: 404, code: ErrorCode.NOT_FOUND, message: 'Project not found' };
+
+    const whereClause: any = { projectId };
+    if (gapId) whereClause.gapId = gapId;
+
+    const notes = await prisma.handoverNote.findMany({
+      where: whereClause,
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const isOwner = project.ownerId === callerId;
+    const isMember = project.members.some(m => m.userId === callerId);
+    const hasFullAccess = isOwner || isMember;
+
+    const sanitized = notes.map(n => {
+      const unfinished = JSON.parse(n.unfinishedTasksJson || '[]');
+      if (hasFullAccess) {
+        return {
+          ...n,
+          unfinishedTasks: unfinished
+        };
+      } else {
+        // Invitees / candidates only see candidateSummary before acceptance
+        return {
+          id: n.id,
+          projectId: n.projectId,
+          gapId: n.gapId,
+          candidateSummary: n.candidateSummary,
+          createdAt: n.createdAt
+        };
+      }
+    });
+
+    return { data: sanitized };
+  }
+
+  async createHandover(projectId: string, callerId: string, data: {
+    gapId?: string | null;
+    workState: string;
+    unfinishedTasks: string[];
+    repoInfo?: string | null;
+    decisions?: string | null;
+    candidateSummary: string;
+  }) {
+    const project = await prisma.project.findUnique({
+      where: { id: projectId },
+      include: { members: { where: { status: 'active' } } }
+    });
+    if (!project) throw { status: 404, code: ErrorCode.NOT_FOUND, message: 'Project not found' };
+
+    const isOwner = project.ownerId === callerId;
+    const isMember = project.members.some(m => m.userId === callerId);
+    if (!isOwner && !isMember) {
+      throw { status: 403, code: ErrorCode.FORBIDDEN, message: 'Only team members or owner can create handover notes' };
+    }
+
+    const note = await prisma.handoverNote.create({
+      data: {
+        projectId,
+        gapId: data.gapId || null,
+        authorId: callerId,
+        workState: data.workState,
+        unfinishedTasksJson: JSON.stringify(data.unfinishedTasks || []),
+        repoInfo: data.repoInfo || null,
+        decisions: data.decisions || null,
+        candidateSummary: data.candidateSummary
+      }
+    });
+
+    eventBus.emitEvent(DomainEvent.HandoverCreated, {
+      handoverId: note.id,
+      projectId,
+      gapId: data.gapId || undefined
+    });
+
+    return {
+      data: {
+        ...note,
+        unfinishedTasks: data.unfinishedTasks || []
+      }
+    };
+  }
+
+  async checkInactivity(projectId: string, callerId: string, thresholdDays = 14) {
+    const project = await prisma.project.findUnique({
+      where: { id: projectId },
+      include: {
+        members: {
+          where: { status: 'active' },
+          include: { user: { select: { id: true, email: true } } }
+        }
+      }
+    });
+    if (!project) throw { status: 404, code: ErrorCode.NOT_FOUND, message: 'Project not found' };
+    if (project.ownerId !== callerId) throw { status: 403, code: ErrorCode.FORBIDDEN, message: 'Only project owner can run inactivity checks' };
+
+    const now = Date.now();
+    const thresholdMs = thresholdDays * 24 * 60 * 60 * 1000;
+
+    const inactiveMembers = [];
+    for (const m of project.members) {
+      if (m.userId === project.ownerId) continue;
+
+      const lastTask = await prisma.task.findFirst({
+        where: { projectId, assigneeId: m.userId },
+        orderBy: { updatedAt: 'desc' },
+        select: { updatedAt: true }
+      });
+
+      const lastTaskComment = await prisma.taskComment.findFirst({
+        where: {
+          taskId: { in: (await prisma.task.findMany({ where: { projectId }, select: { id: true } })).map(t => t.id) },
+          userId: m.userId
+        },
+        orderBy: { createdAt: 'desc' },
+        select: { createdAt: true }
+      });
+
+      const lastActionDate = lastTask?.updatedAt || lastTaskComment?.createdAt || m.joinedAt;
+      const diffMs = now - new Date(lastActionDate).getTime();
+      const inactiveDays = Math.floor(diffMs / (24 * 60 * 60 * 1000));
+
+      if (diffMs > thresholdMs) {
+        inactiveMembers.push({
+          memberId: m.id,
+          userId: m.userId,
+          email: m.user?.email || m.userId,
+          role: m.role,
+          lastActivityDate: lastActionDate,
+          inactiveDays,
+          thresholdDays
+        });
+      }
+    }
+
+    return {
+      data: {
+        thresholdDays,
+        inactiveMembers,
+        totalInactive: inactiveMembers.length
+      }
+    };
   }
 }
 

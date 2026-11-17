@@ -21,7 +21,11 @@ export enum DomainEvent {
   JobClosed = 'JobClosed',
   CandidateShortlisted = 'CandidateShortlisted',
   MessageSent = 'MessageSent',
-  ProjectDeleted = 'ProjectDeleted'
+  ProjectDeleted = 'ProjectDeleted',
+  GapOpened = 'GapOpened',
+  GapFilled = 'GapFilled',
+  GapCancelled = 'GapCancelled',
+  HandoverCreated = 'HandoverCreated'
 }
 
 export type EventPayloads = {
@@ -48,4 +52,8 @@ export type EventPayloads = {
   [DomainEvent.JobClosed]: { jobId: string };
   [DomainEvent.CandidateShortlisted]: { shortlistId: string; jobId: string; candidateId: string };
   [DomainEvent.MessageSent]: { messageId: string; roomId: string };
+  [DomainEvent.GapOpened]: { gapId: string; projectId: string; origin: string };
+  [DomainEvent.GapFilled]: { gapId: string; projectId: string; replacementUserId?: string };
+  [DomainEvent.GapCancelled]: { gapId: string; projectId: string };
+  [DomainEvent.HandoverCreated]: { handoverId: string; projectId: string; gapId?: string };
 };

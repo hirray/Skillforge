@@ -4,6 +4,7 @@ export const inviteSchema = z.object({
   userId: z.string().min(1, 'Target user ID is required'),
   role: z.string().min(1, 'Role title is required'),
   note: z.string().max(500, 'Note must not exceed 500 characters').optional().nullable(),
+  gapId: z.string().optional().nullable(),
   expiresDays: z.number().int().min(1).max(30).default(7)
 });
 
@@ -41,4 +42,32 @@ export const transferOwnershipSchema = z.object({
 
 export const respondTransferSchema = z.object({
   action: z.enum(['accept', 'decline'])
+});
+
+export const createGapSchema = z.object({
+  roleId: z.string().optional().nullable(),
+  roleTitle: z.string().min(1, 'Role title is required'),
+  skills: z.array(z.string()).default([]),
+  targetProficiency: z.enum(['beginner', 'intermediate', 'advanced', 'expert']).default('intermediate'),
+  hoursPerWeek: z.number().int().min(1).max(168).default(10),
+  origin: z.enum(['member_left', 'inactive', 'manual']).default('manual'),
+  departedUserId: z.string().optional().nullable(),
+  merge: z.boolean().optional()
+});
+
+export const updateGapSchema = z.object({
+  roleTitle: z.string().min(1).optional(),
+  skills: z.array(z.string()).optional(),
+  targetProficiency: z.enum(['beginner', 'intermediate', 'advanced', 'expert']).optional(),
+  hoursPerWeek: z.number().int().min(1).max(168).optional(),
+  status: z.enum(['open', 'filled', 'cancelled']).optional()
+});
+
+export const createHandoverSchema = z.object({
+  gapId: z.string().optional().nullable(),
+  workState: z.string().min(1, 'Work state description is required'),
+  unfinishedTasks: z.array(z.string()).default([]),
+  repoInfo: z.string().max(1000).optional().nullable(),
+  decisions: z.string().max(2000).optional().nullable(),
+  candidateSummary: z.string().min(1, 'Candidate summary is required').max(1000)
 });

@@ -540,6 +540,40 @@ paths:
       responses:
         '200':
           description: Successful response
+  /projects/{id}/gaps:
+    get:
+      summary: GET /projects/{id}/gaps
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: POST /projects/{id}/gaps
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/gaps/{gapId}:
+    patch:
+      summary: PATCH /projects/{id}/gaps/{gapId}
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/gaps/{gapId}/candidates:
+    post:
+      summary: POST /projects/{id}/gaps/{gapId}/candidates
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/handover:
+    get:
+      summary: GET /projects/{id}/handover
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: POST /projects/{id}/handover
+      responses:
+        '200':
+          description: Successful response
   /users/me/certificates:
     get:
       summary: GET /users/me/certificates

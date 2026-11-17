@@ -45,6 +45,15 @@ import { TasksSection } from '../tasks/TasksSection';
 import { MilestonesSection } from '../milestones/MilestonesSection';
 import { ResourcesHub } from '../resources';
 import { GroupChat } from '../chat';
+import {
+  RescueBanner,
+  GapWizardModal,
+  GapCandidatesModal,
+  HandoverModal,
+  GapTimelineModal,
+  ProjectGapItem,
+  InactiveMemberItem,
+} from './rescue';
 
 const rolePresets = [
   'Frontend Developer', 'Backend Developer', 'Fullstack Engineer',
@@ -320,6 +329,19 @@ export const ProjectDetail = () => {
   const [customSkillType, setCustomSkillType] = useState<'required' | 'preferred'>('required');
   const [customSkillProficiency, setCustomSkillProficiency] = useState<'beginner' | 'intermediate' | 'expert'>('intermediate');
 
+  // Rescue & Replacement State
+  const [gaps, setGaps] = useState<ProjectGapItem[]>([]);
+  const [inactiveMembers, setInactiveMembers] = useState<InactiveMemberItem[]>([]);
+  const [selectedGapForCandidates, setSelectedGapForCandidates] = useState<ProjectGapItem | null>(null);
+  const [selectedGapForEdit, setSelectedGapForEdit] = useState<ProjectGapItem | null>(null);
+  const [selectedGapForHandover, setSelectedGapForHandover] = useState<ProjectGapItem | null>(null);
+  const [selectedGapForTimeline, setSelectedGapForTimeline] = useState<ProjectGapItem | null>(null);
+  const [showNewGapWizard, setShowNewGapWizard] = useState(false);
+  const [wizardInitialRole, setWizardInitialRole] = useState<string>('');
+  const [wizardInitialOrigin, setWizardInitialOrigin] = useState<'member_left' | 'inactive' | 'manual'>('manual');
+  const [wizardDepartedUserId, setWizardDepartedUserId] = useState<string | null>(null);
+  const [preAcceptanceHandover, setPreAcceptanceHandover] = useState<any | null>(null);
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => {
@@ -379,8 +401,37 @@ export const ProjectDetail = () => {
       .then(d => {
         const inv = (d.data || []).find((i: any) => i.projectId === id && i.status?.toLowerCase() === 'pending');
         setMyPendingInvitation(inv || null);
+        if (inv?.gapId) {
+          fetch(`/api/v1/projects/${id}/handover`, { headers: { Authorization: `Bearer ${currentUserId}` } })
+            .then(res => res.json())
+            .then(hdata => {
+              if (hdata.data && hdata.data.length > 0) {
+                const note = hdata.data.find((n: any) => n.gapId === inv.gapId) || hdata.data[0];
+                setPreAcceptanceHandover(note);
+              }
+            })
+            .catch(() => {});
+        }
       })
       .catch(() => { });
+
+    // Fetch rescue gaps
+    fetch(`/api/v1/projects/${id}/gaps`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.data) setGaps(d.data);
+      })
+      .catch(() => {});
+
+    // Inactivity check (owner-only)
+    fetch(`/api/v1/projects/${id}/inactivity-check`, {
+      headers: { Authorization: `Bearer ${currentUserId}` }
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.data?.inactiveMembers) setInactiveMembers(d.data.inactiveMembers);
+      })
+      .catch(() => {});
   };
 
   useEffect(() => { fetchProject(); }, [id, currentUserId]);
@@ -510,7 +561,7 @@ export const ProjectDetail = () => {
   // ── Loading / error ────────────────────────────────────────────────────
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', flexDirection: 'column', gap: 12, color: '#6B7685', fontSize: 13 }}>
-      <div style={{ width: 36, height: 36, border: '3px solid #E7EAF3', borderTopColor: '#0A1680', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+      <div style={{ width: 36, height: 36, border: '3px solid #33333e', borderTopColor: '#b29af5', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
       Loading project…
     </div>
   );
@@ -727,11 +778,28 @@ export const ProjectDetail = () => {
                   </div>
                   <strong style={{ color: '#ffffff', fontSize: 14 }}>You have been invited to join this project!</strong>
                   <Badge status="active">{myPendingInvitation.role}</Badge>
+                  {myPendingInvitation.gapId && (
+                    <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: 'rgba(245, 158, 11, 0.2)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.4)' }}>
+                      Rescue Replacement
+                    </span>
+                  )}
                 </div>
                 <p style={{ margin: 0, fontSize: 13, color: '#f0edf5' }}>
                   You were invited as <strong>{myPendingInvitation.role}</strong>.
                   {myPendingInvitation.note && <em style={{ color: '#aba6b6', marginLeft: 6 }}>"{myPendingInvitation.note}"</em>}
                 </p>
+                {/* Context-First Handover Candidate Summary */}
+                {myPendingInvitation.gapId && preAcceptanceHandover?.candidateSummary && (
+                  <div style={{ marginTop: 10, padding: 10, background: '#15151a', borderRadius: 8, border: '1px solid #33333e', fontSize: 12 }}>
+                    <span style={{ color: '#f59e0b', fontWeight: 600, display: 'block', marginBottom: 3 }}>
+                      Role Responsibilities & Handover Context:
+                    </span>
+                    <p style={{ margin: 0, color: '#aba6b6', lineHeight: 1.5 }}>{preAcceptanceHandover.candidateSummary}</p>
+                    <span style={{ color: '#6ad4bb', fontSize: 11, marginTop: 4, display: 'block' }}>
+                      Full repository setup, architecture decisions & unfinished tasks unlock immediately upon accepting.
+                    </span>
+                  </div>
+                )}
               </div>
               <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                 <button onClick={() => handleRespondInvitation(myPendingInvitation.id, 'accept')} disabled={isRespondingInvite}
@@ -746,6 +814,27 @@ export const ProjectDetail = () => {
             </div>
           </div>
         )}
+
+        {/* Rescue Gap & Inactive Member Banner */}
+        <RescueBanner
+          gaps={gaps}
+          inactiveMembers={inactiveMembers}
+          isOwner={isOwner}
+          onFindReplacement={(gap) => setSelectedGapForCandidates(gap)}
+          onEditGap={(gap) => {
+            setSelectedGapForEdit(gap);
+            setShowNewGapWizard(true);
+          }}
+          onOpenHandover={(gap) => setSelectedGapForHandover(gap)}
+          onOpenTimeline={(gap) => setSelectedGapForTimeline(gap)}
+          onDeclareGapForInactive={(member) => {
+            setWizardInitialRole(member.role);
+            setWizardInitialOrigin('inactive');
+            setWizardDepartedUserId(member.userId);
+            setSelectedGapForEdit(null);
+            setShowNewGapWizard(true);
+          }}
+        />
 
         {/* ── OVERVIEW ────────────────────────────────────────────── */}
         {activeTab === 'Overview' && (
@@ -799,9 +888,37 @@ export const ProjectDetail = () => {
                     <IcoRoles size={16} color="#b29af5" />
                     <span style={{ fontWeight: 600, color: '#ffffff', fontSize: 13.5 }}>Project Roles</span>
                   </div>
-                  <button onClick={() => setActiveTab('Team')} style={{ fontSize: 12, color: '#b29af5', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}>
-                    View All
-                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {isOwner && (
+                      <button
+                        onClick={() => {
+                          setWizardInitialRole('');
+                          setWizardInitialOrigin('manual');
+                          setSelectedGapForEdit(null);
+                          setShowNewGapWizard(true);
+                        }}
+                        style={{
+                          fontSize: 11.5,
+                          fontWeight: 600,
+                          color: '#f59e0b',
+                          background: 'rgba(245, 158, 11, 0.12)',
+                          border: '1px solid rgba(245, 158, 11, 0.35)',
+                          borderRadius: 6,
+                          padding: '3px 8px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 4
+                        }}
+                        title="Declare a skill gap or replacement needed"
+                      >
+                        <IcoPlus size={12} color="#f59e0b" /> Declare Gap
+                      </button>
+                    )}
+                    <button onClick={() => setActiveTab('Team')} style={{ fontSize: 12, color: '#b29af5', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}>
+                      View All
+                    </button>
+                  </div>
                 </div>
                 {(!project.roles || project.roles.length === 0) ? (
                   <div style={{ textAlign: 'center', padding: '18px 0', color: '#aba6b6', fontSize: 13 }}>
@@ -1076,6 +1193,62 @@ export const ProjectDetail = () => {
             </div>
           </div>
         </div>
+      )}
+      {/* ── RESCUE GAP WIZARD MODAL ───────────────────────── */}
+      {showNewGapWizard && (
+        <GapWizardModal
+          projectId={id!}
+          project={project}
+          gap={selectedGapForEdit}
+          initialRole={wizardInitialRole}
+          initialOrigin={wizardInitialOrigin}
+          departedUserId={wizardDepartedUserId}
+          onClose={() => {
+            setShowNewGapWizard(false);
+            setSelectedGapForEdit(null);
+          }}
+          onSuccess={() => {
+            setShowNewGapWizard(false);
+            setSelectedGapForEdit(null);
+            fetchProject();
+            showToast('Rescue gap saved successfully');
+          }}
+        />
+      )}
+
+      {/* ── GAP CANDIDATES MODAL ──────────────────────────── */}
+      {selectedGapForCandidates && (
+        <GapCandidatesModal
+          projectId={id!}
+          project={project}
+          gap={selectedGapForCandidates}
+          onClose={() => setSelectedGapForCandidates(null)}
+          onInvitationSent={() => {
+            setSelectedGapForCandidates(null);
+            fetchProject();
+            showToast('Context-first rescue invitation sent');
+          }}
+        />
+      )}
+
+      {/* ── HANDOVER NOTES MODAL ─────────────────────────── */}
+      {selectedGapForHandover && (
+        <HandoverModal
+          projectId={id!}
+          project={project}
+          gap={selectedGapForHandover}
+          isOwner={isOwner}
+          onClose={() => setSelectedGapForHandover(null)}
+          onUpdated={() => fetchProject()}
+        />
+      )}
+
+      {/* ── GAP LIFECYCLE TIMELINE MODAL ──────────────────── */}
+      {selectedGapForTimeline && (
+        <GapTimelineModal
+          gap={selectedGapForTimeline}
+          onClose={() => setSelectedGapForTimeline(null)}
+        />
       )}
     </div>
   );

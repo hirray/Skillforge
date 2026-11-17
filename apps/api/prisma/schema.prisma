@@ -175,6 +175,8 @@ model Project {
   members            ProjectMember[]
   invitations        ProjectInvitation[]
   joinRequests       JoinRequest[]
+  gaps               ProjectGap[]
+  handoverNotes      HandoverNote[]
   tasks              Task[]
   milestones         Milestone[]
   resources          ProjectResource[]
@@ -226,11 +228,49 @@ model ProjectInvitation {
   inviteeId String
   role      String   @default("Contributor")
   status    String   @default("pending") // "pending" | "accepted" | "declined" | "expired"
+  gapId     String?
   expiresAt DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [inviteeId], references: [id])
+  gap       ProjectGap? @relation(fields: [gapId], references: [id])
+}
+
+model ProjectGap {
+  id                String              @id @default(uuid())
+  projectId         String
+  roleId            String?
+  roleTitle         String?
+  skillsJson        String              @default("[]")
+  targetProficiency String              @default("intermediate") // "beginner" | "intermediate" | "advanced" | "expert"
+  hoursPerWeek      Int                 @default(10)
+  status            String              @default("open") // "open" | "filled" | "cancelled"
+  origin            String              @default("manual") // "member_left" | "inactive" | "manual"
+  departedUserId    String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  project           Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  handoverNotes     HandoverNote[]
+  invitations       ProjectInvitation[]
+}
+
+model HandoverNote {
+  id                  String      @id @default(uuid())
+  projectId           String
+  gapId               String?
+  authorId            String
+  workState           String      @default("")
+  unfinishedTasksJson String      @default("[]")
+  repoInfo            String?
+  decisions           String?
+  candidateSummary    String      @default("")
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  project             Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  gap                 ProjectGap? @relation(fields: [gapId], references: [id])
 }
 
 model JoinRequest {
