@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, SkeletonLoader } from '../../design-system/components';
+import { Card, Button, SkeletonLoader, IcoLock, IcoClipboard, IcoMap, IcoTarget } from '../../design-system/components';
 import { MilestoneCard } from './MilestoneCard';
 import { MilestoneDetailModal } from './MilestoneDetailModal';
 import { MilestoneCreateModal } from './MilestoneCreateModal';
@@ -235,8 +235,10 @@ export const MilestonesSection: React.FC<MilestonesSectionProps> = ({
   if (error === 'PERMISSION_DENIED') {
     return (
       <Card className="p-12 text-center border-warning/30 bg-warning/5">
-        <span className="text-3xl">🔒</span>
-        <h3 className="text-lg font-bold text-mainText mt-3">Team-Only Workspace</h3>
+        <div className="w-12 h-12 mx-auto rounded-full bg-warning/20 flex items-center justify-center text-warning mb-2">
+          <IcoLock size={22} color="#f59e0b" />
+        </div>
+        <h3 className="text-lg font-bold text-mainText mt-1">Team-Only Workspace</h3>
         <p className="text-xs text-muted max-w-md mx-auto mt-1">
           Only confirmed project members can access and manage delivery milestones.
         </p>
@@ -268,24 +270,26 @@ export const MilestonesSection: React.FC<MilestonesSectionProps> = ({
             <button
               type="button"
               onClick={() => setViewMode('list')}
-              className={`text-xs px-3 py-1.5 rounded-md font-bold transition-all ${
+              className={`text-xs px-3 py-1.5 rounded-md font-bold transition-all inline-flex items-center gap-1.5 ${
                 viewMode === 'list'
-                  ? 'bg-white text-primary shadow-elevation-1'
+                  ? 'bg-[#221a36] text-[#b29af5] border border-[#8861dc50] shadow-sm'
                   : 'text-muted hover:text-mainText'
               }`}
             >
-              📋 Card List
+              <IcoClipboard size={13} />
+              <span>Card List</span>
             </button>
             <button
               type="button"
               onClick={() => setViewMode('timeline')}
-              className={`text-xs px-3 py-1.5 rounded-md font-bold transition-all ${
+              className={`text-xs px-3 py-1.5 rounded-md font-bold transition-all inline-flex items-center gap-1.5 ${
                 viewMode === 'timeline'
-                  ? 'bg-white text-primary shadow-elevation-1'
+                  ? 'bg-[#221a36] text-[#b29af5] border border-[#8861dc50] shadow-sm'
                   : 'text-muted hover:text-mainText'
               }`}
             >
-              🗺️ Roadmap Timeline
+              <IcoMap size={13} />
+              <span>Roadmap Timeline</span>
             </button>
           </div>
 
@@ -332,9 +336,9 @@ export const MilestonesSection: React.FC<MilestonesSectionProps> = ({
         <SkeletonLoader type="card" count={4} className="grid md:grid-cols-2" />
       ) : milestones.length === 0 ? (
         /* Empty State */
-        <Card className="p-12 text-center bg-white border border-dashed border-uiBorder rounded-2xl">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-accent/20 flex items-center justify-center text-2xl text-primary">
-            🎯
+        <Card className="p-12 text-center bg-[#15151a] border border-dashed border-[#33333e] rounded-2xl">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-accent/20 flex items-center justify-center text-primary">
+            <IcoTarget size={28} color="#b29af5" />
           </div>
           <h3 className="text-lg font-bold text-primary">No milestones yet</h3>
           <p className="text-xs text-muted max-w-md mx-auto mt-1 mb-6 leading-relaxed">

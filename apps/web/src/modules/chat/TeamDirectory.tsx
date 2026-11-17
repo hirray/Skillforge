@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Avatar, SkeletonLoader } from '../../design-system/components';
+import { Card, Button, Avatar, SkeletonLoader, IcoMsg } from '../../design-system/components';
 
 export interface TeamDirectoryProps {
   projectId: string;
@@ -126,7 +126,7 @@ export const TeamDirectory: React.FC<TeamDirectoryProps> = ({
                   </div>
 
                   {member.isOwner && (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#0A1680] text-white flex-shrink-0">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#8861dc] text-white flex-shrink-0">
                       Owner
                     </span>
                   )}
@@ -172,9 +172,10 @@ export const TeamDirectory: React.FC<TeamDirectoryProps> = ({
                     size="sm"
                     variant="outline"
                     onClick={() => onStartDirectChat(member.id)}
-                    className="text-xs py-1 px-3"
+                    className="text-xs py-1 px-3 inline-flex items-center gap-1.5"
                   >
-                    💬 Direct Message
+                    <IcoMsg size={13} />
+                    <span>Direct Message</span>
                   </Button>
                 )}
               </div>

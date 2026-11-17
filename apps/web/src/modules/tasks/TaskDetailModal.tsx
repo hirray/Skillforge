@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Button, Badge, Input } from '../../design-system/components';
+import { Card, Button, Badge, Input, IcoClose, IcoTrash } from '../../design-system/components';
 
 interface TaskDetailModalProps {
   task: any;
@@ -74,8 +74,8 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             </div>
             <h2 className="text-xl font-bold text-primary">{task.title}</h2>
           </div>
-          <button onClick={onClose} className="text-muted hover:text-mainText font-bold text-lg">
-            ✕
+          <button onClick={onClose} className="text-muted hover:text-mainText p-1 rounded-lg">
+            <IcoClose size={16} />
           </button>
         </div>
 
@@ -176,9 +176,9 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         <div className="flex justify-between items-center pt-3 border-t border-uiBorder">
           <button
             onClick={() => onDelete(task.id)}
-            className="text-xs text-red-500 hover:underline font-bold"
+            className="text-xs text-red-400 hover:text-red-300 font-semibold inline-flex items-center gap-1.5"
           >
-            🗑️ Delete Task
+            <IcoTrash size={14} color="#f87171" /> Delete Task
           </button>
           <Button variant="outline" size="sm" onClick={onClose}>
             Close

@@ -46,7 +46,7 @@ export const TasksModule = () => {
         </Card>
       ) : (
         <div className="flex flex-col gap-6">
-          <Card className="p-4 bg-white flex flex-wrap items-center justify-between gap-4">
+          <Card className="p-4 bg-surface border border-uiBorder flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <span className="font-bold text-primary text-sm">Select Project:</span>
               <select

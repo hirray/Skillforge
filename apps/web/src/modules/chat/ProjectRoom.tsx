@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Badge, Button, Tabs, Avatar } from '../../design-system/components';
+import { Badge, Button, Tabs, Avatar, IcoLock, IcoRocket } from '../../design-system/components';
 import { GroupChat } from './GroupChat';
 import { DirectChat } from './DirectChat';
 import { TeamDirectory } from './TeamDirectory';
@@ -72,7 +72,9 @@ export const ProjectRoom: React.FC<{ projectId?: string }> = ({ projectId: propP
     return (
       <div className="p-8 max-w-4xl mx-auto">
         <div className="p-8 bg-surface rounded-2xl border border-uiBorder text-center shadow-elevation-1">
-          <span className="text-3xl block mb-2">🔒</span>
+          <div className="w-12 h-12 mx-auto rounded-full bg-warning/20 flex items-center justify-center text-warning mb-2">
+            <IcoLock size={22} color="#f59e0b" />
+          </div>
           <h2 className="text-xl font-bold text-primary mb-2">Access Denied or Not Found</h2>
           <p className="text-xs text-muted max-w-md mx-auto mb-4">
             {error || 'You must be a confirmed member or the owner of this project to enter the Project Room.'}
@@ -97,10 +99,12 @@ export const ProjectRoom: React.FC<{ projectId?: string }> = ({ projectId: propP
   return (
     <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6 animate-fade-in">
       {/* Master Room Header Bar */}
-      <div className="bg-gradient-to-r from-[#0A1680] to-[#16279E] text-white p-6 rounded-2xl shadow-elevation-2 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="bg-gradient-to-r from-[#1e1730] to-[#15151a] text-white p-6 rounded-2xl shadow-elevation-2 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <div className="flex items-center gap-3 mb-1.5 flex-wrap">
-            <span className="text-2xl">🚀</span>
+            <div className="w-8 h-8 rounded-lg bg-[#221a36] border border-[#8861dc]/50 flex items-center justify-center text-primary">
+              <IcoRocket size={18} color="#b29af5" />
+            </div>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{project.title}</h1>
             <Badge status={project.status.toLowerCase() as any}>{project.status}</Badge>
             <span
@@ -130,11 +134,11 @@ export const ProjectRoom: React.FC<{ projectId?: string }> = ({ projectId: propP
                 name={uid}
                 presence="online"
                 size="sm"
-                className="border-2 border-[#0A1680] shadow-sm"
+                className="border-2 border-[#8861dc] shadow-sm"
               />
             ))}
             {onlineUserIds.length > 4 && (
-              <span className="w-8 h-8 rounded-full bg-accent text-primary text-xs font-bold flex items-center justify-center border-2 border-[#0A1680]">
+              <span className="w-8 h-8 rounded-full bg-accent text-primary text-xs font-bold flex items-center justify-center border-2 border-[#8861dc]">
                 +{onlineUserIds.length - 4}
               </span>
             )}
@@ -151,7 +155,7 @@ export const ProjectRoom: React.FC<{ projectId?: string }> = ({ projectId: propP
           <Button
             size="sm"
             onClick={() => navigate('/projects')}
-            className="!bg-white !text-primary hover:!bg-white/90 text-xs font-bold"
+            className="!bg-[#b29af5] !text-[#0b0b0e] hover:!bg-[#c4b0f9] text-xs font-bold"
           >
             All Projects
           </Button>

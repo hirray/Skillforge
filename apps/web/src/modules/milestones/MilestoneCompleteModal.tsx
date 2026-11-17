@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Button } from '../../design-system/components';
+import { Card, Button, IcoClose } from '../../design-system/components';
 
 interface MilestoneCompleteModalProps {
   milestone: any;
@@ -40,8 +40,8 @@ export const MilestoneCompleteModal: React.FC<MilestoneCompleteModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-      <Card className="w-full max-w-md p-6 bg-white my-8 shadow-elevation-3">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+      <Card className="w-full max-w-md p-6 bg-[#15151a] border border-[#33333e] text-[#f0edf5] my-8 shadow-2xl">
         {/* Header */}
         <div className="flex justify-between items-start gap-4 mb-4 pb-3 border-b border-uiBorder">
           <div>
@@ -50,9 +50,9 @@ export const MilestoneCompleteModal: React.FC<MilestoneCompleteModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="text-muted hover:text-mainText text-lg font-bold"
+            className="text-muted hover:text-mainText p-1 rounded-lg"
           >
-            ✕
+            <IcoClose size={16} />
           </button>
         </div>
 

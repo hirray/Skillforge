@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
-import { Card, Button, Badge, SkeletonLoader } from '../../design-system/components';
+import { Card, Button, Badge, SkeletonLoader, IcoMsg } from '../../design-system/components';
 import { ProjectRoom } from './ProjectRoom';
 
 export * from './ProjectRoom';
@@ -55,7 +55,7 @@ const ChatProjectPicker: React.FC = () => {
   return (
     <div className="p-8 max-w-5xl mx-auto space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#0A1680] to-[#16279E] text-white p-6 rounded-2xl shadow-elevation-2 flex justify-between items-center">
+      <div className="bg-gradient-to-r from-[#1e1730] to-[#15151a] text-white p-6 rounded-2xl shadow-elevation-2 flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold tracking-tight mb-1">Project Rooms & Team Chat</h1>
           <p className="text-xs text-accent/90">
@@ -66,7 +66,9 @@ const ChatProjectPicker: React.FC = () => {
 
       {projects.length === 0 ? (
         <Card className="p-12 text-center bg-surface rounded-2xl border border-uiBorder shadow-elevation-1">
-          <span className="text-4xl block mb-3">💬</span>
+          <div className="w-14 h-14 rounded-2xl bg-[#221a36] border border-[#8861dc40] flex items-center justify-center mx-auto mb-3 text-[#b29af5]">
+            <IcoMsg size={28} color="#b29af5" />
+          </div>
           <h3 className="font-bold text-base text-mainText mb-1">No Projects Found</h3>
           <p className="text-xs text-muted max-w-sm mx-auto mb-4">
             You are not part of any projects yet. Create a project or accept an invitation to enter a Project Room.
@@ -97,7 +99,7 @@ const ChatProjectPicker: React.FC = () => {
                   onClick={() => navigate(`/chat/${p.id}`)}
                   className="text-xs font-bold"
                 >
-                  Enter Room ➔
+                  Enter Room
                 </Button>
               </div>
             </Card>

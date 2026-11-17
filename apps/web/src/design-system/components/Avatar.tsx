@@ -50,7 +50,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`relative inline-flex flex-shrink-0 items-center justify-center rounded-full bg-[#0A1680]/10 text-primary border border-uiBorder/80 font-medium select-none ${sizeClasses[size]} ${className} ${onClick ? 'cursor-pointer hover:opacity-90 transition-opacity' : ''}`}
+      className={`relative inline-flex flex-shrink-0 items-center justify-center rounded-full bg-[#8861dc]/20 text-primary border border-uiBorder/80 font-medium select-none ${sizeClasses[size]} ${className} ${onClick ? 'cursor-pointer hover:opacity-90 transition-opacity' : ''}`}
     >
       {src ? (
         <img

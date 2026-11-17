@@ -690,23 +690,23 @@
 .studio input:not([type='checkbox']),
 .studio textarea,
 .studio select {
-  background: #0d0d10;
-  border: 1px solid #303039;
+  background: #0e0e12;
+  border: 1px solid #3a3a48;
   border-radius: 6px;
-  padding: 10px 12px;
-  color: #e2dce9;
+  padding: 8px 12px;
+  color: #ffffff;
   min-width: 0;
-  font-size: 11px;
+  font-size: 12px;
   max-width: 100%;
 }
 .studio textarea {
   resize: vertical;
-  line-height: 1.8;
-  min-height: 100px;
+  line-height: 1.6;
+  min-height: 70px;
 }
 .studio input::placeholder,
 .studio textarea::placeholder {
-  color: #615b6a;
+  color: #8f8a9a;
 }
 .studio input[type='checkbox'] {
   accent-color: var(--st-violet);

@@ -10,10 +10,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const baseStyles = 'inline-flex items-center justify-center font-medium transition-colors focus:outline-none disabled:opacity-50 disabled:pointer-events-none rounded-full';
     
     const variants = {
-      primary: 'bg-primary text-white font-semibold hover:bg-primary/90 shadow-sm',
-      secondary: 'bg-accent text-primary font-semibold hover:bg-accent/90 shadow-sm',
-      outline: 'border border-uiBorder text-mainText hover:bg-gray-50',
-      icon: 'bg-accent text-primary hover:bg-accent/90 p-2',
+      primary: 'bg-primary text-[#0b0b0e] font-semibold hover:bg-primary/90 shadow-sm',
+      secondary: 'bg-accent text-white font-semibold hover:bg-accent/90 shadow-sm',
+      outline: 'border border-uiBorder text-mainText hover:bg-white/10',
+      icon: 'bg-accent text-white hover:bg-accent/90 p-2',
     };
     
     const sizes = {

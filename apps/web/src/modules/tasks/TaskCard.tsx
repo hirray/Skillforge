@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Badge, Avatar } from '../../design-system/components';
+import { Card, Badge, Avatar, IcoCalendar } from '../../design-system/components';
 
 interface TaskCardProps {
   task: any;
@@ -35,8 +35,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, onDragStart }
         )}
 
         {task.dueDate && (
-          <span className="text-muted font-medium">
-            📅 {new Date(task.dueDate).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+          <span className="text-muted font-medium inline-flex items-center gap-1">
+            <IcoCalendar size={12} color="#aba6b6" />
+            <span>{new Date(task.dueDate).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
           </span>
         )}
       </div>

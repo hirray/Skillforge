@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Button, Input, SkeletonLoader, LinkCard, FileCard } from '../../design-system/components';
+import { Button, Input, SkeletonLoader, LinkCard, FileCard, IcoSearch, IcoClose, IcoLink, IcoAlert, IcoFolder } from '../../design-system/components';
 import { AddLinkModal } from './AddLinkModal';
 import { FileUploadZone } from './FileUploadZone';
 import { CategoryFilterChips } from './CategoryFilterChips';
@@ -295,15 +295,15 @@ export const ResourcesHub: React.FC<ResourcesHubProps> = ({ projectId, isOwner }
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
             />
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">
-              🔍
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none flex items-center">
+              <IcoSearch size={14} />
             </span>
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-mainText text-xs font-bold"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-mainText p-1"
               >
-                ✕
+                <IcoClose size={14} />
               </button>
             )}
           </div>
@@ -311,8 +311,9 @@ export const ResourcesHub: React.FC<ResourcesHubProps> = ({ projectId, isOwner }
 
         <div className="flex items-center gap-2.5 w-full md:w-auto flex-wrap">
           {/* External Link Action */}
-          <Button onClick={() => setIsAddLinkOpen(true)} size="sm">
-            🔗 Add Link
+          <Button onClick={() => setIsAddLinkOpen(true)} size="sm" className="inline-flex items-center gap-1.5">
+            <IcoLink size={14} />
+            <span>Add Link</span>
           </Button>
 
           {/* GitHub Live Sync Stub per Scope Boundary */}
@@ -331,7 +332,7 @@ export const ResourcesHub: React.FC<ResourcesHubProps> = ({ projectId, isOwner }
                 Coming Soon
               </span>
             </Button>
-            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-[#16213A] text-white text-[11px] px-3 py-1.5 rounded-lg shadow-elevation-2 whitespace-nowrap z-30">
+            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-[#1a1922] border border-[#33333e] text-white text-[11px] px-3 py-1.5 rounded-lg shadow-elevation-2 whitespace-nowrap z-30">
               Live GitHub OAuth & synchronization will be available in Area 13.
             </div>
           </div>
@@ -351,7 +352,10 @@ export const ResourcesHub: React.FC<ResourcesHubProps> = ({ projectId, isOwner }
       {/* Error state */}
       {error && (
         <div className="p-4 bg-warning/10 border border-warning/30 rounded-2xl text-center text-sm text-warning font-semibold flex flex-col items-center gap-2">
-          <span>⚠️ {error}</span>
+          <div className="flex items-center gap-2">
+            <IcoAlert size={16} color="#f59e0b" />
+            <span>{error}</span>
+          </div>
           <Button size="sm" variant="outline" onClick={fetchResources}>
             Retry
           </Button>
@@ -445,8 +449,8 @@ export const ResourcesHub: React.FC<ResourcesHubProps> = ({ projectId, isOwner }
           ) : uploadQueue.length === 0 ? (
             /* Empty State */
             <div className="p-12 text-center bg-surface rounded-2xl border border-uiBorder shadow-elevation-1 flex flex-col items-center justify-center">
-              <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center text-3xl mb-3">
-                🗂️
+              <div className="w-16 h-16 rounded-full bg-[#221a36] border border-[#8861dc]/30 flex items-center justify-center mb-3">
+                <IcoFolder size={28} color="#b29af5" />
               </div>
               <h3 className="text-base font-bold text-primary mb-1">
                 {searchQuery || activeCategory !== 'all'
@@ -459,8 +463,9 @@ export const ResourcesHub: React.FC<ResourcesHubProps> = ({ projectId, isOwner }
                   : 'Add project documentation, design links, dataset archives, or platform file attachments to share with your team.'}
               </p>
               <div className="flex gap-2">
-                <Button onClick={() => setIsAddLinkOpen(true)} size="sm">
-                  🔗 Add First Link
+                <Button onClick={() => setIsAddLinkOpen(true)} size="sm" className="inline-flex items-center gap-1.5">
+                  <IcoLink size={14} />
+                  <span>Add First Link</span>
                 </Button>
               </div>
             </div>

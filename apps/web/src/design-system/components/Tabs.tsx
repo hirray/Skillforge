@@ -1,5 +1,3 @@
-
-
 export interface TabsProps {
   tabs: string[];
   activeTab: string;
@@ -9,7 +7,7 @@ export interface TabsProps {
 
 export const Tabs = ({ tabs, activeTab, onChange, className = '' }: TabsProps) => {
   return (
-    <div className={`flex border-b border-uiBorder ${className}`}>
+    <div className={`flex flex-wrap border-b border-[#2c2c36] gap-1 ${className}`}>
       {tabs.map((tab) => {
         const isActive = tab === activeTab;
         return (
@@ -17,10 +15,10 @@ export const Tabs = ({ tabs, activeTab, onChange, className = '' }: TabsProps) =
             key={tab}
             type="button"
             onClick={() => onChange(tab)}
-            className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+            className={`px-3 py-1.5 text-xs font-semibold border-b-2 transition-all ${
               isActive
-                ? 'border-primary text-primary'
-                : 'border-transparent text-muted hover:text-mainText hover:border-uiBorder'
+                ? 'border-[#b29af5] text-[#b29af5] bg-[#221a36]/40 rounded-t'
+                : 'border-transparent text-[#aba6b6] hover:text-white hover:border-[#3a3a46]'
             }`}
           >
             {tab}

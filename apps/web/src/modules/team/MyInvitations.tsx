@@ -73,9 +73,9 @@ export const MyInvitations = () => {
         return <Badge className="bg-accent text-primary">Accepted</Badge>;
       case 'declined':
       case 'rejected':
-        return <Badge className="bg-[#E7EAF3] text-[#6B7685]">Declined</Badge>;
+        return <Badge className="bg-[#1a1922] text-[#aba6b6] border border-[#33333e]">Declined</Badge>;
       case 'expired':
-        return <Badge className="bg-[#E7EAF3] text-[#6B7685] opacity-75">Expired</Badge>;
+        return <Badge className="bg-[#1a1922] text-[#aba6b6] border border-[#33333e] opacity-75">Expired</Badge>;
       default:
         return <Badge status="draft">{status}</Badge>;
     }

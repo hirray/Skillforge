@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..');
 const run = (cmd, args, cwd = root) =>
-  execFileSync(cmd, args, { cwd, stdio: 'inherit' });
+  execFileSync(cmd, args, { cwd, stdio: 'inherit', shell: true });
 const ai = path.join(root, 'services/ai');
 const python = path.join(
   ai,

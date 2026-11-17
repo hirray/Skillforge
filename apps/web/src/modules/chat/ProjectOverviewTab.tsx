@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Badge, SkeletonLoader, Button } from '../../design-system/components';
+import { Card, Badge, SkeletonLoader, Button, IcoCalendar, IcoPin } from '../../design-system/components';
 
 export interface ProjectOverviewTabProps {
   projectId: string;
@@ -72,7 +72,7 @@ export const ProjectOverviewTab: React.FC<ProjectOverviewTabProps> = ({
           <div className="flex gap-2">
             {onNavigateTab && (
               <Button size="sm" onClick={() => onNavigateTab('Group Chat')}>
-                Open Team Chat ➔
+                Open Team Chat
               </Button>
             )}
           </div>
@@ -132,7 +132,7 @@ export const ProjectOverviewTab: React.FC<ProjectOverviewTabProps> = ({
                 onClick={() => onNavigateTab('Tasks')}
                 className="text-xs text-accent hover:underline font-semibold"
               >
-                View Kanban Board ➔
+                View Kanban Board
               </button>
             )}
           </div>
@@ -165,8 +165,9 @@ export const ProjectOverviewTab: React.FC<ProjectOverviewTabProps> = ({
                     >
                       {task.priority}
                     </span>
-                    <span className="text-muted font-medium">
-                      📅 {new Date(task.dueDate).toLocaleDateString()}
+                    <span className="text-muted font-medium inline-flex items-center gap-1">
+                      <IcoCalendar size={11} />
+                      <span>{new Date(task.dueDate).toLocaleDateString()}</span>
                     </span>
                   </div>
                 </div>
@@ -180,14 +181,17 @@ export const ProjectOverviewTab: React.FC<ProjectOverviewTabProps> = ({
       <Card className="p-5 bg-surface rounded-2xl border border-uiBorder shadow-elevation-1">
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center gap-2">
-            <h3 className="font-bold text-sm text-primary">📌 Pinned Links & Resources Hub</h3>
+            <h3 className="font-bold text-sm text-primary flex items-center gap-1.5">
+              <IcoPin size={15} color="#b29af5" />
+              <span>Pinned Links & Resources Hub</span>
+            </h3>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/30">
               Active
             </span>
           </div>
           {onNavigateTab && (
             <Button size="sm" variant="outline" onClick={() => onNavigateTab('Resources')}>
-              Open Resources Hub ➔
+              Open Resources Hub
             </Button>
           )}
         </div>

@@ -8,6 +8,11 @@ import {
   TypingIndicator,
   SkeletonLoader,
   ChatMessageItem,
+  IcoUsers,
+  IcoLock,
+  IcoClose,
+  IcoMsg,
+  IcoCheck,
 } from '../../design-system/components';
 import { formatDateDivider } from '../../design-system/components/DateDivider';
 import { useSocket } from './useSocket';
@@ -368,7 +373,9 @@ export const DirectChat: React.FC<DirectChatProps> = ({
             </div>
           ) : directRooms.length === 0 ? (
             <div className="p-8 text-center text-muted text-xs">
-              <span className="text-2xl block mb-2">👤</span>
+              <div className="w-10 h-10 rounded-xl bg-[#221a36] border border-[#8861dc40] flex items-center justify-center mx-auto mb-2 text-[#b29af5]">
+                <IcoUsers size={20} color="#b29af5" />
+              </div>
               <p className="font-semibold text-mainText mb-1">No direct chats yet</p>
               <p className="mb-3">Start a private 1:1 conversation with any team member.</p>
               <Button size="sm" variant="outline" onClick={() => setShowNewChatModal(true)}>
@@ -415,7 +422,7 @@ export const DirectChat: React.FC<DirectChatProps> = ({
         {activeRoom ? (
           <>
             {/* Header */}
-            <div className="bg-gradient-to-r from-[#0A1680] to-[#16279E] text-white px-6 py-3.5 flex justify-between items-center shadow-elevation-1">
+            <div className="bg-gradient-to-r from-[#1e1730] to-[#15151a] text-white px-6 py-3.5 flex justify-between items-center shadow-elevation-1">
               <div className="flex items-center gap-3">
                 <Avatar
                   name={activeRoom.otherUserName}
@@ -443,7 +450,7 @@ export const DirectChat: React.FC<DirectChatProps> = ({
             {/* Messages Scroll View */}
             <div
               ref={scrollContainerRef}
-              className="flex-1 p-6 overflow-y-auto bg-[#FCFDFF] relative divide-y-0"
+              className="flex-1 p-6 overflow-y-auto bg-[#0e0e12] relative divide-y-0"
             >
               {loadingMessages ? (
                 <SkeletonLoader type="bubble" count={4} />
@@ -454,8 +461,8 @@ export const DirectChat: React.FC<DirectChatProps> = ({
                 </div>
               ) : processedMessages.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center p-8 text-muted">
-                  <div className="w-14 h-14 rounded-full bg-accent/20 flex items-center justify-center text-2xl text-primary mb-2">
-                    🔒
+                  <div className="w-14 h-14 rounded-full bg-[#221a36] border border-[#8861dc40] flex items-center justify-center text-primary mb-2">
+                    <IcoLock size={22} color="#b29af5" />
                   </div>
                   <h4 className="font-bold text-mainText text-sm mb-1">
                     Private Conversation with {activeRoom.otherUserName}
@@ -499,7 +506,7 @@ export const DirectChat: React.FC<DirectChatProps> = ({
                 <span className="font-bold text-primary">Editing:</span>
                 <input
                   type="text"
-                  className="flex-1 px-2.5 py-1 border border-uiBorder rounded bg-white text-xs"
+                  className="flex-1 px-2.5 py-1 border border-[#3a3a48] rounded bg-[#0e0e12] text-white text-xs"
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
                 />
@@ -508,9 +515,9 @@ export const DirectChat: React.FC<DirectChatProps> = ({
                 </Button>
                 <button
                   onClick={() => setEditingMessage(null)}
-                  className="text-muted hover:text-mainText"
+                  className="text-muted hover:text-mainText p-1"
                 >
-                  ✕
+                  <IcoClose size={14} />
                 </button>
               </div>
             )}
@@ -524,21 +531,23 @@ export const DirectChat: React.FC<DirectChatProps> = ({
                   value={inputValue}
                   onChange={handleInputChange}
                   disabled={isSending}
-                  className="flex-1 px-4 py-2.5 bg-bg border border-uiBorder rounded-xl text-sm text-mainText placeholder-muted focus:outline-none focus:border-accent focus:bg-white shadow-inner"
+                  className="flex-1 px-4 py-2.5 bg-bg border border-uiBorder rounded-xl text-sm text-mainText placeholder-muted focus:outline-none focus:border-accent shadow-inner"
                 />
                 <Button
                   type="submit"
                   disabled={!inputValue.trim() || isSending}
                   className="rounded-xl px-5 py-2.5"
                 >
-                  {isSending ? 'Sending...' : 'Send ➔'}
+                  {isSending ? 'Sending...' : 'Send'}
                 </Button>
               </form>
             </div>
           </>
         ) : (
           <div className="h-full flex flex-col items-center justify-center text-center p-8 text-muted">
-            <span className="text-4xl block mb-2">💬</span>
+            <div className="w-14 h-14 rounded-2xl bg-[#221a36] border border-[#8861dc40] flex items-center justify-center mx-auto mb-3 text-[#b29af5]">
+              <IcoMsg size={28} color="#b29af5" />
+            </div>
             <h3 className="font-bold text-mainText text-base mb-1">Select a Direct Message</h3>
             <p className="text-xs text-muted max-w-sm mb-4">
               Choose an existing teammate conversation from the left, or start a new 1:1 chat.
@@ -552,15 +561,15 @@ export const DirectChat: React.FC<DirectChatProps> = ({
 
       {/* ----------------- NEW 1:1 CHAT MODAL ----------------- */}
       {showNewChatModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-          <Card className="w-full max-w-md p-6 bg-white shadow-elevation-3">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+          <Card className="w-full max-w-md p-6 bg-[#15151a] border border-[#33333e] text-[#f0edf5] shadow-2xl">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-lg text-primary">Start Direct 1:1 Chat</h3>
               <button
                 onClick={() => setShowNewChatModal(false)}
-                className="text-muted hover:text-mainText text-sm font-bold"
+                className="text-muted hover:text-mainText text-sm font-bold p-1"
               >
-                ✕
+                <IcoClose size={14} />
               </button>
             </div>
 
@@ -585,7 +594,7 @@ export const DirectChat: React.FC<DirectChatProps> = ({
                         <span className="text-[10px] text-muted block">{member.role || 'Member'}</span>
                       </div>
                     </div>
-                    <span className="text-xs font-bold text-accent">Chat ➔</span>
+                    <span className="text-xs font-bold text-accent">Chat</span>
                   </button>
                 ))
               )}
@@ -602,12 +611,13 @@ export const DirectChat: React.FC<DirectChatProps> = ({
 
       {/* ----------------- REPORT MODAL ----------------- */}
       {reportingMessage && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-          <Card className="w-full max-w-md p-6 bg-white shadow-elevation-3">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+          <Card className="w-full max-w-md p-6 bg-[#15151a] border border-[#33333e] text-[#f0edf5] shadow-2xl">
             <h3 className="font-bold text-lg text-primary mb-2">Report Message</h3>
             {reportSubmitted ? (
-              <div className="p-3 bg-accent/20 text-primary text-center text-xs font-bold rounded-lg">
-                ✓ Report submitted to moderators.
+              <div className="p-3 bg-accent/20 text-primary text-center text-xs font-bold rounded-lg flex items-center justify-center gap-2">
+                <IcoCheck size={14} color="#b29af5" />
+                <span>Report submitted to moderators.</span>
               </div>
             ) : (
               <div className="space-y-3 text-xs">

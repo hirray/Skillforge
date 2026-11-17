@@ -8,6 +8,11 @@ import {
   NewMessagesPill,
   SkeletonLoader,
   ChatMessageItem,
+  IcoMsg,
+  IcoRefresh,
+  IcoClose,
+  IcoCheck,
+  IcoFile,
 } from '../../design-system/components';
 import { formatDateDivider } from '../../design-system/components/DateDivider';
 import { useSocket } from './useSocket';
@@ -403,10 +408,10 @@ export const GroupChat: React.FC<GroupChatProps> = ({
   return (
     <Card className="flex flex-col h-[700px] bg-surface rounded-2xl border border-uiBorder shadow-elevation-2 overflow-hidden">
       {/* Header bar */}
-      <div className="bg-gradient-to-r from-[#0A1680] to-[#16279E] text-white px-6 py-4 flex justify-between items-center shadow-elevation-1">
+      <div className="bg-gradient-to-r from-[#1e1730] to-[#15151a] text-white px-6 py-4 flex justify-between items-center shadow-elevation-1">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-xl font-bold border border-white/20 shadow-sm">
-            💬
+          <div className="w-10 h-10 rounded-xl bg-[#221a36] border border-[#8861dc40] flex items-center justify-center text-[#b29af5] shadow-sm">
+            <IcoMsg size={20} color="#b29af5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -430,9 +435,10 @@ export const GroupChat: React.FC<GroupChatProps> = ({
             size="sm"
             variant="outline"
             onClick={fetchMessages}
-            className="!text-white !border-white/30 hover:!bg-white/10 text-xs"
+            className="!text-white !border-white/30 hover:!bg-white/10 text-xs flex items-center gap-1.5"
           >
-            ↻ Refresh
+            <IcoRefresh size={12} />
+            <span>Refresh</span>
           </Button>
         </div>
       </div>
@@ -441,7 +447,7 @@ export const GroupChat: React.FC<GroupChatProps> = ({
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-1 p-6 overflow-y-auto bg-[#FCFDFF] divide-y-0 relative"
+        className="flex-1 p-6 overflow-y-auto bg-[#0e0e12] divide-y-0 relative"
       >
         {loading ? (
           <SkeletonLoader type="bubble" count={6} />
@@ -452,8 +458,8 @@ export const GroupChat: React.FC<GroupChatProps> = ({
           </div>
         ) : processedMessages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center p-8 text-muted">
-            <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center text-2xl text-primary mb-3">
-              💬
+            <div className="w-16 h-16 rounded-2xl bg-[#221a36] border border-[#8861dc40] flex items-center justify-center text-[#b29af5] mb-3">
+              <IcoMsg size={28} color="#b29af5" />
             </div>
             <h3 className="font-bold text-mainText text-base mb-1">Welcome to the Project Room!</h3>
             <p className="text-xs text-muted max-w-sm">
@@ -507,9 +513,9 @@ export const GroupChat: React.FC<GroupChatProps> = ({
           </div>
           <button
             onClick={() => setReplyingTo(null)}
-            className="text-muted hover:text-mainText font-bold ml-2"
+            className="text-muted hover:text-mainText font-bold ml-2 p-1"
           >
-            ✕
+            <IcoClose size={12} />
           </button>
         </div>
       )}
@@ -520,15 +526,16 @@ export const GroupChat: React.FC<GroupChatProps> = ({
             <span className="font-bold text-primary">Editing Message (within 10-minute window)</span>
             <button
               onClick={() => setEditingMessage(null)}
-              className="text-muted hover:text-mainText font-bold"
+              className="text-muted hover:text-mainText font-bold flex items-center gap-1"
             >
-              ✕ Cancel
+              <IcoClose size={12} />
+              <span>Cancel</span>
             </button>
           </div>
           <div className="flex gap-2">
             <input
               type="text"
-              className="flex-1 px-3 py-1.5 border border-uiBorder rounded-lg text-sm bg-white"
+              className="flex-1 px-3 py-1.5 border border-[#3a3a48] rounded-lg text-sm bg-[#0e0e12] text-white"
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
               onKeyDown={(e) => {
@@ -551,7 +558,7 @@ export const GroupChat: React.FC<GroupChatProps> = ({
               key={idx}
               className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-surface border border-uiBorder rounded-lg text-xs"
             >
-              <span>📎</span>
+              <IcoFile size={13} color="#b29af5" />
               <span className="font-medium text-mainText truncate max-w-xs">{att.name}</span>
               <button
                 type="button"
@@ -582,9 +589,9 @@ export const GroupChat: React.FC<GroupChatProps> = ({
             type="button"
             onClick={handleAddAttachment}
             title="Attach file"
-            className="p-2.5 text-muted hover:text-primary hover:bg-bg rounded-xl border border-uiBorder/60 transition-colors flex-shrink-0"
+            className="p-2.5 text-muted hover:text-primary hover:bg-bg rounded-xl border border-uiBorder/60 transition-colors flex-shrink-0 flex items-center justify-center"
           >
-            📎
+            <IcoFile size={16} />
           </button>
 
           <div className="flex-1 relative">
@@ -594,7 +601,7 @@ export const GroupChat: React.FC<GroupChatProps> = ({
               value={inputValue}
               onChange={handleInputChange}
               disabled={isSending}
-              className="w-full px-4 py-2.5 bg-bg border border-uiBorder rounded-xl text-sm text-mainText placeholder-muted focus:outline-none focus:border-accent focus:bg-white transition-all shadow-inner"
+              className="w-full px-4 py-2.5 bg-bg border border-uiBorder rounded-xl text-sm text-mainText placeholder-muted focus:outline-none focus:border-accent transition-all shadow-inner"
             />
           </div>
 
@@ -603,7 +610,7 @@ export const GroupChat: React.FC<GroupChatProps> = ({
             disabled={(!inputValue.trim() && attachments.length === 0) || isSending}
             className="rounded-xl px-5 py-2.5 flex-shrink-0"
           >
-            {isSending ? 'Sending...' : 'Send ➔'}
+            {isSending ? 'Sending...' : 'Send'}
           </Button>
         </form>
       </div>
@@ -611,20 +618,21 @@ export const GroupChat: React.FC<GroupChatProps> = ({
       {/* ----------------- REPORT MESSAGE MODAL ----------------- */}
       {reportingMessage && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-          <Card className="w-full max-w-md p-6 bg-white shadow-elevation-3">
+          <Card className="w-full max-w-md p-6 bg-[#15151a] border border-[#33333e] text-[#f0edf5] shadow-elevation-3">
             <div className="flex justify-between items-center mb-3">
               <h3 className="font-bold text-lg text-primary">Report Message</h3>
               <button
                 onClick={() => setReportingMessage(null)}
-                className="text-muted hover:text-mainText text-sm font-bold"
+                className="text-muted hover:text-mainText text-sm font-bold p-1"
               >
-                ✕
+                <IcoClose size={14} />
               </button>
             </div>
 
             {reportSubmitted ? (
-              <div className="p-4 bg-accent/20 border border-accent/40 rounded-xl text-primary text-center text-sm font-bold">
-                ✓ Report submitted to moderators. Thank you for keeping our community safe.
+              <div className="p-4 bg-accent/20 border border-accent/40 rounded-xl text-primary text-center text-sm font-bold flex items-center justify-center gap-2">
+                <IcoCheck size={16} color="#b29af5" />
+                <span>Report submitted to moderators. Thank you for keeping our community safe.</span>
               </div>
             ) : (
               <div className="space-y-4 text-sm">
@@ -641,7 +649,7 @@ export const GroupChat: React.FC<GroupChatProps> = ({
                   </label>
                   <textarea
                     rows={3}
-                    className="w-full p-2.5 border border-uiBorder rounded-lg bg-bg text-xs focus:bg-white focus:outline-none focus:border-accent"
+                    className="w-full p-2.5 border border-uiBorder rounded-lg bg-bg text-xs focus:outline-none focus:border-accent"
                     placeholder="Describe why this message violates project guidelines..."
                     value={reportReason}
                     onChange={(e) => setReportReason(e.target.value)}

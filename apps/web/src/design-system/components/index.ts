@@ -14,3 +14,5 @@ export * from './ProgressRing';
 export * from './Timeline';
 export * from './LinkCard';
 export * from './FileCard';
+export * from './Icons';
+

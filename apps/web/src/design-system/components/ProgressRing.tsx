@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { IcoCheck } from './Icons';
 
 export interface ProgressRingProps {
   progress: number; // 0 to 100
@@ -37,11 +38,11 @@ export const ProgressRing: React.FC<ProgressRingProps> = ({
   // Determine stroke color from locked palette
   let strokeColor = '#93B2F8'; // Bleu ciel (In Progress)
   if (status === 'Done' || animatedProgress === 100) {
-    strokeColor = '#0A1680'; // Bleu océan (Done)
+    strokeColor = '#b29af5'; // Bleu océan (Done)
   } else if (isOverdue) {
     strokeColor = '#F1B94C'; // Orange pastel (Overdue)
   } else if (status === 'To Do' || animatedProgress === 0) {
-    strokeColor = '#E7EAF3'; // Neutral border track
+    strokeColor = '#26262e'; // Neutral border track
   }
 
   const isCompleted = status === 'Done' || animatedProgress === 100;
@@ -59,7 +60,7 @@ export const ProgressRing: React.FC<ProgressRingProps> = ({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#E7EAF3"
+          stroke="#26262e"
           strokeWidth={strokeWidth}
           fill="transparent"
         />
@@ -83,7 +84,7 @@ export const ProgressRing: React.FC<ProgressRingProps> = ({
       {/* Centered Percentage or Checkmark */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none pointer-events-none">
         {isCompleted ? (
-          <span className="text-primary font-bold text-sm leading-none">✓</span>
+          <IcoCheck size={16} color="#b29af5" />
         ) : showPercent ? (
           <span
             className={`font-bold text-xs tracking-tight ${

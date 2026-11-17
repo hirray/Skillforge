@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { IcoUpload } from '../../design-system/components';
 
 interface FileUploadZoneProps {
   onFilesSelected: (files: File[]) => void;
@@ -56,7 +57,7 @@ export const FileUploadZone: React.FC<FileUploadZoneProps> = ({ onFilesSelected,
       onDrop={handleDrop}
       className={`relative rounded-2xl border-2 border-dashed p-6 text-center transition-all duration-200 cursor-pointer ${
         isDragOver
-          ? 'border-[#93B2F8] bg-[#93B2F8]/10 shadow-elevation-2 scale-[1.005]'
+          ? 'border-[#8861dc] bg-[#8861dc]/10 shadow-elevation-2 scale-[1.005]'
           : 'border-uiBorder bg-surface hover:border-accent/60 hover:bg-bg/60 shadow-elevation-1'
       } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       onClick={() => {
@@ -73,10 +74,10 @@ export const FileUploadZone: React.FC<FileUploadZoneProps> = ({ onFilesSelected,
       />
 
       <div className="flex flex-col items-center justify-center space-y-2 pointer-events-none">
-        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl transition-transform duration-200 ${
-          isDragOver ? 'scale-110 bg-[#93B2F8]/20 text-[#0A1680]' : 'bg-primary/5 text-primary'
+        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-transform duration-200 ${
+          isDragOver ? 'scale-110 bg-[#8861dc]/20 text-[#b29af5]' : 'bg-[#221a36] text-[#b29af5] border border-[#8861dc]/30'
         }`}>
-          📁
+          <IcoUpload size={24} />
         </div>
         <div>
           <p className="text-sm font-bold text-mainText">

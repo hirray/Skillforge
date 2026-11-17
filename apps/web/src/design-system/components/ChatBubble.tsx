@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Avatar } from './Avatar';
+import { IcoPaperclip, IcoEdit, IcoTrash, IcoFlag, IcoCheck } from './Icons';
 
 export interface ChatAttachment {
   fileId: string;
@@ -169,7 +170,7 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
         <div
           className={`relative px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-elevation-1 transition-all ${
             isMe
-              ? 'bg-gradient-to-br from-[#0A1680] to-[#14239E] text-white rounded-tr-sm'
+              ? 'bg-gradient-to-br from-[#8861dc] to-[#6042b0] text-white rounded-tr-sm'
               : 'bg-surface text-mainText border border-uiBorder rounded-tl-sm'
           } ${message.deleted ? 'bg-bg border-dashed border-uiBorder text-muted' : ''}`}
         >
@@ -186,7 +187,7 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
                     isMe ? 'bg-white/10 text-white' : 'bg-bg text-mainText border border-uiBorder'
                   }`}
                 >
-                  <span>📎</span>
+                  <IcoPaperclip size={13} />
                   <span className="font-medium truncate flex-1">{att.name}</span>
                   {att.url && (
                     <a
@@ -220,10 +221,15 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
           <div className="flex items-center gap-1.5 mt-0.5 px-1 text-[10px] text-muted">
             {hasSeen ? (
               <span className="text-accent font-semibold flex items-center gap-0.5">
-                ✓✓ Seen
+                <IcoCheck size={11} color="#b29af5" />
+                <IcoCheck size={11} color="#b29af5" className="-ml-1" />
+                <span>Seen</span>
               </span>
             ) : (
-              <span>✓ Sent</span>
+              <span className="flex items-center gap-0.5">
+                <IcoCheck size={11} />
+                <span>Sent</span>
+              </span>
             )}
             {isGroupedWithPrevious && <span>• {formatTime(message.createdAt)}</span>}
           </div>
@@ -250,27 +256,30 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
             <button
               onClick={() => onEdit(message)}
               title="Edit (within 10m)"
-              className="p-1 hover:bg-bg rounded text-muted hover:text-primary transition-colors"
+              className="p-1 hover:bg-bg rounded text-muted hover:text-primary transition-colors inline-flex items-center gap-1"
             >
-              ✏️ Edit
+              <IcoEdit size={12} />
+              <span>Edit</span>
             </button>
           )}
           {canDelete && onDelete && (
             <button
               onClick={() => onDelete(message.id)}
               title="Delete message"
-              className="p-1 hover:bg-bg rounded text-muted hover:text-warning transition-colors"
+              className="p-1 hover:bg-bg rounded text-muted hover:text-warning transition-colors inline-flex items-center gap-1"
             >
-              🗑️ Delete
+              <IcoTrash size={12} />
+              <span>Delete</span>
             </button>
           )}
           {!isMe && onReport && (
             <button
               onClick={() => onReport(message)}
               title="Report message"
-              className="p-1 hover:bg-bg rounded text-muted hover:text-warning transition-colors"
+              className="p-1 hover:bg-bg rounded text-muted hover:text-warning transition-colors inline-flex items-center gap-1"
             >
-              🚩 Report
+              <IcoFlag size={12} />
+              <span>Report</span>
             </button>
           )}
         </div>

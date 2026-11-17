@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, ProgressRing } from '../../design-system/components';
+import { Card, ProgressRing, IcoCalendar, IcoClipboard, IcoAlert, IcoCheck } from '../../design-system/components';
 
 interface MilestoneCardProps {
   milestone: any;
@@ -32,7 +32,7 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
 
   return (
     <Card
-      className="relative overflow-hidden transition-all duration-200 hover:shadow-elevation-2 cursor-pointer group bg-white border border-uiBorder/80 p-5"
+      className="relative overflow-hidden transition-all duration-200 hover:shadow-lg cursor-pointer group bg-[#15151a] border border-[#33333e] text-[#f0edf5] p-5"
       onClick={onClick}
     >
       {/* Left-edge accent bar */}
@@ -44,7 +44,7 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
             {/* Status Pill */}
             <span
-              className={`text-xs px-2.5 py-0.5 rounded-full font-bold inline-flex items-center gap-1 ${
+              className={`text-xs px-2.5 py-0.5 rounded-full font-bold inline-flex items-center gap-1.5 ${
                 isDone
                   ? 'bg-primary text-white'
                   : isOverdue
@@ -54,7 +54,21 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
                   : 'bg-uiBorder text-muted'
               }`}
             >
-              {isDone ? '✓ Done' : isOverdue ? '⚠️ Overdue' : progress > 0 ? 'In Progress' : 'To Do'}
+              {isDone ? (
+                <>
+                  <IcoCheck size={12} />
+                  <span>Done</span>
+                </>
+              ) : isOverdue ? (
+                <>
+                  <IcoAlert size={12} color="#f59e0b" />
+                  <span>Overdue</span>
+                </>
+              ) : progress > 0 ? (
+                'In Progress'
+              ) : (
+                'To Do'
+              )}
             </span>
 
             {/* Manually Confirmed Flag */}
@@ -81,7 +95,7 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
           {/* Metadata Footer */}
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
             <div className="flex items-center gap-1.5">
-              <span>📅</span>
+              <IcoCalendar size={13} color="#aba6b6" />
               <span className={isOverdue ? 'text-warning font-bold' : ''}>
                 {milestone.dueDate
                   ? new Date(milestone.dueDate).toLocaleDateString(undefined, {
@@ -94,7 +108,7 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
             </div>
 
             <div className="flex items-center gap-1.5">
-              <span>📋</span>
+              <IcoClipboard size={13} color="#aba6b6" />
               <span>
                 {totalTasks === 0
                   ? '0 tasks linked'

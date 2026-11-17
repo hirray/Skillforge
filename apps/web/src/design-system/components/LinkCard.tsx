@@ -1,5 +1,16 @@
 import React from 'react';
 import { Card } from './Card';
+import {
+  IcoGithub,
+  IcoFigma,
+  IcoFolder,
+  IcoNotion,
+  IcoVideo,
+  IcoMap,
+  IcoMsg,
+  IcoBar,
+  IcoLink,
+} from './Icons';
 
 export interface LinkCardProps {
   id: string;
@@ -39,15 +50,15 @@ export const LinkCard: React.FC<LinkCardProps> = ({
   // Derive specialized icon by domain
   const getDomainIcon = (h: string) => {
     const lower = h.toLowerCase();
-    if (lower.includes('github.com') || lower.includes('gitlab.com')) return '🐙';
-    if (lower.includes('figma.com')) return '🎨';
-    if (lower.includes('drive.google.com') || lower.includes('docs.google.com')) return '📁';
-    if (lower.includes('notion.so') || lower.includes('notion.site')) return '📓';
-    if (lower.includes('youtube.com') || lower.includes('youtu.be') || lower.includes('loom.com')) return '🎥';
-    if (lower.includes('miro.com') || lower.includes('whimsical.com')) return '🗺️';
-    if (lower.includes('slack.com') || lower.includes('discord.gg') || lower.includes('discord.com')) return '💬';
-    if (lower.includes('kaggle.com') || lower.includes('huggingface.co')) return '📊';
-    return '🔗';
+    if (lower.includes('github.com') || lower.includes('gitlab.com')) return <IcoGithub size={16} color="#ffffff" />;
+    if (lower.includes('figma.com')) return <IcoFigma size={16} color="#f472b6" />;
+    if (lower.includes('drive.google.com') || lower.includes('docs.google.com')) return <IcoFolder size={16} color="#60a5fa" />;
+    if (lower.includes('notion.so') || lower.includes('notion.site')) return <IcoNotion size={16} color="#ffffff" />;
+    if (lower.includes('youtube.com') || lower.includes('youtu.be') || lower.includes('loom.com')) return <IcoVideo size={16} color="#fb7185" />;
+    if (lower.includes('miro.com') || lower.includes('whimsical.com')) return <IcoMap size={16} color="#fbbf24" />;
+    if (lower.includes('slack.com') || lower.includes('discord.gg') || lower.includes('discord.com')) return <IcoMsg size={16} color="#818cf8" />;
+    if (lower.includes('kaggle.com') || lower.includes('huggingface.co')) return <IcoBar size={16} color="#34d399" />;
+    return <IcoLink size={16} color="#b29af5" />;
   };
 
   const getCategoryColor = (cat: string) => {
@@ -69,7 +80,7 @@ export const LinkCard: React.FC<LinkCardProps> = ({
 
   return (
     <Card
-      className={`p-4 bg-white border border-uiBorder/80 rounded-xl hover:shadow-elevation-2 transition-all duration-200 flex flex-col justify-between group ${className}`}
+      className={`p-4 bg-[#15151a] border border-[#33333e] text-[#f0edf5] rounded-xl hover:shadow-lg transition-all duration-200 flex flex-col justify-between group ${className}`}
     >
       <div>
         {/* Top Header: Category Badge, Domain & External Action */}

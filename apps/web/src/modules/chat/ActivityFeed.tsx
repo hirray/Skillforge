@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, SkeletonLoader } from '../../design-system/components';
+import {
+  Card,
+  Button,
+  SkeletonLoader,
+  IcoUsers,
+  IcoCheck,
+  IcoClose,
+  IcoFile,
+  IcoServer,
+  IcoFlash,
+  IcoRefresh,
+} from '../../design-system/components';
 
 export interface ActivityFeedProps {
   projectId: string;
@@ -21,39 +32,39 @@ const getEventConfig = (eventType: string) => {
   switch (eventType) {
     case 'MemberJoined':
       return {
-        icon: '👋',
-        badgeBg: 'bg-accent/20 text-primary border-accent/40',
-        dotColor: 'bg-accent',
+        icon: <IcoUsers size={14} color="#6ad4bb" />,
+        badgeBg: 'bg-[#132822] text-[#6ad4bb] border-[#6ad4bb50]',
+        dotColor: 'bg-[#6ad4bb]',
       };
     case 'MemberLeft':
       return {
-        icon: '🚪',
-        badgeBg: 'bg-muted/20 text-mainText border-uiBorder',
-        dotColor: 'bg-muted',
+        icon: <IcoClose size={14} color="#fb7185" />,
+        badgeBg: 'bg-[#2c1518] text-[#fb7185] border-[#fb718550]',
+        dotColor: 'bg-[#fb7185]',
       };
     case 'TaskCompleted':
       return {
-        icon: '✅',
-        badgeBg: 'bg-primary text-white border-primary',
-        dotColor: 'bg-primary',
+        icon: <IcoCheck size={14} color="#10B981" />,
+        badgeBg: 'bg-[#132822] text-[#10B981] border-[#10B98150]',
+        dotColor: 'bg-[#10B981]',
       };
     case 'TaskCreated':
       return {
-        icon: '📌',
-        badgeBg: 'bg-yellow/30 text-mainText border-yellow/50',
-        dotColor: 'bg-warning',
+        icon: <IcoFile size={14} color="#f59e0b" />,
+        badgeBg: 'bg-[#2a1e12] text-[#f59e0b] border-[#f59e0b50]',
+        dotColor: 'bg-[#f59e0b]',
       };
     case 'ProjectUpdated':
       return {
-        icon: '⚙️',
-        badgeBg: 'bg-surface text-primary border-uiBorder',
-        dotColor: 'bg-primary',
+        icon: <IcoServer size={14} color="#b29af5" />,
+        badgeBg: 'bg-[#221a36] text-[#b29af5] border-[#8861dc50]',
+        dotColor: 'bg-[#b29af5]',
       };
     default:
       return {
-        icon: '⚡',
-        badgeBg: 'bg-bg text-mainText border-uiBorder',
-        dotColor: 'bg-accent',
+        icon: <IcoFlash size={14} color="#b29af5" />,
+        badgeBg: 'bg-[#19191e] text-[#b29af5] border-[#3a3a48]',
+        dotColor: 'bg-[#b29af5]',
       };
   }
 };
@@ -131,8 +142,9 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ projectId }) => {
             </button>
           </div>
 
-          <Button size="sm" variant="outline" onClick={fetchActivity} className="text-xs">
-            ↻ Refresh
+          <Button size="sm" variant="outline" onClick={fetchActivity} className="text-xs flex items-center gap-1.5">
+            <IcoRefresh size={12} />
+            <span>Refresh</span>
           </Button>
         </div>
       </div>
@@ -148,7 +160,9 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ projectId }) => {
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-12 text-muted">
-            <span className="text-3xl block mb-2">📜</span>
+            <div className="w-12 h-12 rounded-xl bg-[#221a36] border border-[#8861dc40] flex items-center justify-center mx-auto mb-3 text-[#b29af5]">
+              <IcoFile size={22} color="#b29af5" />
+            </div>
             <h4 className="font-bold text-mainText text-sm mb-1">No Activity Logged Yet</h4>
             <p className="text-xs max-w-sm mx-auto">
               Project events such as members joining or tasks completing will automatically stream here.
@@ -169,7 +183,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ projectId }) => {
                 <div key={entry.id} className="relative flex items-start gap-4 text-xs group">
                   {/* Timeline Dot */}
                   <div
-                    className={`absolute -left-6 top-1 w-5 h-5 rounded-full ${cfg.dotColor} flex items-center justify-center text-[10px] text-white border-2 border-white shadow-sm flex-shrink-0`}
+                    className={`absolute -left-6 top-1 w-5 h-5 rounded-full ${cfg.dotColor} flex items-center justify-center text-[10px] text-white border border-[#15151a] shadow-sm flex-shrink-0`}
                   >
                     {cfg.icon}
                   </div>

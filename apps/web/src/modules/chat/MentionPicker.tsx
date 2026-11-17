@@ -1,5 +1,5 @@
 import React from 'react';
-import { Avatar } from '../../design-system/components';
+import { Avatar, IcoClose } from '../../design-system/components';
 
 export interface MentionMember {
   id: string;
@@ -36,9 +36,9 @@ export const MentionPicker: React.FC<MentionPickerProps> = ({
         <button
           type="button"
           onClick={onClose}
-          className="hover:text-mainText text-xs leading-none"
+          className="hover:text-mainText text-xs leading-none p-1"
         >
-          ✕
+          <IcoClose size={12} />
         </button>
       </div>
 

@@ -53,7 +53,7 @@ export const MilestoneTimelineView: React.FC<MilestoneTimelineViewProps> = ({
       </div>
 
       {/* Horizontal Roadmap Timeline */}
-      <Card className="p-4 bg-white border border-uiBorder">
+      <Card className="p-4 bg-[#15151a] border border-[#33333e] text-[#f0edf5]">
         <div className="flex justify-between items-center mb-2 px-2">
           <div>
             <h3 className="font-bold text-primary text-sm">Delivery Roadmap</h3>

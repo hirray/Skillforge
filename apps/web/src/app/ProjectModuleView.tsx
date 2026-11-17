@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button, SkeletonLoader } from '../design-system/components';
+import { Card, Button, SkeletonLoader, IcoFolder, IcoAlert } from '../design-system/components';
 import { TeamSection } from '../modules/projects/TeamSection';
 import { TasksSection } from '../modules/tasks/TasksSection';
 import { MilestonesSection } from '../modules/milestones/MilestonesSection';
@@ -72,8 +72,10 @@ export const ProjectModuleView: React.FC<ProjectModuleViewProps> = ({ moduleName
   if (projects.length === 0) {
     return (
       <div className="p-8 max-w-4xl mx-auto text-center space-y-4">
-        <Card className="p-8">
-          <span className="text-4xl mb-3 block">📁</span>
+        <Card className="p-8 flex flex-col items-center justify-center">
+          <div className="w-16 h-16 rounded-2xl bg-[#221a36] border border-[#8861dc]/30 flex items-center justify-center mb-3 text-primary">
+            <IcoFolder size={32} color="#b29af5" />
+          </div>
           <h2 className="text-xl font-bold text-primary mb-2">No Projects Found</h2>
           <p className="text-sm text-muted mb-6">
             Create your first project to start managing {title.toLowerCase()}.
@@ -87,8 +89,9 @@ export const ProjectModuleView: React.FC<ProjectModuleViewProps> = ({ moduleName
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6 animate-fade-in">
       {error && (
-        <div className="p-4 bg-red-100/60 border border-red-200 rounded-2xl text-xs text-red-600 font-semibold">
-          ⚠️ {error}
+        <div className="p-4 bg-red-950/40 border border-red-500/30 rounded-2xl text-xs text-red-400 font-semibold flex items-center gap-2">
+          <IcoAlert size={14} color="#f87171" />
+          <span>{error}</span>
         </div>
       )}
       {/* Header with Project Selector */}

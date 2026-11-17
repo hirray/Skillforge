@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { NavLink, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { api, token, WorkspaceContext, ResumeRecord } from './client';
 import {
   Brand,
@@ -8,7 +8,6 @@ import {
   ErrorNotice,
   PageHeader,
   Pill,
-  Button,
 } from './shared';
 import Requirements from './Requirements';
 import Matching from './Matching';
@@ -16,6 +15,10 @@ import Health from './Health';
 import JobMatching from './JobMatching';
 import Analytics from './Analytics';
 import ResumeStudio from '../resumes/ResumeStudio';
+import ProjectsModule from '../projects';
+import TasksModule from '../tasks';
+import MyInvitations from '../team/MyInvitations';
+import ChatModule from '../chat';
 import './studio.css';
 
 const tools = [
@@ -62,26 +65,43 @@ const tools = [
     label: 'Understand the outcome',
   },
 ];
+
 const accounts = [
-  ['user-001', 'Project owner'],
-  ['user-002', 'Frontend engineer'],
-  ['user-003', 'Backend developer'],
-  ['user-004', 'Product engineer'],
-  ['user-005', 'Designer'],
-  ['user-006', 'ML engineer'],
-  ['user-007', 'Cloud engineer'],
-  ['user-008', 'Developer'],
-  ['recruiter-001', 'Recruiter'],
-  ['admin-001', 'Admin'],
+  ['user-001', 'Student (user-001)'],
+  ['user-002', 'Freelancer (user-002)'],
+  ['user-003', 'Pro Dev (user-003)'],
+  ['user-004', 'Founder (user-004)'],
+  ['user-005', 'Designer (user-005)'],
+  ['user-006', 'ML Engineer (user-006)'],
+  ['user-007', 'Cloud Arch (user-007)'],
+  ['user-008', 'Job Seeker (user-008)'],
+  ['recruiter-001', 'Recruiter (recruiter-001)'],
+  ['admin-001', 'Admin (admin-001)'],
 ];
+
+const fallbackContext: WorkspaceContext = {
+  user: { id: token(), name: 'SkillForge User', roles: ['owner'] },
+  projects: [],
+  jobs: [],
+  preference: {
+    matchingOptIn: true,
+    recruiterVisible: true,
+    publicSkills: true,
+  },
+  extensionsEnabled: true,
+  ranker: 'standard',
+};
+
 function Overview({ context }: { context: WorkspaceContext }) {
-  const [records, setRecords] = useState<ResumeRecord[]>([]),
-    [error, setError] = useState<unknown>(null);
+  const [records, setRecords] = useState<ResumeRecord[]>([]);
+  const [error, setError] = useState<unknown>(null);
+
   useEffect(() => {
     void api<{ data: ResumeRecord[] }>('/resumes')
       .then((r) => setRecords(r.data))
       .catch(setError);
   }, []);
+
   return (
     <>
       <section className="st-hero">
@@ -103,8 +123,8 @@ function Overview({ context }: { context: WorkspaceContext }) {
           Turn an idea into a team that can bring it to life.
         </p>
         <div className="st-hero-actions">
-          <Link className="st-button" to="/ai/requirements">
-            Start with an idea
+          <Link className="st-button" to="/projects/create">
+            Create project
             <Icon name="arrow" />
           </Link>
           <Link className="st-text-button" to="/resumes">
@@ -121,6 +141,7 @@ function Overview({ context }: { context: WorkspaceContext }) {
           </span>
         </div>
       </section>
+
       <div className="st-overview-metrics">
         <div>
           <span>Your projects</span>
@@ -147,7 +168,9 @@ function Overview({ context }: { context: WorkspaceContext }) {
           <small>You choose when to be discoverable</small>
         </div>
       </div>
+
       <ErrorNotice error={error} />
+
       <div className="st-section-heading">
         <div>
           <div className="st-eyebrow">Your next move</div>
@@ -155,45 +178,28 @@ function Overview({ context }: { context: WorkspaceContext }) {
         </div>
         <span className="st-muted">Six tools. One connected journey.</span>
       </div>
+
       <div className="st-tool-grid">
-        {tools.map((tool, i) => (
+        {tools.map((tool) => (
           <Link to={tool.path} className="st-tool-card" key={tool.path}>
-            <div className="st-tool-top">
+            <div className="st-tool-head">
               <span className="st-tool-icon">
-                <Icon name={tool.icon} size={23} />
+                <Icon name={tool.icon} />
               </span>
-              <span className="st-tool-number">0{i + 1}</span>
+              <span className="st-tool-tag">{tool.label}</span>
             </div>
-            <span className="st-tool-label">{tool.label}</span>
             <h3>{tool.name}</h3>
             <p>{tool.description}</p>
             <span className="st-tool-link">
-              Explore
-              <Icon name="arrow" size={16} />
+              Open <Icon name="arrow" size={12} />
             </span>
           </Link>
         ))}
       </div>
-      <section className="st-journey">
-        <div>
-          <Icon name="shield" />
-          <strong>Evidence you can inspect. Decisions you own.</strong>
-          <p>
-            Every suggestion comes with its reasoning. Nothing joins a team,
-            edits a profile, or selects a candidate automatically.
-          </p>
-        </div>
-        <div className="st-journey-steps">
-          <span>Discover</span>
-          <i />
-          <span>Understand</span>
-          <i />
-          <span>Build together</span>
-        </div>
-      </section>
     </>
   );
 }
+
 function Preferences({
   context,
   onUpdate,
@@ -201,9 +207,10 @@ function Preferences({
   context: WorkspaceContext;
   onUpdate: () => void;
 }) {
-  const [error, setError] = useState<unknown>(null),
-    [saving, setSaving] = useState(false),
-    [message, setMessage] = useState('');
+  const [error, setError] = useState<unknown>(null);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
+
   const update = async (key: string, value: boolean) => {
     setSaving(true);
     setError(null);
@@ -220,6 +227,7 @@ function Preferences({
       setSaving(false);
     }
   };
+
   return (
     <>
       <PageHeader
@@ -273,32 +281,59 @@ function Preferences({
     </>
   );
 }
+
 export default function Member2Workspace() {
-  const [context, setContext] = useState<WorkspaceContext | null>(null),
-    [error, setError] = useState<unknown>(null),
-    [loading, setLoading] = useState(true),
-    [mobileNav, setMobileNav] = useState(false);
+  const [context, setContext] = useState<WorkspaceContext | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [mobileNav, setMobileNav] = useState(false);
   const location = useLocation();
-  const load = () =>
+
+  const load = () => {
+    setLoading(true);
     api<{ data: WorkspaceContext }>('/ai/context')
-      .then((r) => setContext(r.data))
-      .catch(setError)
+      .then((r) => {
+        setContext(r.data);
+      })
+      .catch((err) => {
+        console.warn('AI context load warning:', err);
+        setContext(fallbackContext);
+      })
       .finally(() => setLoading(false));
+  };
+
   useEffect(() => {
     void load();
   }, []);
-  const current = tools.find((t) =>
-    location.pathname.startsWith(t.path.replace('/demo', ''))
-  ) || { name: 'Overview' };
+
+  const getPageTitle = (pathname: string) => {
+    if (pathname.startsWith('/projects/create') || pathname.startsWith('/projects/new')) return 'Create Project';
+    if (pathname.startsWith('/projects')) return 'Projects';
+    if (pathname.startsWith('/tasks')) return 'Tasks';
+    if (pathname.startsWith('/team')) return 'Team Invitations';
+    if (pathname.startsWith('/chat')) return 'Project Rooms';
+    if (pathname.startsWith('/resumes')) return 'Resume Intelligence';
+    if (pathname.startsWith('/ai/requirements')) return 'Project Blueprint';
+    if (pathname.startsWith('/ai/match')) return 'Find Collaborators';
+    if (pathname.startsWith('/ai/health')) return 'Project Health';
+    if (pathname.startsWith('/ai/job-match')) return 'Talent Matching';
+    if (pathname.startsWith('/ai/preferences')) return 'Discovery Settings';
+    if (pathname.startsWith('/analytics')) return 'Analytics & Evaluation';
+    if (pathname.startsWith('/ai')) return 'Intelligence Overview';
+    return 'SkillForge';
+  };
+
+  const activeContext = context || fallbackContext;
+
   return (
     <div className="studio">
       <aside className={`st-sidebar ${mobileNav ? 'open' : ''}`}>
-        <Link to="/ai" className="st-brand">
+        <Link to="/projects" className="st-brand">
           <Brand />
           <span>
             skillforge<span className="st-brand-dot">.</span>
           </span>
         </Link>
+
         <div className="st-workspace-tag">
           <span className="st-workspace-avatar">S</span>
           <div>
@@ -307,40 +342,58 @@ export default function Member2Workspace() {
           </div>
           <Icon name="chevron" size={14} />
         </div>
-        <nav aria-label="Intelligence navigation">
-          <span className="st-nav-label">Workspace</span>
+
+        <nav aria-label="Main navigation">
+          <span className="st-nav-label">Build together</span>
+          <NavLink to="/projects" onClick={() => setMobileNav(false)}>
+            <Icon name="folder" />
+            Projects
+          </NavLink>
+          <NavLink to="/tasks" onClick={() => setMobileNav(false)}>
+            <Icon name="check" />
+            Tasks
+          </NavLink>
+          <NavLink to="/team" onClick={() => setMobileNav(false)}>
+            <Icon name="people" />
+            Team invitations
+          </NavLink>
+          <NavLink to="/chat" onClick={() => setMobileNav(false)}>
+            <Icon name="chat" />
+            Project rooms
+          </NavLink>
+
+          <span className="st-nav-label">Intelligence</span>
           <NavLink end to="/ai" onClick={() => setMobileNav(false)}>
             <Icon name="overview" />
             Overview
           </NavLink>
-          {tools.map((t) => (
-            <NavLink
-              key={t.path}
-              to={t.path}
-              onClick={() => setMobileNav(false)}
-            >
-              <Icon name={t.icon} />
-              {t.name}
-              {t.icon === 'spark' && <span className="st-nav-new">NEW</span>}
-            </NavLink>
-          ))}
-          <span className="st-nav-label">Build together</span>
-          <a href="/projects">
-            <Icon name="folder" />
-            Projects
-            <Icon name="arrow" size={13} />
-          </a>
-          <a href="/tasks">
-            <Icon name="check" />
-            Tasks
-            <Icon name="arrow" size={13} />
-          </a>
-          <a href="/chat">
+          <NavLink to="/resumes" onClick={() => setMobileNav(false)}>
+            <Icon name="resume" />
+            Resume intelligence
+          </NavLink>
+          <NavLink to="/ai/requirements" onClick={() => setMobileNav(false)}>
+            <Icon name="spark" />
+            Project blueprint
+            <span className="st-nav-new">AI</span>
+          </NavLink>
+          <NavLink to="/ai/match/demo" onClick={() => setMobileNav(false)}>
             <Icon name="people" />
-            Project rooms
-            <Icon name="arrow" size={13} />
-          </a>
+            Find collaborators
+          </NavLink>
+          <NavLink to="/ai/health" onClick={() => setMobileNav(false)}>
+            <Icon name="health" />
+            Project health
+          </NavLink>
+          <NavLink to="/ai/job-match/demo" onClick={() => setMobileNav(false)}>
+            <Icon name="job" />
+            Talent matching
+          </NavLink>
+          <NavLink to="/analytics" onClick={() => setMobileNav(false)}>
+            <Icon name="chart" />
+            Analytics & evaluation
+          </NavLink>
         </nav>
+
         <div className="st-sidebar-bottom">
           <NavLink to="/ai/preferences">
             <Icon name="shield" />
@@ -352,6 +405,7 @@ export default function Member2Workspace() {
           </div>
         </div>
       </aside>
+
       <div className="st-main">
         <header className="st-topbar">
           <button
@@ -359,18 +413,18 @@ export default function Member2Workspace() {
             aria-label="Toggle navigation"
             onClick={() => setMobileNav(!mobileNav)}
           >
-            ☰
+            <Icon name="menu" size={18} />
           </button>
           <div className="st-breadcrumb">
             <span>Workspace</span>
             <Icon name="chevron" size={13} />
-            <strong>{current.name}</strong>
+            <strong>{getPageTitle(location.pathname)}</strong>
           </div>
           <div className="st-topbar-right">
             <span className="st-preview-tag">Local preview</span>
             <label className="st-account">
               <span className="st-user-avatar">
-                {context?.user.name
+                {activeContext.user.name
                   ?.split(' ')
                   .map((n) => n[0])
                   .slice(0, 2)
@@ -393,71 +447,54 @@ export default function Member2Workspace() {
             </label>
           </div>
         </header>
+
         <main className="st-content">
-          {loading ? (
+          {loading && !context ? (
             <Loading />
-          ) : error ? (
-            <>
-              <PageHeader
-                eyebrow="Workspace setup"
-                title="Let’s get connected."
-              >
-                The intelligence workspace needs the Member 2 local
-                configuration.
-              </PageHeader>
-              <ErrorNotice error={error} />
-              <p className="st-muted">
-                Run the documented Member 2 setup, then restart the API.
-              </p>
-              <Button
-                onClick={() => {
-                  setError(null);
-                  setLoading(true);
-                  void load();
-                }}
-              >
-                Try again
-              </Button>
-            </>
           ) : (
-            context && (
-              <Routes>
-                <Route path="/ai" element={<Overview context={context} />} />
-                <Route
-                  path="/ai/requirements"
-                  element={<Requirements context={context} />}
-                />
-                <Route
-                  path="/ai/match/*"
-                  element={<Matching context={context} />}
-                />
-                <Route
-                  path="/ai/health"
-                  element={<Health context={context} />}
-                />
-                <Route
-                  path="/ai/job-match/*"
-                  element={<JobMatching context={context} />}
-                />
-                <Route
-                  path="/ai/preferences"
-                  element={
-                    <Preferences
-                      context={context}
-                      onUpdate={() => void load()}
-                    />
-                  }
-                />
-                <Route path="/resumes/*" element={<ResumeStudio />} />
-                <Route
-                  path="/analytics/*"
-                  element={<Analytics context={context} />}
-                />
-                <Route path="*" element={<Overview context={context} />} />
-              </Routes>
-            )
+            <Routes>
+              <Route path="/" element={<Navigate to="/projects" replace />} />
+              <Route path="/projects/*" element={<ProjectsModule />} />
+              <Route path="/tasks/*" element={<TasksModule />} />
+              <Route path="/team/*" element={<MyInvitations />} />
+              <Route path="/chat/*" element={<ChatModule />} />
+              
+              <Route path="/ai" element={<Overview context={activeContext} />} />
+              <Route
+                path="/ai/requirements"
+                element={<Requirements context={activeContext} />}
+              />
+              <Route
+                path="/ai/match/*"
+                element={<Matching context={activeContext} />}
+              />
+              <Route
+                path="/ai/health"
+                element={<Health context={activeContext} />}
+              />
+              <Route
+                path="/ai/job-match/*"
+                element={<JobMatching context={activeContext} />}
+              />
+              <Route
+                path="/ai/preferences"
+                element={
+                  <Preferences
+                    context={activeContext}
+                    onUpdate={() => void load()}
+                  />
+                }
+              />
+              <Route path="/resumes/*" element={<ResumeStudio />} />
+              <Route
+                path="/analytics/*"
+                element={<Analytics context={activeContext} />}
+              />
+              <Route path="*" element={<Navigate to="/projects" replace />} />
+            </Routes>
           )}
         </main>
+
         <footer className="st-footer">
           <span>SkillForge Intelligence</span>
           <span>Human judgment, supported by evidence.</span>

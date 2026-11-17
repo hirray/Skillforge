@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Button, ProgressRing, Input } from '../../design-system/components';
+import { Card, Button, ProgressRing, Input, IcoCheck, IcoAlert, IcoEdit, IcoClose, IcoFile, IcoTarget } from '../../design-system/components';
 
 interface MilestoneDetailModalProps {
   milestone: any;
@@ -111,28 +111,42 @@ export const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-      <Card className="w-full max-w-2xl p-6 bg-white my-8 max-h-[90vh] overflow-y-auto shadow-elevation-3">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+      <Card className="w-full max-w-2xl p-6 bg-[#15151a] border border-[#33333e] text-[#f0edf5] my-8 max-h-[90vh] overflow-y-auto shadow-2xl">
         {/* Top Header */}
-        <div className="flex justify-between items-start gap-4 mb-4 pb-3 border-b border-uiBorder">
+        <div className="flex justify-between items-start gap-4 mb-4 pb-3 border-b border-[#26262e]">
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-2 mb-1.5">
               <span
                 className={`text-xs px-2.5 py-0.5 rounded-full font-bold inline-flex items-center gap-1 ${
                   isDone
-                    ? 'bg-primary text-white'
+                    ? 'bg-[#221a36] text-[#b29af5] border border-[#8861dc50]'
                     : isOverdue
                     ? 'bg-warning/20 text-warning border border-warning/30'
                     : progress > 0
                     ? 'bg-accent/20 text-primary border border-accent/40'
-                    : 'bg-uiBorder text-muted'
+                    : 'bg-[#1a1922] text-[#aba6b6] border border-[#33333e]'
                 }`}
               >
-                {isDone ? '✓ Completed' : isOverdue ? '⚠️ Overdue' : progress > 0 ? 'In Progress' : 'To Do'}
+                {isDone ? (
+                  <>
+                    <IcoCheck size={12} />
+                    <span>Completed</span>
+                  </>
+                ) : isOverdue ? (
+                  <>
+                    <IcoAlert size={12} color="#f59e0b" />
+                    <span>Overdue</span>
+                  </>
+                ) : progress > 0 ? (
+                  'In Progress'
+                ) : (
+                  'To Do'
+                )}
               </span>
 
               {milestone.isManualCompletion && (
-                <span className="text-[11px] px-2 py-0.5 bg-yellow/40 border border-yellow text-mainText rounded-full font-semibold">
+                <span className="text-[11px] px-2 py-0.5 bg-[#2a1e12] border border-[#f59e0b50] text-[#f59e0b] rounded-full font-semibold">
                   Manually Confirmed
                 </span>
               )}
@@ -156,16 +170,16 @@ export const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
               <button
                 type="button"
                 onClick={() => setIsEditing(true)}
-                className="text-xs text-accent hover:text-primary font-bold px-2 py-1 rounded hover:bg-bg"
+                className="text-xs text-accent hover:text-primary font-bold px-2 py-1 rounded hover:bg-bg inline-flex items-center gap-1"
               >
-                ✏️ Edit
+                <IcoEdit size={12} /> Edit
               </button>
             )}
             <button
               onClick={onClose}
-              className="text-muted hover:text-mainText text-lg font-bold p-1"
+              className="text-muted hover:text-mainText p-1 rounded-lg"
             >
-              ✕
+              <IcoClose size={16} />
             </button>
           </div>
         </div>
@@ -225,9 +239,12 @@ export const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
 
             {/* Manual Completion Rationale Note */}
             {milestone.isManualCompletion && milestone.completionRationale && (
-              <div className="p-3 bg-yellow/20 border border-yellow/40 rounded-lg text-xs">
-                <p className="font-bold text-mainText mb-0.5">📝 Manual Completion Rationale:</p>
-                <p className="text-muted italic leading-relaxed">
+              <div className="p-3 bg-[#2a1e12] border border-[#f59e0b50] rounded-lg text-xs">
+                <p className="font-bold text-[#f59e0b] mb-0.5 inline-flex items-center gap-1.5">
+                  <IcoFile size={13} color="#f59e0b" />
+                  <span>Manual Completion Rationale:</span>
+                </p>
+                <p className="text-[#aba6b6] italic leading-relaxed">
                   "{milestone.completionRationale}"
                 </p>
                 {milestone.completedBy && (
@@ -375,7 +392,7 @@ export const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
             </div>
 
             {/* Metadata Card */}
-            <div className="w-full space-y-3 bg-white p-3 rounded-xl border border-uiBorder">
+            <div className="w-full space-y-3 bg-[#111114] p-3 rounded-xl border border-[#33333e]">
               <div>
                 <label className="font-bold block text-muted text-[10px] uppercase">Target Due Date</label>
                 {!isEditing ? (
@@ -391,7 +408,7 @@ export const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
                 ) : (
                   <input
                     type="date"
-                    className="w-full p-1 border border-uiBorder rounded bg-bg text-xs mt-0.5"
+                    className="w-full p-1 border border-[#3a3a48] rounded bg-[#0e0e12] text-xs mt-0.5 text-white"
                     value={editDueDate}
                     onChange={(e) => setEditDueDate(e.target.value)}
                   />
@@ -418,14 +435,15 @@ export const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
             </div>
 
             {/* Action Buttons */}
-            <div className="w-full space-y-2 pt-2 border-t border-uiBorder">
+            <div className="w-full space-y-2 pt-2 border-t border-[#26262e]">
               {!isDone && canEdit && (
                 <Button
                   size="sm"
-                  className="w-full bg-primary hover:bg-primary/90 text-white"
+                  className="w-full bg-primary hover:bg-primary/90 text-white font-bold inline-flex items-center justify-center gap-1.5"
                   onClick={onOpenCompleteModal}
                 >
-                  🎯 Mark Milestone Complete
+                  <IcoTarget size={14} color="#ffffff" />
+                  <span>Mark Milestone Complete</span>
                 </Button>
               )}
 
@@ -433,7 +451,7 @@ export const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full text-warning border-warning/30 hover:bg-warning/10"
+                  className="w-full text-[#fb7185] border-[#fb718540] hover:bg-[#fb718515]"
                   onClick={handleDelete}
                   disabled={isDeleting}
                 >

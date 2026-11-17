@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Button, Badge, Input } from '../../design-system/components';
+import { Card, Button, Badge, Input, IcoMail, IcoCrown } from '../../design-system/components';
 
 interface TeamSectionProps {
   projectId: string;
@@ -308,9 +308,9 @@ export const TeamSection = ({ projectId, project, onProjectUpdated }: TeamSectio
         return <Badge className="bg-accent text-primary">Accepted</Badge>;
       case 'declined':
       case 'rejected':
-        return <Badge className="bg-[#E7EAF3] text-[#6B7685]">{status}</Badge>;
+        return <Badge className="bg-[#1a1922] text-[#aba6b6] border border-[#33333e]">{status}</Badge>;
       case 'expired':
-        return <Badge className="bg-[#E7EAF3] text-[#6B7685] opacity-75">Expired</Badge>;
+        return <Badge className="bg-[#1a1922] text-[#aba6b6] border border-[#33333e] opacity-75">Expired</Badge>;
       default:
         return <Badge status="draft">{status}</Badge>;
     }
@@ -326,7 +326,9 @@ export const TeamSection = ({ projectId, project, onProjectUpdated }: TeamSectio
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-xl">🎉</span>
+                <div className="w-7 h-7 rounded-lg bg-accent/30 border border-accent/60 flex items-center justify-center text-primary">
+                  <IcoMail size={16} />
+                </div>
                 <h3 className="font-bold text-primary text-base">You've Been Invited to Join This Team!</h3>
                 <Badge className="bg-primary text-white">{myPendingInvitation.role}</Badge>
               </div>
@@ -334,7 +336,7 @@ export const TeamSection = ({ projectId, project, onProjectUpdated }: TeamSectio
                 The project owner has invited you to join the team as a <strong>{myPendingInvitation.role}</strong>.
               </p>
               {myPendingInvitation.note && (
-                <p className="text-xs text-muted italic mt-1.5 bg-white/80 p-2.5 rounded-lg border border-uiBorder">
+                <p className="text-xs text-muted italic mt-1.5 bg-[#15151a] p-2.5 rounded-lg border border-uiBorder">
                   "{myPendingInvitation.note}"
                 </p>
               )}
@@ -447,8 +449,8 @@ export const TeamSection = ({ projectId, project, onProjectUpdated }: TeamSectio
         {/* Project Owner Card */}
         <Card className="flex justify-between items-center border-l-4 border-primary p-4">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">
-              👑
+            <div className="w-10 h-10 rounded-full bg-accent/20 border border-accent/40 text-primary flex items-center justify-center">
+              <IcoCrown size={20} color="#b29af5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -544,7 +546,7 @@ export const TeamSection = ({ projectId, project, onProjectUpdated }: TeamSectio
                     {m.status === 'removed' ? `Removed: ${m.removalReason || 'No reason provided'}` : `Left: ${m.leaveReason || 'Voluntary departure'}`} ({m.leftAt ? new Date(m.leftAt).toLocaleDateString() : ''})
                   </p>
                 </div>
-                <Badge className="bg-[#E7EAF3] text-[#6B7685]">{m.status}</Badge>
+                <Badge className="bg-[#1a1922] text-[#aba6b6] border border-[#33333e]">{m.status}</Badge>
               </Card>
             ))}
           </div>
@@ -606,7 +608,7 @@ export const TeamSection = ({ projectId, project, onProjectUpdated }: TeamSectio
                     </div>
 
                     {req.message && (
-                      <p className="text-mainText bg-white p-2 rounded border border-uiBorder/50">"{req.message}"</p>
+                      <p className="text-mainText bg-[#1a1922] p-2 rounded border border-[#33333e]">"{req.message}"</p>
                     )}
 
                     {req.status === 'Pending' && (
@@ -642,7 +644,7 @@ export const TeamSection = ({ projectId, project, onProjectUpdated }: TeamSectio
       {/* 1. Invite Modal */}
       {showInviteModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md p-6 bg-white">
+          <Card className="w-full max-w-md p-6 bg-[#15151a] border border-[#33333e] text-[#f0edf5]">
             <h3 className="text-lg font-bold text-primary mb-4">Invite Candidate to Team</h3>
             
             <div className="flex flex-col gap-4 text-sm">
@@ -720,7 +722,7 @@ export const TeamSection = ({ projectId, project, onProjectUpdated }: TeamSectio
       {/* 2. Request to Join Modal */}
       {showJoinModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md p-6 bg-white">
+          <Card className="w-full max-w-md p-6 bg-[#15151a] border border-[#33333e] text-[#f0edf5]">
             <h3 className="text-lg font-bold text-primary mb-4">Request to Join Project</h3>
             
             <div className="flex flex-col gap-4 text-sm">
@@ -773,7 +775,7 @@ export const TeamSection = ({ projectId, project, onProjectUpdated }: TeamSectio
       {/* 3. Reject Join Request Modal */}
       {showRejectModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md p-6 bg-white">
+          <Card className="w-full max-w-md p-6 bg-[#15151a] border border-[#33333e] text-[#f0edf5]">
             <h3 className="text-lg font-bold text-primary mb-2">Decline Join Request</h3>
             <p className="text-xs text-muted mb-4">
               The applicant will receive a respectful notification without any comparison to other applicants.
@@ -803,7 +805,7 @@ export const TeamSection = ({ projectId, project, onProjectUpdated }: TeamSectio
       {/* 4. Edit Role Modal */}
       {showRoleModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md p-6 bg-white">
+          <Card className="w-full max-w-md p-6 bg-[#15151a] border border-[#33333e] text-[#f0edf5]">
             <h3 className="text-lg font-bold text-primary mb-4">Edit Member Role</h3>
             
             <div className="flex flex-col gap-4 text-sm">
@@ -854,7 +856,7 @@ export const TeamSection = ({ projectId, project, onProjectUpdated }: TeamSectio
       {/* 5. Remove Member Modal */}
       {showRemoveModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md p-6 bg-white">
+          <Card className="w-full max-w-md p-6 bg-[#15151a] border border-[#33333e] text-[#f0edf5]">
             <h3 className="text-lg font-bold text-warning mb-2">Remove Member from Team</h3>
             
             {project.status === 'Active' && activeMembers.length === 1 && (
@@ -891,7 +893,7 @@ export const TeamSection = ({ projectId, project, onProjectUpdated }: TeamSectio
       {/* 6. Leave Project Modal */}
       {showLeaveModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md p-6 bg-white">
+          <Card className="w-full max-w-md p-6 bg-[#15151a] border border-[#33333e] text-[#f0edf5]">
             <h3 className="text-lg font-bold text-warning mb-2">Leave Project</h3>
             <p className="text-xs text-muted mb-4">
               Are you sure you want to leave this project? Your past contributions will remain recorded.
@@ -915,7 +917,7 @@ export const TeamSection = ({ projectId, project, onProjectUpdated }: TeamSectio
       {/* 7. Transfer Ownership Modal */}
       {showTransferModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md p-6 bg-white">
+          <Card className="w-full max-w-md p-6 bg-[#15151a] border border-[#33333e] text-[#f0edf5]">
             <h3 className="text-lg font-bold text-primary mb-2">Transfer Project Ownership</h3>
             <p className="text-xs text-muted mb-4">
               Designate a current active member to take over project ownership. You will remain the project owner until they explicitly accept the transfer.

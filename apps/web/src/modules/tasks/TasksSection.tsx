@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Button, Input } from '../../design-system/components';
+import { Card, Button, Input, IcoLock, IcoAlert, IcoCalendar, IcoTarget, IcoClose } from '../../design-system/components';
 
 interface TasksSectionProps {
   projectId: string;
@@ -250,7 +250,7 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
   const getPriorityPill = (priority: string) => {
     switch (priority) {
       case 'Low':
-        return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-[#E7EAF3] text-[#6B7685]">Low</span>;
+        return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-[#1a1922] text-[#aba6b6] border border-[#33333e]">Low</span>;
       case 'Medium':
         return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-accent text-primary">Medium</span>;
       case 'High':
@@ -258,14 +258,14 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
       case 'Critical':
         return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-primary text-white">Critical</span>;
       default:
-        return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-[#E7EAF3] text-[#6B7685]">{priority}</span>;
+        return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-[#1a1922] text-[#aba6b6] border border-[#33333e]">{priority}</span>;
     }
   };
 
   const getStatusColumnPill = (status: string) => {
     switch (status) {
       case 'To Do':
-        return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-[#E7EAF3] text-[#6B7685]">To Do</span>;
+        return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-[#1a1922] text-[#aba6b6] border border-[#33333e]">To Do</span>;
       case 'In Progress':
         return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-accent text-primary">In Progress</span>;
       case 'In Review':
@@ -280,7 +280,7 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
           </span>
         );
       default:
-        return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-[#E7EAF3] text-[#6B7685]">{status}</span>;
+        return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-[#1a1922] text-[#aba6b6] border border-[#33333e]">{status}</span>;
     }
   };
 
@@ -304,7 +304,10 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
   if (error === 'PERMISSION_DENIED' || (!isMember && error)) {
     return (
       <Card className="p-8 text-center border-l-4 border-warning bg-warning/5">
-        <h3 className="font-bold text-primary text-lg mb-2">🔒 Member-Only Task Board</h3>
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <IcoLock size={20} color="#f59e0b" />
+          <h3 className="font-bold text-primary text-lg">Member-Only Task Board</h3>
+        </div>
         <p className="text-sm text-mainText max-w-md mx-auto mb-4">
           Task tracking, Kanban boards, and assignment are restricted to confirmed active team members of this project.
         </p>
@@ -357,12 +360,12 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
       </div>
 
       {/* Filter Controls Bar */}
-      <Card className="p-3 bg-white flex flex-wrap items-center justify-between gap-3 text-xs">
+      <Card className="p-3 bg-[#15151a] border border-[#33333e] text-[#f0edf5] flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-1.5">
-            <span className="font-semibold text-muted">Assignee:</span>
+            <span className="font-semibold text-[#aba6b6]">Assignee:</span>
             <select
-              className="p-1.5 border border-uiBorder rounded bg-bg text-mainText font-medium"
+              className="p-1.5 border border-[#3a3a48] rounded bg-[#0e0e12] text-white font-medium"
               value={assigneeFilter}
               onChange={e => setAssigneeFilter(e.target.value)}
             >
@@ -378,9 +381,9 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
           </div>
 
           <div className="flex items-center gap-1.5">
-            <span className="font-semibold text-muted">Priority:</span>
+            <span className="font-semibold text-[#aba6b6]">Priority:</span>
             <select
-              className="p-1.5 border border-uiBorder rounded bg-bg text-mainText font-medium"
+              className="p-1.5 border border-[#3a3a48] rounded bg-[#0e0e12] text-white font-medium"
               value={priorityFilter}
               onChange={e => setPriorityFilter(e.target.value)}
             >
@@ -396,7 +399,7 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
         <div className="w-full sm:w-64">
           <input
             type="text"
-            className="w-full p-1.5 border border-uiBorder rounded bg-bg text-xs"
+            className="w-full p-1.5 border border-[#3a3a48] rounded bg-[#0e0e12] text-xs text-white placeholder-[#8f8a9a]"
             placeholder="Search tasks..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
@@ -434,15 +437,15 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
               }}
               className={`flex flex-col gap-3 p-3 rounded-xl border min-h-[500px] transition-all duration-150 ${
                 isOver
-                  ? 'bg-accent/10 border-accent ring-2 ring-accent shadow-sm'
-                  : 'bg-bg/50 border-uiBorder'
+                  ? 'bg-[#221a36]/50 border-[#8861dc] ring-2 ring-[#8861dc]/50 shadow-sm'
+                  : 'bg-[#111114] border-[#2c2c36]'
               }`}
             >
               {/* Column Header */}
-              <div className="flex justify-between items-center pb-2 border-b border-uiBorder">
+              <div className="flex justify-between items-center pb-2 border-b border-[#2c2c36]">
                 <div className="flex items-center gap-2">
                   {getStatusColumnPill(column)}
-                  <span className="text-xs font-bold text-muted">({colTasks.length})</span>
+                  <span className="text-xs font-bold text-[#aba6b6]">({colTasks.length})</span>
                 </div>
                 <button
                   type="button"
@@ -450,7 +453,7 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
                     setCreateForm({ ...createForm, status: column });
                     setShowCreateModal(true);
                   }}
-                  className="text-muted hover:text-primary text-sm font-bold px-1"
+                  className="text-[#aba6b6] hover:text-[#b29af5] text-sm font-bold px-1"
                   title="Add task to this column"
                 >
                   +
@@ -459,7 +462,7 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
 
               {/* Drop Target Indicator when dragging over empty or non-empty column */}
               {isOver && (
-                <div className="p-3 text-center border-2 border-dashed border-accent rounded-lg bg-accent/20 text-xs font-bold text-primary animate-pulse">
+                <div className="p-3 text-center border-2 border-dashed border-[#8861dc] rounded-lg bg-[#221a36] text-xs font-bold text-[#b29af5] animate-pulse">
                   Drop to move to {column}
                 </div>
               )}
@@ -467,7 +470,7 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
               {/* Task Cards List */}
               <div className="flex flex-col gap-3 flex-1">
                 {colTasks.length === 0 && !isOver ? (
-                  <div className="p-6 text-center text-muted/60 text-xs border border-dashed border-uiBorder rounded-lg my-auto">
+                  <div className="p-6 text-center text-[#aba6b6]/60 text-xs border border-dashed border-[#2c2c36] rounded-lg my-auto">
                     No tasks in {column}
                   </div>
                 ) : (
@@ -488,21 +491,22 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
                           setDraggedTaskId(null);
                           setDragOverColumn(null);
                         }}
-                        className={`p-3.5 bg-white cursor-grab active:cursor-grabbing hover:shadow-md transition-all border select-none ${
+                        className={`p-3.5 bg-[#18181f] text-white cursor-grab active:cursor-grabbing hover:shadow-md hover:border-[#8861dc]/60 transition-all border select-none ${
                           isBeingDragged
                             ? 'opacity-40 scale-95 border-accent'
                             : task.needsReassignment
-                            ? 'border-warning/80 ring-1 ring-warning/30'
+                            ? 'border-amber-400 ring-1 ring-amber-400/30'
                             : dueSoon && task.status !== 'Done'
-                            ? 'border-warning/60 bg-warning/[0.02]'
-                            : 'border-uiBorder'
+                            ? 'border-amber-400/60 bg-amber-950/20'
+                            : 'border-[#2c2c36]'
                         }`}
                         onClick={() => setSelectedTask(task)}
                       >
                         {/* Reassignment Attention Banner */}
                         {task.needsReassignment && (
-                          <div className="mb-2 px-2 py-1 bg-warning/20 border border-warning/40 text-mainText text-[11px] font-bold rounded flex items-center gap-1">
-                            <span>⚠️ Needs Reassignment</span>
+                          <div className="mb-2 px-2 py-1 bg-warning/20 border border-warning/40 text-mainText text-[11px] font-bold rounded flex items-center gap-1.5">
+                            <IcoAlert size={12} color="#f59e0b" />
+                            <span>Needs Reassignment</span>
                           </div>
                         )}
 
@@ -515,14 +519,15 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
 
                           {task.dueDate && (
                             <span
-                              className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${
+                              className={`text-[11px] px-2 py-0.5 rounded-full font-medium inline-flex items-center gap-1 ${
                                 dueSoon && task.status !== 'Done'
                                   ? 'bg-warning/20 text-mainText font-bold'
                                   : 'text-muted bg-bg'
                               }`}
                               title={new Date(task.dueDate).toLocaleString()}
                             >
-                              📅 {new Date(task.dueDate).toLocaleDateString()}
+                              <IcoCalendar size={11} />
+                              <span>{new Date(task.dueDate).toLocaleDateString()}</span>
                             </span>
                           )}
                         </div>
@@ -531,7 +536,8 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
                         {task.milestoneId && (
                           <div className="mb-1.5">
                             <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 truncate max-w-full">
-                              🎯 {milestones.find(m => m.id === task.milestoneId)?.title || 'Milestone'}
+                              <IcoTarget size={10} />
+                              <span>{milestones.find(m => m.id === task.milestoneId)?.title || 'Milestone'}</span>
                             </span>
                           </div>
                         )}
@@ -615,15 +621,15 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
 
       {/* ----------------- CREATE TASK MODAL ----------------- */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <Card className="w-full max-w-lg p-6 bg-white my-8 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <Card className="w-full max-w-lg p-6 bg-[#15151a] border border-[#33333e] text-[#f0edf5] my-8 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-primary">Create New Task</h3>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-muted hover:text-mainText text-lg font-bold"
+                className="text-muted hover:text-mainText p-1 rounded-lg"
               >
-                ✕
+                <IcoClose size={16} />
               </button>
             </div>
 
@@ -718,7 +724,7 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
                   <option value="">-- None / Backlog --</option>
                   {milestones.map(ms => (
                     <option key={ms.id} value={ms.id}>
-                      🎯 {ms.title} ({ms.status})
+                      {ms.title} ({ms.status})
                     </option>
                   ))}
                 </select>
@@ -742,8 +748,8 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
 
       {/* ----------------- TASK DETAIL & HISTORY MODAL ----------------- */}
       {selectedTask && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <Card className="w-full max-w-2xl p-6 bg-white my-8 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <Card className="w-full max-w-2xl p-6 bg-[#15151a] border border-[#33333e] text-[#f0edf5] my-8 max-h-[90vh] overflow-y-auto">
             {/* Header */}
             <div className="flex justify-between items-start gap-4 mb-4 pb-3 border-b border-uiBorder">
               <div className="flex-1">
@@ -751,8 +757,9 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
                   {getStatusColumnPill(selectedTask.status)}
                   {getPriorityPill(selectedTask.priority)}
                   {selectedTask.needsReassignment && (
-                    <span className="px-2 py-0.5 bg-warning/20 border border-warning/40 text-mainText text-xs font-bold rounded">
-                      ⚠️ Needs Reassignment
+                    <span className="px-2 py-0.5 bg-warning/20 border border-warning/40 text-mainText text-xs font-bold rounded inline-flex items-center gap-1">
+                      <IcoAlert size={12} color="#f59e0b" />
+                      <span>Needs Reassignment</span>
                     </span>
                   )}
                 </div>
@@ -762,9 +769,9 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
               </div>
               <button
                 onClick={() => setSelectedTask(null)}
-                className="text-muted hover:text-mainText text-lg font-bold"
+                className="text-muted hover:text-mainText p-1 rounded-lg"
               >
-                ✕
+                <IcoClose size={16} />
               </button>
             </div>
 
@@ -916,7 +923,7 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
                     <option value="">-- No Milestone Linked --</option>
                     {milestones.map(ms => (
                       <option key={ms.id} value={ms.id}>
-                        🎯 {ms.title} ({ms.status})
+                        {ms.title} ({ms.status})
                       </option>
                     ))}
                   </select>

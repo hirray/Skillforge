@@ -1,4 +1,5 @@
 import React from 'react';
+import { IcoCheck } from './Icons';
 
 export interface TimelineMilestone {
   id: string;
@@ -67,12 +68,12 @@ export const Timeline: React.FC<TimelineProps> = ({
                   isDone
                     ? 'bg-primary text-white ring-4 ring-primary/20'
                     : isOverdue
-                    ? 'bg-white border-2 border-warning text-warning ring-4 ring-warning/30 animate-pulse'
-                    : 'bg-white border-2 border-accent text-primary ring-4 ring-accent/20'
+                    ? 'bg-[#2a1e12] border-2 border-warning text-warning ring-4 ring-warning/30 animate-pulse'
+                    : 'bg-[#15151a] border-2 border-accent text-primary ring-4 ring-accent/20'
                 } ${isSelected ? 'ring-primary shadow-elevation-2' : ''}`}
               >
                 {isDone ? (
-                  <span className="font-bold text-base">✓</span>
+                  <IcoCheck size={18} color="#ffffff" />
                 ) : (
                   <span className="text-xs font-bold">{effectiveProgress}%</span>
                 )}
@@ -82,8 +83,8 @@ export const Timeline: React.FC<TimelineProps> = ({
               <div
                 className={`mt-3 p-3 rounded-xl border text-center transition-all duration-200 w-full ${
                   isSelected
-                    ? 'bg-white border-primary shadow-elevation-2'
-                    : 'bg-white/90 border-uiBorder group-hover:border-accent shadow-elevation-1'
+                    ? 'bg-[#221a36] border-primary shadow-elevation-2'
+                    : 'bg-[#15151a] border-[#33333e] group-hover:border-accent shadow-elevation-1'
                 }`}
               >
                 <p className="font-bold text-xs text-primary line-clamp-2 leading-snug">

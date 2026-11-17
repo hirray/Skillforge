@@ -1,5 +1,15 @@
 import React from 'react';
 import { Card } from './Card';
+import {
+  IcoFile,
+  IcoBar,
+  IcoImage,
+  IcoBox,
+  IcoCode,
+  IcoVideo,
+  IcoPaperclip,
+  IcoDownload,
+} from './Icons';
 
 export interface FileCardProps {
   id: string;
@@ -43,14 +53,14 @@ export const FileCard: React.FC<FileCardProps> = ({
     const ext = fName ? fName.split('.').pop()?.toLowerCase() : '';
     const m = (mime || '').toLowerCase();
 
-    if (ext === 'pdf' || m.includes('pdf')) return '📄';
-    if (['doc', 'docx', 'txt', 'rtf', 'odt'].includes(ext || '') || m.includes('word') || m.includes('text')) return '📝';
-    if (['xls', 'xlsx', 'csv'].includes(ext || '') || m.includes('excel') || m.includes('spreadsheet')) return '📊';
-    if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(ext || '') || m.includes('image')) return '🖼️';
-    if (['zip', 'tar', 'gz', '7z', 'rar'].includes(ext || '') || m.includes('archive') || m.includes('zip')) return '📦';
-    if (['json', 'yaml', 'yml', 'xml', 'ts', 'js', 'py', 'sql'].includes(ext || '') || m.includes('json') || m.includes('javascript')) return '💻';
-    if (['mp4', 'mov', 'webm', 'mp3', 'wav'].includes(ext || '') || m.includes('video') || m.includes('audio')) return '🎬';
-    return '📎';
+    if (ext === 'pdf' || m.includes('pdf')) return <IcoFile size={16} color="#fb7185" />;
+    if (['doc', 'docx', 'txt', 'rtf', 'odt'].includes(ext || '') || m.includes('word') || m.includes('text')) return <IcoFile size={16} color="#60a5fa" />;
+    if (['xls', 'xlsx', 'csv'].includes(ext || '') || m.includes('excel') || m.includes('spreadsheet')) return <IcoBar size={16} color="#34d399" />;
+    if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(ext || '') || m.includes('image')) return <IcoImage size={16} color="#f472b6" />;
+    if (['zip', 'tar', 'gz', '7z', 'rar'].includes(ext || '') || m.includes('archive') || m.includes('zip')) return <IcoBox size={16} color="#fbbf24" />;
+    if (['json', 'yaml', 'yml', 'xml', 'ts', 'js', 'py', 'sql'].includes(ext || '') || m.includes('json') || m.includes('javascript')) return <IcoCode size={16} color="#b29af5" />;
+    if (['mp4', 'mov', 'webm', 'mp3', 'wav'].includes(ext || '') || m.includes('video') || m.includes('audio')) return <IcoVideo size={16} color="#a78bfa" />;
+    return <IcoPaperclip size={16} color="#aba6b6" />;
   };
 
   const formatFileSize = (bytes?: number) => {
@@ -65,8 +75,8 @@ export const FileCard: React.FC<FileCardProps> = ({
 
   return (
     <Card
-      className={`p-4 bg-white border border-uiBorder/80 rounded-xl hover:shadow-elevation-2 transition-all duration-200 flex flex-col justify-between group ${
-        error ? 'border-warning/80 ring-1 ring-warning/30 bg-warning/[0.02]' : ''
+      className={`p-4 bg-[#15151a] border border-[#33333e] text-[#f0edf5] rounded-xl hover:shadow-lg transition-all duration-200 flex flex-col justify-between group ${
+        error ? 'border-[#fb718580] ring-1 ring-[#fb718530] bg-[#2c1518]' : ''
       } ${className}`}
     >
       <div>
@@ -93,7 +103,7 @@ export const FileCard: React.FC<FileCardProps> = ({
               className="text-muted hover:text-primary p-1.5 rounded-lg hover:bg-bg transition-colors"
               title="Download file"
             >
-              📥
+              <IcoDownload size={15} />
             </button>
           )}
         </div>

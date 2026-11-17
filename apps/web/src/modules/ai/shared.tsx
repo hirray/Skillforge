@@ -73,6 +73,16 @@ const paths: Record<string, React.ReactNode> = {
       <path d="m8 12 3 3 5-6" />
     </>
   ),
+  chat: (
+    <>
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </>
+  ),
+  menu: (
+    <>
+      <path d="M3 12h18M3 6h18M3 18h18" />
+    </>
+  ),
 };
 export const Icon = ({ name, size = 18 }: { name: string; size?: number }) => (
   <svg

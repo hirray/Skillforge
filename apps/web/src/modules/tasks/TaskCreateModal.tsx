@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Button, Input } from '../../design-system/components';
+import { Card, Button, Input, IcoClose, IcoAlert } from '../../design-system/components';
 
 interface TaskCreateModalProps {
   isOpen: boolean;
@@ -59,14 +59,15 @@ export const TaskCreateModal: React.FC<TaskCreateModalProps> = ({
       <Card className="w-full max-w-lg bg-surface border border-uiBorder shadow-elevation-3 p-6 space-y-4">
         <div className="flex justify-between items-center pb-2 border-b border-uiBorder">
           <h2 className="text-lg font-bold text-primary">Create New Task</h2>
-          <button onClick={onClose} className="text-muted hover:text-mainText font-bold text-lg">
-            ✕
+          <button onClick={onClose} className="text-muted hover:text-mainText p-1 rounded-lg">
+            <IcoClose size={16} />
           </button>
         </div>
 
         {error && (
-          <div className="p-3 bg-red-100/60 border border-red-200 rounded-xl text-xs text-red-600 font-semibold">
-            ⚠️ {error}
+          <div className="p-3 bg-red-950/40 border border-red-500/30 rounded-xl text-xs text-red-400 font-semibold flex items-center gap-2">
+            <IcoAlert size={14} color="#f87171" />
+            <span>{error}</span>
           </div>
         )}
 

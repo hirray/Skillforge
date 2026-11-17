@@ -11,20 +11,20 @@ export const Badge = ({ status = 'draft', className = '', children, ...props }: 
   const normalizedStatus = (status || 'draft').toLowerCase();
 
   const statusStyles: Record<string, string> = {
-    draft: 'bg-[#E7EAF3] text-[#6B7685] border border-[#E7EAF3]',
-    recruiting: 'bg-[#F1B94C]/20 text-[#9E6B0A] border border-[#F1B94C]/40',
-    active: 'bg-[#93B2F8]/30 text-[#0A1680] border border-[#93B2F8]/60',
-    paused: 'bg-[#FBEDB0] text-[#8C6B14] border border-[#FBEDB0]',
-    completed: 'bg-[#0A1680] text-white border border-[#0A1680]',
-    verified: 'bg-[#0A1680] text-white border border-[#0A1680]',
-    archived: 'bg-[#E7EAF3] text-[#6B7685] border border-[#E7EAF3]',
-    todo: 'bg-slate-100 text-slate-700 border border-slate-200',
-    inprogress: 'bg-blue-100 text-blue-800 border border-blue-200',
-    inreview: 'bg-amber-100 text-amber-800 border border-amber-200',
-    done: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
+    draft: 'bg-[#19191e] text-[#96939f] border border-[#26262e]',
+    recruiting: 'bg-[#2a2215] text-[#d9b774] border border-[#d9b774]/30',
+    active: 'bg-[#221a36] text-[#b29af5] border border-[#8861dc]/40',
+    paused: 'bg-[#2a2215] text-[#d9b774] border border-[#d9b774]/30',
+    completed: 'bg-[#132822] text-[#6ad4bb] border border-[#6ad4bb]/30',
+    verified: 'bg-[#221a36] text-[#b29af5] border border-[#b29af5]/40',
+    archived: 'bg-[#19191e] text-[#96939f] border border-[#26262e]',
+    todo: 'bg-[#19191e] text-[#96939f] border border-[#26262e]',
+    inprogress: 'bg-[#221a36] text-[#b29af5] border border-[#8861dc]/40',
+    inreview: 'bg-[#2a2215] text-[#d9b774] border border-[#d9b774]/30',
+    done: 'bg-[#132822] text-[#6ad4bb] border border-[#6ad4bb]/30',
   };
 
-  const styleClass = statusStyles[normalizedStatus] || 'bg-[#E7EAF3] text-[#6B7685] border border-[#E7EAF3]';
+  const styleClass = statusStyles[normalizedStatus] || 'bg-[#19191e] text-[#96939f] border border-[#26262e]';
 
   return (
     <span
