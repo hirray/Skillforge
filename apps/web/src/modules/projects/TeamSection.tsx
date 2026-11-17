@@ -5,9 +5,23 @@ interface TeamSectionProps {
   projectId: string;
   project: any;
   onProjectUpdated: () => void;
+  gaps?: any[];
+  onFindReplacement?: (gap: any) => void;
+  onEditGap?: (gap: any) => void;
+  onOpenHandover?: (gap: any) => void;
+  onOpenTimeline?: (gap: any) => void;
 }
 
-export const TeamSection = ({ projectId, project, onProjectUpdated }: TeamSectionProps) => {
+export const TeamSection = ({
+  projectId,
+  project,
+  onProjectUpdated,
+  gaps = [],
+  onFindReplacement,
+  onEditGap: _onEditGap,
+  onOpenHandover,
+  onOpenTimeline
+}: TeamSectionProps) => {
   const currentUserId = localStorage.getItem('token') || 'user-001';
   const isOwner = project?.ownerId === currentUserId;
 
@@ -208,7 +222,8 @@ export const TeamSection = ({ projectId, project, onProjectUpdated }: TeamSectio
       if (!res.ok || data.error) throw new Error(data.error?.message || 'Failed to remove member');
       setShowRemoveModal(false);
       setRemoveForm({ targetUserId: '', reason: '' });
-      fetchTeamData();
+      await fetchTeamData();
+      onProjectUpdated();
     } catch (e: any) {
       setActionError(e.message);
     }
@@ -229,7 +244,8 @@ export const TeamSection = ({ projectId, project, onProjectUpdated }: TeamSectio
       if (!res.ok || data.error) throw new Error(data.error?.message || 'Failed to leave project');
       setShowLeaveModal(false);
       setLeaveReason('');
-      fetchTeamData();
+      await fetchTeamData();
+      onProjectUpdated();
     } catch (e: any) {
       setActionError(e.message);
     }
@@ -389,6 +405,69 @@ export const TeamSection = ({ projectId, project, onProjectUpdated }: TeamSectio
             )}
           </div>
         </Card>
+      )}
+
+      {/* Open Rescue Gaps in Team Section */}
+      {gaps && gaps.filter((g: any) => g.status === 'open').length > 0 && (
+        <div className="flex flex-col gap-3 p-4 rounded-xl bg-gradient-to-r from-amber-500/10 via-amber-950/20 to-transparent border border-amber-500/40">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#f59e0b] animate-pulse" />
+              <h3 className="font-bold text-white text-base">Open Rescue Gaps ({gaps.filter((g: any) => g.status === 'open').length})</h3>
+            </div>
+            <span className="text-xs text-[#aba6b6]">Departed members or critical skill shortages</span>
+          </div>
+          {gaps.filter((g: any) => g.status === 'open').map((gap: any) => (
+            <Card key={gap.id} className="p-4 bg-[#15151a] border border-[#33333e] rounded-xl hover:border-amber-500/50 transition">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <strong className="text-white text-sm">{gap.roleTitle} Needed</strong>
+                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#f59e0b]/20 text-[#f59e0b] font-semibold border border-[#f59e0b]/30">
+                      {gap.origin === 'member_left' ? 'Outgoing Member Left' : gap.origin === 'inactive' ? 'Inactivity Alert' : 'Manual Gap'}
+                    </span>
+                    <span className="text-xs text-[#aba6b6]">{gap.hoursPerWeek} hrs/wk</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {(gap.skills || []).map((sk: string, idx: number) => (
+                      <span key={idx} className="text-[11px] px-2 py-0.5 rounded-full bg-[#221a36] text-[#b29af5] border border-[#8861dc]/30">
+                        {sk}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                {isOwner && (
+                  <div className="flex items-center gap-2 shrink-0">
+                    {onFindReplacement && (
+                      <button
+                        onClick={() => onFindReplacement(gap)}
+                        className="px-3 py-1.5 bg-[#b29af5] text-[#0b0b0e] text-xs font-bold rounded-lg hover:brightness-110 transition cursor-pointer"
+                      >
+                        Find Replacement
+                      </button>
+                    )}
+                    {onOpenHandover && (
+                      <button
+                        onClick={() => onOpenHandover(gap)}
+                        className="px-3 py-1.5 bg-[#1a1922] text-[#aba6b6] border border-[#33333e] text-xs rounded-lg hover:text-white transition cursor-pointer"
+                      >
+                        Handover Notes
+                      </button>
+                    )}
+                    {onOpenTimeline && (
+                      <button
+                        onClick={() => onOpenTimeline(gap)}
+                        className="px-3 py-1.5 bg-[#1a1922] text-[#aba6b6] border border-[#33333e] text-xs rounded-lg hover:text-white transition cursor-pointer"
+                      >
+                        Lifecycle
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </Card>
+          ))}
+        </div>
       )}
 
       {/* Action Header */}

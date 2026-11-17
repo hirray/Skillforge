@@ -138,6 +138,7 @@ export const ResourcesHub: React.FC<ResourcesHubProps> = ({ projectId, isOwner }
           fileSize: file.size,
           mimeType: file.type || 'application/octet-stream',
           data: base64Data,
+          dataBase64: base64Data,
         }),
       });
 

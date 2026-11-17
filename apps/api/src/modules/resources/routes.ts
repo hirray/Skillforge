@@ -34,7 +34,8 @@ router.post('/projects/:id/resources/links', requireAuth, async (req, res, next)
 router.post('/projects/:id/resources/files', requireAuth, async (req, res, next) => {
   try {
     const userId = (req as any).user.id;
-    const { fileName, dataBase64, mimeType, title, category } = req.body;
+    const { fileName, mimeType, title, category } = req.body;
+    const dataBase64 = req.body.dataBase64 || req.body.data || req.body.base64;
 
     if (!fileName) {
       return res.status(400).json({ error: { code: 'INVALID_FILE', message: 'fileName is required' } });

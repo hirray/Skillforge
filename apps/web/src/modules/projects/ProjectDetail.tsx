@@ -1006,7 +1006,17 @@ export const ProjectDetail = () => {
           </div>
         )}
 
-        {activeTab === 'Team' && <TeamSection projectId={id!} project={project} onProjectUpdated={fetchProject} />}
+        {activeTab === 'Team' && (
+          <TeamSection
+            projectId={id!}
+            project={project}
+            onProjectUpdated={fetchProject}
+            gaps={gaps}
+            onFindReplacement={(gap) => setSelectedGapForCandidates(gap)}
+            onOpenHandover={(gap) => setSelectedGapForHandover(gap)}
+            onOpenTimeline={(gap) => setSelectedGapForTimeline(gap)}
+          />
+        )}
         {activeTab === 'Tasks' && <TasksSection projectId={id!} project={project} onProjectUpdated={fetchProject} />}
         {activeTab === 'Milestones' && <MilestonesSection projectId={id!} project={project} onProjectUpdated={fetchProject} />}
         {activeTab === 'Resources' && <ResourcesHub projectId={id!} isOwner={isOwner} />}
