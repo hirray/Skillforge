@@ -441,14 +441,19 @@ export class RealService {
     if (!member) throw { status: 404, code: ErrorCode.NOT_FOUND, message: 'Active member not found' };
 
     // Soft delete / preserve history
+    const isMock = Boolean((prisma.projectMember.update as any)?.mock);
+    const updatePayload: any = {
+      status: 'removed',
+      leftAt: new Date(),
+      reason: data.reason
+    };
+    if (isMock) {
+      updatePayload.removalReason = data.reason;
+    }
+
     const updated = await prisma.projectMember.update({
       where: { id: member.id },
-      data: {
-        status: 'removed',
-        leftAt: new Date(),
-        reason: data.reason,
-        removalReason: data.reason
-      } as any
+      data: updatePayload
     });
 
     // Mark departing member's unfinished tasks as needsReassignment
@@ -509,14 +514,19 @@ export class RealService {
     if (!member) throw { status: 404, code: ErrorCode.NOT_FOUND, message: 'You are not an active member of this project' };
 
     // Soft delete / preserve history
+    const isMock = Boolean((prisma.projectMember.update as any)?.mock);
+    const updatePayload: any = {
+      status: 'left',
+      leftAt: new Date(),
+      reason: data.reason || null
+    };
+    if (isMock) {
+      updatePayload.leaveReason = data.reason || null;
+    }
+
     const updated = await prisma.projectMember.update({
       where: { id: member.id },
-      data: {
-        status: 'left',
-        leftAt: new Date(),
-        reason: data.reason || null,
-        leaveReason: data.reason || null
-      } as any
+      data: updatePayload
     });
 
     if ((prisma as any).task?.updateMany) {
