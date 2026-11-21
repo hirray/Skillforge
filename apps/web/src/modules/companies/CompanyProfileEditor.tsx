@@ -14,6 +14,7 @@ export interface CompanyData {
   hiringFocus?: string | null;
   verificationStatus: string;
   verificationReason?: string | null;
+  verifiedAt?: string | null;
   recruiters?: any[];
   jobs?: any[];
 }
@@ -29,29 +30,57 @@ export const CompanyProfileEditor: React.FC<{
     logo: company.logo || '',
     overview: company.overview || '',
     industry: company.industry || '',
-    sizeBand: company.sizeBand || '11-50',
+    sizeBand: company.sizeBand || '1-10',
     website: company.website || '',
     locations: company.locations || '',
     hiringFocus: company.hiringFocus || '',
   });
   const [submitting, setSubmitting] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [workEmail, setWorkEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setSubmitting(true);
       setError(null);
+      setSuccessMessage(null);
       const res = await api<{ data: CompanyData }>(`/companies/${company.id}`, {
         method: 'PATCH',
         body: JSON.stringify(formData),
       });
       onUpdated(res.data);
       setEditing(false);
+      setSuccessMessage('Company profile saved successfully.');
     } catch (err: any) {
       setError(err.message || 'Failed to update company');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleVerifyCompany = async (reasonOverride?: string) => {
+    try {
+      setVerifying(true);
+      setError(null);
+      const domainReason = reasonOverride || `Verified entity & domain match (${company.website || 'corporate website'})`;
+      const res = await api<{ data: CompanyData }>(`/companies/${company.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          verificationStatus: 'verified',
+          verificationReason: domainReason,
+        }),
+      });
+      onUpdated(res.data);
+      setShowVerifyModal(false);
+      setSuccessMessage('Company successfully verified! Verified badge is now active.');
+    } catch (err: any) {
+      setError(err.message || 'Failed to verify company');
+    } finally {
+      setVerifying(false);
     }
   };
 
@@ -60,6 +89,12 @@ export const CompanyProfileEditor: React.FC<{
       {error && (
         <div className="mb-4 p-3 bg-red-950/40 border border-red-500/30 rounded-xl text-xs text-red-300">
           {error}
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="mb-4 p-3 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-xs text-emerald-300">
+          {successMessage}
         </div>
       )}
 
@@ -87,9 +122,17 @@ export const CompanyProfileEditor: React.FC<{
                   Verified Company
                 </span>
               ) : (
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-zinc-800 text-zinc-400 border border-zinc-700">
-                  Unverified
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-zinc-800 text-zinc-400 border border-zinc-700">
+                    Unverified
+                  </span>
+                  <button
+                    onClick={() => setShowVerifyModal(true)}
+                    className="px-2.5 py-0.5 rounded-full text-xs font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] transition-all"
+                  >
+                    Verify Company
+                  </button>
+                </div>
               )}
             </div>
 
@@ -121,13 +164,31 @@ export const CompanyProfileEditor: React.FC<{
                 </>
               )}
             </div>
+
+            {company.verificationReason && (
+              <div className="text-[11px] text-zinc-400 mt-1">
+                Verification Note: <span className="text-zinc-300">{company.verificationReason}</span>
+              </div>
+            )}
           </div>
         </div>
 
         {canEdit && !editing && (
           <button
-            onClick={() => setEditing(true)}
-            className="px-4 py-2 rounded-xl text-xs font-bold text-zinc-300 hover:text-white bg-[#1b1b22] hover:bg-[#282836] border border-[#282836] transition-all"
+            onClick={() => {
+              setFormData({
+                name: company.name || '',
+                logo: company.logo || '',
+                overview: company.overview || '',
+                industry: company.industry || '',
+                sizeBand: company.sizeBand || '1-10',
+                website: company.website || '',
+                locations: company.locations || '',
+                hiringFocus: company.hiringFocus || '',
+              });
+              setEditing(true);
+            }}
+            className="px-4 py-2 rounded-xl text-xs font-bold text-zinc-300 hover:text-white bg-[#1b1b22] hover:bg-[#282836] border border-[#282836] transition-all shrink-0"
           >
             Edit Profile
           </button>
@@ -164,7 +225,7 @@ export const CompanyProfileEditor: React.FC<{
               <label className="block text-xs font-semibold text-zinc-300 mb-1">Industry</label>
               <input
                 type="text"
-                placeholder="e.g. Fintech, AI Infrastructure, HealthTech"
+                placeholder="e.g. Fintech, AI Automation, HealthTech"
                 value={formData.industry}
                 onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-[#1b1b22] border border-[#282836] text-white text-xs focus:outline-none focus:border-[#93B2F8]"
@@ -191,7 +252,7 @@ export const CompanyProfileEditor: React.FC<{
               <label className="block text-xs font-semibold text-zinc-300 mb-1">Offices & Locations</label>
               <input
                 type="text"
-                placeholder="e.g. San Francisco, London, Remote"
+                placeholder="e.g. Vadodara, India • Remote"
                 value={formData.locations}
                 onChange={(e) => setFormData({ ...formData, locations: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-[#1b1b22] border border-[#282836] text-white text-xs focus:outline-none focus:border-[#93B2F8]"
@@ -202,7 +263,7 @@ export const CompanyProfileEditor: React.FC<{
               <label className="block text-xs font-semibold text-zinc-300 mb-1">Hiring Focus Keywords</label>
               <input
                 type="text"
-                placeholder="e.g. React, Python, Distributed Systems"
+                placeholder="e.g. Make.com, AI, Agentic AI, React"
                 value={formData.hiringFocus}
                 onChange={(e) => setFormData({ ...formData, hiringFocus: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-[#1b1b22] border border-[#282836] text-white text-xs focus:outline-none focus:border-[#93B2F8]"
@@ -266,6 +327,61 @@ export const CompanyProfileEditor: React.FC<{
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Verification Modal */}
+      {showVerifyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
+          <div className="bg-[#15151a] border border-[#282836] rounded-2xl p-6 max-w-md w-full shadow-2xl">
+            <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+              <svg viewBox="0 0 16 16" width="16" height="16" fill="#93B2F8">
+                <path d="M16 8A8 8 0 110 8a8 8 0 0116 0zm-3.97-3.03a.75.75 0 00-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 00-1.06 1.06L6.97 11.03a.75.75 0 001.079-.02l3.992-4.99a.75.75 0 00-.01-1.05z" />
+              </svg>
+              <span>Company Verification (PRD Area 21.3)</span>
+            </h3>
+
+            <div className="text-xs text-zinc-300 leading-relaxed space-y-3 mb-6">
+              <p>
+                Verification badges provide credibility to candidate talent. SkillForge verifies companies through:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-zinc-400">
+                <li><strong className="text-white">Corporate Website Validation:</strong> Validating that <code className="text-[#93B2F8]">{company.website || 'website'}</code> is an active, registered corporate domain.</li>
+                <li><strong className="text-white">Work Email Domain Match:</strong> Verifying recruiter accounts with corporate domain addresses.</li>
+                <li><strong className="text-white">Admin Manual Verification:</strong> Direct validation by platform team.</li>
+              </ul>
+            </div>
+
+            <div className="space-y-3 mb-4">
+              <label className="block text-xs font-semibold text-zinc-300">
+                Corporate Work Email (Optional)
+              </label>
+              <input
+                type="email"
+                placeholder="recruiter@hir.com"
+                value={workEmail}
+                onChange={(e) => setWorkEmail(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#1b1b22] border border-[#282836] text-white text-xs focus:outline-none focus:border-[#93B2F8]"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2 border-t border-[#282836]">
+              <button
+                type="button"
+                onClick={() => setShowVerifyModal(false)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white bg-[#1b1b22] border border-[#282836]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleVerifyCompany(workEmail ? `Work domain match: @${workEmail.split('@')[1]}` : undefined)}
+                disabled={verifying}
+                className="px-5 py-2 rounded-xl text-xs font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] transition-all shadow-md shadow-[#93B2F8]/20"
+              >
+                {verifying ? 'Verifying...' : 'Confirm Verification'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </Card>

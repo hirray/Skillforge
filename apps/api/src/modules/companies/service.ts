@@ -2,8 +2,10 @@ import { config } from '../../config';
 import { MockService } from './mock';
 import { RealService } from './real';
 
+const mockServiceInstance = new MockService();
+const realServiceInstance = new RealService();
+
 export const getService = () => {
-  const sourceKey = 'COMPANIES_SOURCE';
-  const isReal = config[sourceKey as keyof typeof config] === 'real';
-  return isReal ? new RealService() : new MockService();
+  const isReal = config.COMPANIES_SOURCE === 'real';
+  return isReal ? realServiceInstance : mockServiceInstance;
 };

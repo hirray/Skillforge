@@ -69,9 +69,15 @@ export class RealService {
         console.warn('[GitHub RealService] OAuth token exchange fallback:', err);
       }
     } else {
-      // In local dev without OAuth credentials, extract username or generate readable handle
-      if (code && code.length > 2) {
-        githubUsername = code.replace(/[^a-zA-Z0-9-_]/g, '');
+      // In local dev or direct connect, extract username and optional PAT
+      if (code && code.includes('::')) {
+        const [u, t] = code.split('::');
+        githubUsername = u.trim().replace(/^@/, '');
+        if (t && t.trim()) {
+          accessToken = t.trim();
+        }
+      } else if (code && code.length > 2) {
+        githubUsername = code.trim().replace(/^@/, '');
       }
     }
 

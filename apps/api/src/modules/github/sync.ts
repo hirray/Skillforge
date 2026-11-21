@@ -100,63 +100,67 @@ export async function syncRepository(
   });
 
   let liveFetched = false;
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.github.v3+json',
+    'User-Agent': 'SkillForge-GitHub-Sync',
+  };
+
   if (integrations.length > 0) {
     const activeIntegration = integrations[0];
     try {
       const decryptedToken = decryptToken(activeIntegration.token);
-      // Attempt live GitHub REST API fetch if token is available
       if (decryptedToken && !decryptedToken.startsWith('mock_')) {
-        const headers = {
-          Authorization: `Bearer ${decryptedToken}`,
-          Accept: 'application/vnd.github.v3+json',
-          'User-Agent': 'SkillForge-GitHub-Sync',
-        };
-
-        const commitsRes = await fetch(
-          `https://api.github.com/repos/${repo.owner}/${repo.name}/commits?per_page=20`,
-          { headers }
-        );
-
-        if (commitsRes.ok) {
-          const commits = (await commitsRes.json()) as any[];
-          for (const c of commits) {
-            eventsToIngest.push({
-              externalId: c.sha,
-              type: 'commit',
-              detail: c.commit?.message?.split('\n')[0] || 'GitHub commit',
-              externalLogin: c.author?.login || c.committer?.login,
-              authorEmail: c.commit?.author?.email,
-              referenceUrl: c.html_url,
-              occurredAt: new Date(c.commit?.author?.date || Date.now()),
-              metadata: { sha: c.sha },
-            });
-          }
-          liveFetched = true;
-        }
-
-        const pullsRes = await fetch(
-          `https://api.github.com/repos/${repo.owner}/${repo.name}/pulls?state=all&per_page=10`,
-          { headers }
-        );
-        if (pullsRes.ok) {
-          const pulls = (await pullsRes.json()) as any[];
-          for (const p of pulls) {
-            eventsToIngest.push({
-              externalId: `pr-${p.number}`,
-              type: 'pr',
-              detail: `PR #${p.number}: ${p.title}`,
-              externalLogin: p.user?.login,
-              referenceUrl: p.html_url,
-              occurredAt: new Date(p.created_at),
-              metadata: { number: p.number, state: p.state },
-            });
-          }
-          liveFetched = true;
-        }
+        headers['Authorization'] = `Bearer ${decryptedToken}`;
       }
     } catch (err) {
-      console.warn('[GitHub Sync] Live GitHub API sync encountered fallback:', err);
+      // Continue without token
     }
+  }
+
+  try {
+    const commitsRes = await fetch(
+      `https://api.github.com/repos/${repo.owner}/${repo.name}/commits?per_page=20`,
+      { headers }
+    );
+
+    if (commitsRes.ok) {
+      const commits = (await commitsRes.json()) as any[];
+      for (const c of commits) {
+        eventsToIngest.push({
+          externalId: c.sha,
+          type: 'commit',
+          detail: c.commit?.message?.split('\n')[0] || 'GitHub commit',
+          externalLogin: c.author?.login || c.committer?.login,
+          authorEmail: c.commit?.author?.email,
+          referenceUrl: c.html_url,
+          occurredAt: new Date(c.commit?.author?.date || Date.now()),
+          metadata: { sha: c.sha },
+        });
+      }
+      liveFetched = true;
+    }
+
+    const pullsRes = await fetch(
+      `https://api.github.com/repos/${repo.owner}/${repo.name}/pulls?state=all&per_page=10`,
+      { headers }
+    );
+    if (pullsRes.ok) {
+      const pulls = (await pullsRes.json()) as any[];
+      for (const p of pulls) {
+        eventsToIngest.push({
+          externalId: `pr-${p.number}`,
+          type: 'pr',
+          detail: `PR #${p.number}: ${p.title}`,
+          externalLogin: p.user?.login,
+          referenceUrl: p.html_url,
+          occurredAt: new Date(p.created_at),
+          metadata: { number: p.number, state: p.state },
+        });
+      }
+      liveFetched = true;
+    }
+  } catch (err) {
+    console.warn('[GitHub Sync] Live GitHub API sync encountered fallback:', err);
   }
 
   // Fallback to deterministic sandbox fixtures for offline testing / sandbox repos
