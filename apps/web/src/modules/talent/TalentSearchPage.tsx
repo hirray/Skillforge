@@ -66,6 +66,7 @@ export const TalentSearchPage: React.FC = () => {
 
   // Shortlisted tracking
   const [shortlistedIds, setShortlistedIds] = useState<Set<string>>(new Set());
+  const [selectedProofCandidate, setSelectedProofCandidate] = useState<Candidate | null>(null);
 
   const fetchCandidates = async () => {
     try {
@@ -537,12 +538,14 @@ export const TalentSearchPage: React.FC = () => {
                         {isShortlisted ? 'Shortlisted' : 'Shortlist Candidate'}
                       </button>
 
-                      <a
-                        href={`/portfolio?userId=${cand.userId || cand.id}`}
-                        className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#93B2F8] hover:text-white hover:bg-[#1b1b22] transition-all"
+                      <button
+                        type="button"
+                        onClick={() => setSelectedProofCandidate(cand)}
+                        className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] transition-all shadow-sm shadow-[#93B2F8]/20 flex items-center gap-1"
                       >
-                        View Full Proof →
-                      </a>
+                        <span>View Full Proof</span>
+                        <span>→</span>
+                      </button>
                     </div>
                   </div>
                 );
@@ -551,6 +554,140 @@ export const TalentSearchPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Candidate Verified Proof Modal */}
+      {selectedProofCandidate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div className="bg-[#15151a] border border-[#282836] rounded-2xl max-w-2xl w-full p-6 md:p-7 shadow-2xl space-y-5 my-8">
+            {/* Modal Header */}
+            <div className="flex items-start justify-between gap-3 pb-4 border-b border-[#282836]">
+              <div className="flex items-center gap-3.5">
+                <div className="w-13 h-13 rounded-2xl bg-[#0A1680] border border-[#93B2F8]/40 flex items-center justify-center text-xl font-bold text-[#93B2F8] shrink-0">
+                  {selectedProofCandidate.name[0].toUpperCase()}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                    <h3 className="text-base font-bold text-white tracking-tight">{selectedProofCandidate.name}</h3>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#0A1680] text-[#93B2F8] border border-[#93B2F8]/30">
+                      Verified Candidate
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 capitalize">
+                      {selectedProofCandidate.availability.replace('_', ' ')}
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-300 font-medium">{selectedProofCandidate.headline}</p>
+                  <p className="text-[11px] text-zinc-400 mt-1">
+                    📍 {selectedProofCandidate.location} • <span className="capitalize">{selectedProofCandidate.workMode}</span> •{' '}
+                    {selectedProofCandidate.experienceYears} Years Exp
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedProofCandidate(null)}
+                className="w-8 h-8 rounded-lg bg-[#1b1b22] hover:bg-[#282836] border border-[#282836] flex items-center justify-center text-zinc-400 hover:text-white transition-all shrink-0"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Proof Match Rationale */}
+            <div className="p-4 rounded-xl bg-[#0A1680]/20 border border-[#93B2F8]/30 text-xs text-zinc-200 leading-relaxed font-sans">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-[#93B2F8] mb-1 flex items-center gap-1.5">
+                <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor">
+                  <path d="M8 0a8 8 0 100 16A8 8 0 008 0zm3.5 6l-4.5 4.5L5 8.5l1-1 1 1 3.5-3.5 1 1z" />
+                </svg>
+                Verified Proof Match Rationale
+              </div>
+              {selectedProofCandidate.whyThisCandidate}
+            </div>
+
+            {/* Evidence Metric Badges */}
+            <div>
+              <h4 className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2">
+                Attested Evidence Breakdown
+              </h4>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {selectedProofCandidate.evidenceHighlights.map((h, i) => (
+                  <div key={i} className="p-3 rounded-xl bg-[#1b1b22] border border-[#282836] text-center">
+                    <div className="text-xl font-bold text-white mb-0.5">{h.count}</div>
+                    <div className="text-[10px] font-semibold text-emerald-400 uppercase tracking-wide">
+                      {h.label.replace(/^\d+\s*/, '')}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Verified Skills */}
+            <div>
+              <h4 className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2">Demonstrated Skills</h4>
+              <div className="flex flex-wrap gap-1.5">
+                {selectedProofCandidate.skills.map((sk) => (
+                  <span
+                    key={sk}
+                    className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#1b1b22] text-[#93B2F8] border border-[#282836]"
+                  >
+                    {sk}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Collaborative Project Experience */}
+            <div>
+              <h4 className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2">
+                Verified Collaborative Projects ({selectedProofCandidate.verifiedProjectCount})
+              </h4>
+              <div className="space-y-2 text-xs">
+                <div className="p-3 rounded-xl bg-[#1b1b22] border border-[#282836]">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-bold text-white">SkillForge Monorepo & AI Intelligence Suite</span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-500/30">
+                      Verified Lead
+                    </span>
+                  </div>
+                  <p className="text-zinc-400 text-[11px]">
+                    Role: Fullstack Lead Contributor • Documented API orchestration, schema migrations, and real-time ledger.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-between gap-3 pt-3 border-t border-[#282836]">
+              <button
+                type="button"
+                onClick={() => toggleShortlist(selectedProofCandidate.id)}
+                className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  shortlistedIds.has(selectedProofCandidate.id)
+                    ? 'bg-emerald-500 text-black font-bold shadow-md shadow-emerald-500/20'
+                    : 'bg-[#1b1b22] text-zinc-300 hover:text-white border border-[#282836]'
+                }`}
+              >
+                <span>{shortlistedIds.has(selectedProofCandidate.id) ? '★ Shortlisted' : '☆ Shortlist Candidate'}</span>
+              </button>
+
+              <div className="flex items-center gap-2">
+                <a
+                  href={`/portfolio?userId=${selectedProofCandidate.userId || selectedProofCandidate.id}`}
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold text-[#93B2F8] hover:text-white bg-[#1b1b22] border border-[#282836] transition-all"
+                >
+                  Full Page View ↗
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setSelectedProofCandidate(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white bg-[#1b1b22] border border-[#282836]"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Save Search Modal */}
       {showSaveModal && (

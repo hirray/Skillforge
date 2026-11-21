@@ -25,7 +25,7 @@ import { GitHubIntegrationPage } from '../github';
 import { CompanyWorkspacePage } from '../companies';
 import { JobsBoardPage } from '../jobs';
 import { ContributionsHubPage } from '../contribution';
-import { TalentSearchPage } from '../talent';
+import { TalentSearchPage, CandidateProofView } from '../talent';
 import './studio.css';
 
 const tools = [
@@ -502,6 +502,7 @@ export default function Member2Workspace() {
               <Route path="/companies/*" element={<CompanyWorkspacePage />} />
               <Route path="/jobs/*" element={<JobsBoardPage />} />
               <Route path="/talent/*" element={<TalentSearchPage />} />
+              <Route path="/portfolio/*" element={<CandidateProofView />} />
               
               <Route path="/ai" element={<Overview context={activeContext} />} />
               <Route
