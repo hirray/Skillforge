@@ -29,6 +29,11 @@ model User {
   contributions  ContributionEvent[]
   tasksAssigned  Task[]              @relation("TaskAssignee")
   taskComments   TaskComment[]
+  mentorProfile  MentorProfile?
+  mentorshipRequestsReceived MentorshipRequest[] @relation("MentorUserRequests")
+  mentorFeedbackGiven        MentorFeedback[]    @relation("MentorUserFeedback")
+  eventsOrganized            HackathonEvent[]    @relation("EventOrganizer")
+  eventParticipations        EventParticipant[]
 }
 
 model Skill {
@@ -185,6 +190,10 @@ model Project {
   completions        ProjectCompletion[]
   verifications      ProjectVerification[]
   activityFeed       ActivityFeedEntry[]
+  mentorshipRequests MentorshipRequest[]
+  mentorFeedbacks    MentorFeedback[]
+  eventId            String?
+  event              HackathonEvent?     @relation(fields: [eventId], references: [id], onDelete: SetNull)
 }
 
 model ProjectRequirement {
@@ -633,3 +642,91 @@ model ResumeAccessLog {
   action    String
   createdAt DateTime @default(now())
 }
+
+// ── Phase 4: Module 27 - Mentors / Expert Layer ────────────────────────────
+
+model MentorProfile {
+  id                String              @id @default(uuid())
+  userId            String              @unique
+  expertiseSkillIds String              // JSON string array e.g. ["React", "Python"]
+  domains           String              // JSON string array e.g. ["Web", "AI/ML", "Fintech"]
+  availability      String              // e.g. "5 hrs/week"
+  formats           String              // JSON string array e.g. ["async_review", "live_call", "check_ins"]
+  bio               String?
+  active            Boolean             @default(true)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requests          MentorshipRequest[]
+  feedback          MentorFeedback[]
+}
+
+model MentorshipRequest {
+  id          String         @id @default(uuid())
+  projectId   String
+  mentorId    String
+  scope       String         @default("general") // "general" | "milestone"
+  milestoneId String?
+  message     String
+  status      String         @default("pending") // "pending" | "accepted" | "declined" | "expired"
+  expiresAt   DateTime
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  project     Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  mentor      User           @relation("MentorUserRequests", fields: [mentorId], references: [id], onDelete: Cascade)
+  profile     MentorProfile? @relation(fields: [mentorId], references: [userId])
+
+  @@index([projectId, mentorId])
+  @@index([mentorId, status])
+}
+
+model MentorFeedback {
+  id          String         @id @default(uuid())
+  projectId   String
+  mentorId    String
+  milestoneId String?
+  text        String
+  isAdvisory  Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  project     Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  mentor      User           @relation("MentorUserFeedback", fields: [mentorId], references: [id], onDelete: Cascade)
+  profile     MentorProfile? @relation(fields: [mentorId], references: [userId])
+
+  @@index([projectId, mentorId])
+}
+
+// ── Phase 4: Module 29 - Hackathon / Sprint Mode ───────────────────────────
+
+model HackathonEvent {
+  id                String             @id @default(uuid())
+  name              String
+  description       String
+  theme             String
+  startsAt          DateTime
+  endsAt            DateTime
+  rules             String?
+  suggestedSkillIds String             // JSON string array e.g. ["React", "FastAPI"]
+  status            String             @default("draft") // "draft" | "open" | "running" | "ended" | "archived"
+  organizerId       String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  organizer         User               @relation("EventOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
+  participants      EventParticipant[]
+  projects          Project[]
+}
+
+model EventParticipant {
+  id             String         @id @default(uuid())
+  eventId        String
+  userId         String
+  lookingForTeam Boolean        @default(true)
+  skillsSnapshot String         @default("[]") // JSON string array
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  event          HackathonEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+}
+

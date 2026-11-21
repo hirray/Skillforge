@@ -19,6 +19,8 @@ const envSchema = z.object({
   AI_MATCH_SOURCE: z.enum(['mock', 'real']).optional(),
   AI_HEALTH_SOURCE: z.enum(['mock', 'real']).optional(),
   AI_JOBMATCH_SOURCE: z.enum(['mock', 'real']).optional(),
+  MENTORS_SOURCE: z.enum(['mock', 'real']).default('real'),
+  HACKATHONS_SOURCE: z.enum(['mock', 'real']).default('real'),
   ANALYTICS_SOURCE: z.enum(['mock', 'real']).default('mock'),
   MATCH_RANKER: z.enum(['baseline', 'hybrid']).default('baseline'),
   LLM_PROVIDER: z.enum(['none']).default('none'),

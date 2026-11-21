@@ -768,6 +768,51 @@ paths:
       responses:
         '200':
           description: Successful response
+  /mentors/profile:
+    get:
+      summary: GET /mentors/profile
+      responses:
+        '200':
+          description: Successful response
+    put:
+      summary: PUT /mentors/profile
+      responses:
+        '200':
+          description: Successful response
+  /mentors/requests:
+    get:
+      summary: GET /mentors/requests
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: POST /mentors/requests
+      responses:
+        '200':
+          description: Successful response
+  /mentors/requests/{id}/respond:
+    post:
+      summary: POST /mentors/requests/{id}/respond
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/mentor-feedback:
+    get:
+      summary: GET /projects/{id}/mentor-feedback
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: POST /projects/{id}/mentor-feedback
+      responses:
+        '200':
+          description: Successful response
+  /projects/{id}/mentor-requests:
+    get:
+      summary: GET /projects/{id}/mentor-requests
+      responses:
+        '200':
+          description: Successful response
   /hackathons:
     get:
       summary: GET /hackathons

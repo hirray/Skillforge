@@ -255,3 +255,67 @@ export interface HandoverNote {
   updatedAt: string;
   author?: User;
 }
+
+export interface MentorProfile {
+  id: string;
+  userId: string;
+  expertiseSkillIds: string[];
+  domains: string[];
+  availability: string;
+  formats: string[];
+  bio?: string | null;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+  user?: {
+    id: string;
+    email: string;
+    name?: string;
+  };
+}
+
+export interface MentorshipRequest {
+  id: string;
+  projectId: string;
+  mentorId: string;
+  scope: 'general' | 'milestone' | string;
+  milestoneId?: string | null;
+  message: string;
+  status: 'pending' | 'accepted' | 'declined' | 'expired' | string;
+  expiresAt: string;
+  createdAt: string;
+  updatedAt: string;
+  project?: {
+    id: string;
+    title: string;
+    stage?: string;
+  };
+  mentor?: {
+    id: string;
+    email: string;
+  };
+  milestone?: {
+    id: string;
+    title: string;
+  };
+}
+
+export interface MentorFeedback {
+  id: string;
+  projectId: string;
+  mentorId: string;
+  milestoneId?: string | null;
+  text: string;
+  isAdvisory: boolean;
+  createdAt: string;
+  updatedAt: string;
+  mentor?: {
+    id: string;
+    email: string;
+  };
+  milestone?: {
+    id: string;
+    title: string;
+  };
+}
+

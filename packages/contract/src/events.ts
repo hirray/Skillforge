@@ -25,7 +25,10 @@ export enum DomainEvent {
   GapOpened = 'GapOpened',
   GapFilled = 'GapFilled',
   GapCancelled = 'GapCancelled',
-  HandoverCreated = 'HandoverCreated'
+  HandoverCreated = 'HandoverCreated',
+  MentorshipRequested = 'MentorshipRequested',
+  MentorshipRequestResponded = 'MentorshipRequestResponded',
+  MentorFeedbackCreated = 'MentorFeedbackCreated'
 }
 
 export type EventPayloads = {
@@ -56,4 +59,7 @@ export type EventPayloads = {
   [DomainEvent.GapFilled]: { gapId: string; projectId: string; replacementUserId?: string };
   [DomainEvent.GapCancelled]: { gapId: string; projectId: string };
   [DomainEvent.HandoverCreated]: { handoverId: string; projectId: string; gapId?: string };
+  [DomainEvent.MentorshipRequested]: { requestId: string; projectId: string; mentorId: string };
+  [DomainEvent.MentorshipRequestResponded]: { requestId: string; projectId: string; status: string };
+  [DomainEvent.MentorFeedbackCreated]: { feedbackId: string; projectId: string; mentorId: string };
 };

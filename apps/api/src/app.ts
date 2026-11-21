@@ -74,6 +74,7 @@ app.use('/api/v1', tasksRouter);
 app.use('/api/v1', chatRouter);
 app.use('/api/v1', milestonesRouter);
 app.use('/api/v1', resourcesRouter);
+app.use('/api/v1', mentorsRouter);
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/verification', verificationRouter);
 app.use('/api/v1', member2Router);

@@ -54,6 +54,7 @@ import {
   ProjectGapItem,
   InactiveMemberItem,
 } from './rescue';
+import { MentorAdvisorySection } from './MentorAdvisorySection';
 
 const rolePresets = [
   'Frontend Developer', 'Backend Developer', 'Fullstack Engineer',
@@ -1003,6 +1004,9 @@ export const ProjectDetail = () => {
                 ))}
               </div>
             </div>
+
+            {/* Mentor & Advisory Section */}
+            <MentorAdvisorySection projectId={id!} />
           </div>
         )}
 

@@ -19,6 +19,7 @@ import ProjectsModule from '../projects';
 import TasksModule from '../tasks';
 import MyInvitations from '../team/MyInvitations';
 import ChatModule from '../chat';
+import MentorsModule from '../mentors';
 import './studio.css';
 
 const tools = [
@@ -311,6 +312,7 @@ export default function Member2Workspace() {
     if (pathname.startsWith('/tasks')) return 'Tasks';
     if (pathname.startsWith('/team')) return 'Team Invitations';
     if (pathname.startsWith('/chat')) return 'Project Rooms';
+    if (pathname.startsWith('/mentors')) return 'Mentors & Technical Advisors';
     if (pathname.startsWith('/resumes')) return 'Resume Intelligence';
     if (pathname.startsWith('/ai/requirements')) return 'Project Blueprint';
     if (pathname.startsWith('/ai/match')) return 'Find Collaborators';
@@ -360,6 +362,10 @@ export default function Member2Workspace() {
           <NavLink to="/chat" onClick={() => setMobileNav(false)}>
             <Icon name="chat" />
             Project rooms
+          </NavLink>
+          <NavLink to="/mentors" onClick={() => setMobileNav(false)}>
+            <Icon name="spark" />
+            Mentors & Advisors
           </NavLink>
 
           <span className="st-nav-label">Intelligence</span>
@@ -458,6 +464,7 @@ export default function Member2Workspace() {
               <Route path="/tasks/*" element={<TasksModule />} />
               <Route path="/team/*" element={<MyInvitations />} />
               <Route path="/chat/*" element={<ChatModule />} />
+              <Route path="/mentors/*" element={<MentorsModule />} />
               
               <Route path="/ai" element={<Overview context={activeContext} />} />
               <Route
