@@ -44,11 +44,17 @@ export async function api<T = any>(
   if (options.body && !(options.body instanceof FormData))
     headers.set('Content-Type', 'application/json');
   const response = await fetch(`/api/v1${path}`, { ...options, headers });
-  const data = await response.json();
+  const text = await response.text();
+  let data: any = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    data = { error: { message: text || `HTTP ${response.status}` } };
+  }
   if (!response.ok)
     throw new ApiError(
       response.status,
-      data.error?.message || 'The request could not be completed.'
+      data.error?.message || data.message || `The request could not be completed (HTTP ${response.status}).`
     );
   return data;
 }

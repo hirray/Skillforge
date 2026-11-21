@@ -5,7 +5,7 @@ import {
   IcoSpark,
   IcoAlert,
 } from '../../design-system/components';
-import { api } from '../ai/client';
+import { api, getEffectiveUserId } from '../ai/client';
 import { MentorProfile } from '@skillforge/contract';
 
 interface ProjectOption {
@@ -45,17 +45,25 @@ export const MentorshipRequestModal: React.FC<Props> = ({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const currentUserId = getEffectiveUserId();
+
   useEffect(() => {
     if (!isOpen) return;
     setError(null);
     api<any>('/projects')
       .then((res) => {
         const list = res.data || res.projects || res || [];
-        setProjects(list);
+        // Prioritize projects owned by or associated with the user
+        const sorted = [...list].sort((a: any, b: any) => {
+          const aMine = a.ownerId === currentUserId || a.ownerId === 'user-001' ? -1 : 1;
+          const bMine = b.ownerId === currentUserId || b.ownerId === 'user-001' ? -1 : 1;
+          return aMine - bMine;
+        });
+        setProjects(sorted);
         if (defaultProjectId) {
           setSelectedProjectId(defaultProjectId);
-        } else if (list.length > 0 && !selectedProjectId) {
-          setSelectedProjectId(list[0].id);
+        } else if (sorted.length > 0 && !selectedProjectId) {
+          setSelectedProjectId(sorted[0].id);
         }
       })
       .catch((err) => {
@@ -225,11 +233,14 @@ export const MentorshipRequestModal: React.FC<Props> = ({
                     color: '#fff',
                   }}
                 >
-                  {projects.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.title} ({p.stage || 'In progress'})
-                    </option>
-                  ))}
+                  {projects.map((p) => {
+                    const isMyProject = p.ownerId === currentUserId || p.ownerId === 'user-001';
+                    return (
+                      <option key={p.id} value={p.id}>
+                        {p.title} ({p.stage || 'In progress'}) {isMyProject ? '★ (Your Project)' : ''}
+                      </option>
+                    );
+                  })}
                 </select>
               )}
             </div>

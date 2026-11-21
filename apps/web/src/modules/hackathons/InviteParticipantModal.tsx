@@ -53,35 +53,43 @@ export const InviteParticipantModal: React.FC<Props> = ({
       return;
     }
 
-    // Filter projects owned by current user
-    const userOwnedInEvent = eventProjects.filter(
-      (p) => p.ownerId === currentUserId || p.ownerId === 'user-001'
-    );
+    // Prioritize projects owned by the active user, then fallback to projects without this member
+    const sortAndSelect = (list: any[]) => {
+      // Find whether member is already on team
+      const isAlreadyMember = (proj: any) =>
+        proj.members?.some((m: any) => m.userId === participant?.userId && m.status === 'active');
 
-    if (userOwnedInEvent.length > 0) {
-      setProjects(userOwnedInEvent);
-      setSelectedProjectId(userOwnedInEvent[0].id);
+      const sorted = [...list].sort((a, b) => {
+        const aMine = a.ownerId === currentUserId ? -1 : 1;
+        const bMine = b.ownerId === currentUserId ? -1 : 1;
+        if (aMine !== bMine) return aMine - bMine;
+        const aMem = isAlreadyMember(a) ? 1 : -1;
+        const bMem = isAlreadyMember(b) ? 1 : -1;
+        return aMem - bMem;
+      });
+
+      setProjects(sorted);
+      const firstEligible = sorted.find((pr) => !isAlreadyMember(pr));
+      if (firstEligible) {
+        setSelectedProjectId(firstEligible.id);
+      } else if (sorted.length > 0) {
+        setSelectedProjectId(sorted[0].id);
+      }
+    };
+
+    if (eventProjects && eventProjects.length > 0) {
+      sortAndSelect(eventProjects);
     } else {
-      // Fetch all projects owned by user
       api<{ data?: any[] } | any[]>('/projects')
         .then((res) => {
           const all = Array.isArray(res) ? res : res.data || [];
-          const owned = all.filter(
-            (p: any) => p.ownerId === currentUserId || p.ownerId === 'user-001'
-          );
-          setProjects(owned.length > 0 ? owned : all);
-          if (owned.length > 0) {
-            setSelectedProjectId(owned[0].id);
-          } else if (all.length > 0) {
-            setSelectedProjectId(all[0].id);
-          }
+          sortAndSelect(all);
         })
         .catch(() => {
-          setProjects(eventProjects);
-          if (eventProjects.length > 0) setSelectedProjectId(eventProjects[0].id);
+          setProjects([]);
         });
     }
-  }, [isOpen, eventProjects, currentUserId]);
+  }, [isOpen, eventProjects, currentUserId, participant]);
 
   if (!isOpen || !participant) return null;
 
@@ -311,11 +319,17 @@ export const InviteParticipantModal: React.FC<Props> = ({
                     color: '#fff',
                   }}
                 >
-                  {projects.map((pr) => (
-                    <option key={pr.id} value={pr.id}>
-                      {pr.title}
-                    </option>
-                  ))}
+                  {projects.map((pr) => {
+                    const alreadyMember = pr.members?.some(
+                      (m: any) => m.userId === participant.userId && m.status === 'active'
+                    );
+                    const isMine = pr.ownerId === currentUserId;
+                    return (
+                      <option key={pr.id} value={pr.id} disabled={alreadyMember}>
+                        {pr.title} ({pr.id.slice(0, 6)}) {isMine ? '★ (Your Project)' : ''} {alreadyMember ? '— [Already on Team]' : ''}
+                      </option>
+                    );
+                  })}
                 </select>
               )}
             </div>
