@@ -514,18 +514,85 @@ model ProjectVerification {
 }
 
 model Certificate {
+  id               String    @id @default(uuid())
+  userId           String
+  projectId        String
+  certNumber       String    @default("")
+  recipientName    String    @default("")
+  projectName      String    @default("")
+  rolesJson        String    @default("[]")
+  technologiesJson String    @default("[]")
+  duration         String?
+  completedAt      DateTime  @default(now())
+  issuerName       String    @default("SkillForge Attestation Authority")
+  url              String    @default("")
+  pdfUrl           String?
+  qrCodeUrl        String?
+  status           String    @default("valid") // "valid" | "revoked"
+  revokedReason    String?
+  revokedAt        DateTime?
+  revokedBy        String?
+  version          Int       @default(1)
+  supersedesId     String?
+  showTechnologies Boolean   @default(true)
+  showDuration     Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @default(now()) @updatedAt
+
+  @@index([userId])
+  @@index([certNumber])
+  @@index([projectId, userId])
+}
+
+model CertificateSequence {
   id        String   @id @default(uuid())
-  userId    String
-  projectId String
-  url       String
-  createdAt DateTime @default(now())
+  year      Int      @unique
+  counter   Int      @default(0)
+  updatedAt DateTime @updatedAt
 }
 
 model PortfolioProject {
-  id        String   @id @default(uuid())
-  userId    String
-  projectId String
-  user      User     @relation(fields: [userId], references: [id])
+  id           String   @id @default(uuid())
+  userId       String
+  projectId    String
+  role         String?
+  title        String?
+  technologies String?  // JSON string array
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, projectId])
+}
+
+model CorrectionRequest {
+  id           String    @id @default(uuid())
+  experienceId String
+  requestedBy  String
+  field        String
+  oldValue     String?
+  newValue     String
+  status       String    @default("pending") // pending | approved | rejected
+  reason       String
+  decidedBy    String?
+  decidedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
+
+  @@index([experienceId])
+  @@index([requestedBy])
+}
+
+model PortfolioSettings {
+  id                    String   @id @default(uuid())
+  userId                String   @unique
+  visibility            String   @default("public") // public | platform | recruiters | private
+  headline              String   @default("")
+  bioOverride           String   @default("")
+  sectionOrderJson      String   @default("[\"skills\",\"projects\",\"certificates\"]")
+  sectionVisibilityJson String   @default("{\"skills\":true,\"projects\":true,\"certificates\":true}")
+  pinnedProjectIdsJson  String   @default("[]")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @default(now()) @updatedAt
 }
 
 model Company {

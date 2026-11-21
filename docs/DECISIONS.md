@@ -92,7 +92,27 @@
     - `MilestoneReached` domain event emits on completion and writes to `ActivityFeedEntry` and `Notification`.
     - Added "Link to Milestone" selector in Task detail panel and task creation modal in the Tasks module.
 
-## Phase 2: Resources Module Design System & Decisions (PRD Area 12)
+## Phase 3: Project Completion Certificate, Verified Experience & Professional Portfolio (PRD Areas 18, 19, 20)
+- **Credential PDF Generation (`pdf-lib`)**:
+  - Chosen `pdf-lib` over native canvas/Chromium headless engines to generate pure, lightweight, reproducible A4 landscape PDF certificates on Node.js without OS dependencies.
+  - Branded with SkillForge primary palette (`#0A1680` Navy, `#F1B94C` Gold, `#93B2F8` Bleu ciel, `#FCFDFF` Pearl background).
+- **Public Verification & QR Codes (`qrcode`)**:
+  - Chosen `qrcode` for generating cryptographic verification QR matrices pointing directly to public `/verify/:certId` verification routes.
+  - Embedded into the PDF credential and rendered in web previews.
+- **Sequential Identifiers & Idempotency**:
+  - Credential sequence format: `SF-{YEAR}-{COUNTER:05d}` backed by `CertificateSequence` model.
+  - Automatic issuance on `DomainEvent.ProjectVerified` is strictly idempotent: re-verifying a project preserves existing certificates and credential IDs.
+- **Privacy & Share Toggles**:
+  - Recipients can toggle `showTechnologies` and `showDuration` independently; public verification views filter these attributes according to recipient preferences.
+  - Admin revocations log immutable reason strings to `AuditLog` and emit `DomainEvent.CertificateRevoked`.
+- **Verified Experience & Correction Requests**:
+  - Automatically turns verified project deliveries into lasting career entries (`PortfolioProject`) with deep links to raw contribution ledger proofs and certificates.
+  - `CorrectionRequest` workflow allows contributors to propose role/title revisions with status transitions (`pending`, `approved`, `rejected`).
+- **Professional Portfolio & Visibility Gates**:
+  - 4-Tier visibility controls: `public` (open web), `platform` (authenticated developers), `recruiters` (verified hiring accounts), and `private` (owner-only).
+  - Graceful, informative restricted-state UI prevents data leakage while explaining access requirements.
+  - Interactive section reordering (`skills`, `projects`, `certificates`) and live editor preview.
+
 - Reusable Design System Primitives added in `apps/web/src/design-system/components/`:
   - `LinkCard`: Rich external URL preview card featuring domain-derived favicon/icon (GitHub, Figma, Google Drive, Notion, YouTube, generic), URL host name, resource label/title, category badge, uploader attribution, upload date, external link launcher, and scoped delete control.
   - `FileCard`: Platform file attachment card featuring deterministic type icons based on file extension (PDF, Word documents, Excel spreadsheets, Images, Compressed archives, Code/text, generic), formatted file size (Bytes/KB/MB), real-time animated upload progress bar (0-100%), inline retry and error state for failed uploads, secure download action, and delete control.

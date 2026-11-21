@@ -26,6 +26,8 @@ import { CompanyWorkspacePage } from '../companies';
 import { JobsBoardPage } from '../jobs';
 import { ContributionsHubPage } from '../contribution';
 import { TalentSearchPage, CandidateProofView } from '../talent';
+import { MyCertificatesPage, PublicVerifyPage } from '../certificates';
+import { VerifiedExperiencePage, PortfolioEditorPage, PublicPortfolioPage } from '../portfolio';
 import './studio.css';
 
 const tools = [
@@ -313,6 +315,11 @@ export default function Member2Workspace() {
   }, []);
 
   const getPageTitle = (pathname: string) => {
+    if (pathname.startsWith('/certificates')) return 'Completion Certificates';
+    if (pathname.startsWith('/verify')) return 'Credential Verification';
+    if (pathname.startsWith('/me/verified-experience')) return 'Verified Experience';
+    if (pathname.startsWith('/me/portfolio')) return 'Portfolio Editor';
+    if (pathname.startsWith('/u/') || pathname.startsWith('/portfolio')) return 'Professional Portfolio';
     if (pathname.startsWith('/projects/create') || pathname.startsWith('/projects/new')) return 'Create Project';
     if (pathname.startsWith('/projects')) return 'Projects';
     if (pathname.startsWith('/tasks')) return 'Tasks';
@@ -381,6 +388,18 @@ export default function Member2Workspace() {
           <NavLink to="/contributions" onClick={() => setMobileNav(false)}>
             <Icon name="overview" />
             Documented Contributions
+          </NavLink>
+          <NavLink to="/certificates" onClick={() => setMobileNav(false)}>
+            <Icon name="spark" />
+            Completion Certificates
+          </NavLink>
+          <NavLink to="/me/verified-experience" onClick={() => setMobileNav(false)}>
+            <Icon name="check" />
+            Verified Experience
+          </NavLink>
+          <NavLink to="/me/portfolio" onClick={() => setMobileNav(false)}>
+            <Icon name="people" />
+            My Portfolio
           </NavLink>
           <NavLink to="/integrations/github" onClick={() => setMobileNav(false)}>
             <Icon name="document" />
@@ -498,10 +517,18 @@ export default function Member2Workspace() {
               <Route path="/mentors/*" element={<MentorsModule />} />
               <Route path="/hackathons/*" element={<HackathonsModule />} />
               <Route path="/contributions/*" element={<ContributionsHubPage />} />
+              <Route path="/certificates/*" element={<MyCertificatesPage />} />
+              <Route path="/verify/:certId" element={<PublicVerifyPage />} />
+              <Route path="/verify" element={<PublicVerifyPage />} />
+              <Route path="/me/verified-experience/*" element={<VerifiedExperiencePage />} />
+              <Route path="/me/portfolio/*" element={<PortfolioEditorPage />} />
+              <Route path="/u/:username" element={<PublicPortfolioPage />} />
+              <Route path="/portfolio/:username" element={<PublicPortfolioPage />} />
               <Route path="/integrations/github/*" element={<GitHubIntegrationPage />} />
               <Route path="/companies/*" element={<CompanyWorkspacePage />} />
               <Route path="/jobs/*" element={<JobsBoardPage />} />
               <Route path="/talent/*" element={<TalentSearchPage />} />
+              <Route path="/portfolio/candidate/*" element={<CandidateProofView />} />
               <Route path="/portfolio/*" element={<CandidateProofView />} />
               
               <Route path="/ai" element={<Overview context={activeContext} />} />

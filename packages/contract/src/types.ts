@@ -491,5 +491,131 @@ export interface JobApplication {
   job?: Job;
 }
 
+// Module 18: Project Completion Certificate
+export interface Certificate {
+  id: string;
+  userId: string;
+  projectId: string;
+  certNumber: string;
+  recipientName: string;
+  projectName: string;
+  roles: string[];
+  technologies: string[];
+  duration?: string | null;
+  completedAt: string;
+  issuerName: string;
+  url: string;
+  pdfUrl?: string | null;
+  qrCodeUrl?: string | null;
+  status: 'valid' | 'revoked' | string;
+  revokedReason?: string | null;
+  revokedAt?: string | null;
+  revokedBy?: string | null;
+  version: number;
+  supersedesId?: string | null;
+  showTechnologies: boolean;
+  showDuration: boolean;
+  createdAt: string;
+}
+
+export interface PublicCertificateView {
+  certNumber: string;
+  status: 'valid' | 'revoked' | string;
+  recipientName: string;
+  projectName: string;
+  roles: string[];
+  technologies?: string[];
+  duration?: string | null;
+  completedAt: string;
+  issuerName: string;
+  verifiedAt: string;
+  verificationUrl: string;
+  revokedReason?: string | null;
+  revokedAt?: string | null;
+}
+
+// Module 19: Verified Project Experience
+export interface VerifiedProjectExperience {
+  id: string;
+  projectId: string;
+  title: string;
+  description: string;
+  role: string;
+  technologies: string[];
+  duration?: string | null;
+  completedAt: string;
+  verifiedAt: string;
+  status: string;
+  evidenceLinks: {
+    contributionsUrl: string;
+    certificateUrl?: string | null;
+    certNumber?: string | null;
+    repositoryUrl?: string | null;
+  };
+  skillEvidences: Array<{
+    skillName: string;
+    level?: string;
+    occurredAt: string;
+  }>;
+}
+
+export interface CorrectionRequest {
+  id: string;
+  experienceId: string;
+  requestedBy: string;
+  field: string;
+  oldValue?: string | null;
+  newValue: string;
+  status: 'pending' | 'approved' | 'rejected' | string;
+  reason: string;
+  decidedBy?: string | null;
+  decidedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Module 20: Professional Portfolio
+export interface PortfolioSettings {
+  id?: string;
+  userId: string;
+  visibility: 'public' | 'platform' | 'recruiters' | 'private' | string;
+  headline?: string;
+  bioOverride?: string;
+  sectionOrder: string[];
+  sectionVisibility: Record<string, boolean>;
+  pinnedProjectIds: string[];
+}
+
+export interface PublicPortfolioView {
+  username: string;
+  name: string;
+  avatar?: string | null;
+  headline: string;
+  bio: string;
+  visibility: string;
+  canView: boolean;
+  privateReason?: string;
+  skills: Array<{
+    name: string;
+    level: string;
+    verified: boolean;
+    evidenceCount: number;
+  }>;
+  projects: VerifiedProjectExperience[];
+  certificates: Array<{
+    certNumber: string;
+    projectName: string;
+    roles: string[];
+    completedAt: string;
+    verificationUrl: string;
+  }>;
+  settings: {
+    sectionOrder: string[];
+    sectionVisibility: Record<string, boolean>;
+    pinnedProjectIds: string[];
+  };
+}
+
+
 
 
