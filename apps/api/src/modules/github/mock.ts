@@ -58,6 +58,35 @@ export class MockService {
     };
   }
 
+  async getUserRepos(userId: string) {
+    const conn = this.mockConnectedUsers.get(userId);
+    const username = conn?.username || 'octocat-dev';
+    return [
+      {
+        name: 'skillforge-sandbox',
+        fullName: `${username}/skillforge-sandbox`,
+        owner: username,
+        description: 'Reference test repository for contribution verification',
+        stars: 12,
+        language: 'TypeScript',
+        isPrivate: false,
+        updatedAt: new Date().toISOString(),
+        htmlUrl: `https://github.com/${username}/skillforge-sandbox`,
+      },
+      {
+        name: 'agentic-workflow-engine',
+        fullName: `${username}/agentic-workflow-engine`,
+        owner: username,
+        description: 'Autonomous collaboration and AI task orchestrator',
+        stars: 34,
+        language: 'Python',
+        isPrivate: false,
+        updatedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+        htmlUrl: `https://github.com/${username}/agentic-workflow-engine`,
+      },
+    ];
+  }
+
   async getProjectRepos(projectId: string) {
     const repos = this.mockRepos.get(projectId) || [
       {

@@ -173,7 +173,7 @@ export const CompanyProfileEditor: React.FC<{
           </div>
         </div>
 
-        {canEdit && !editing && (
+        {canEdit !== false && !editing && (
           <button
             onClick={() => {
               setFormData({
@@ -301,12 +301,35 @@ export const CompanyProfileEditor: React.FC<{
         </form>
       ) : (
         <div className="pt-6 space-y-4 text-xs leading-relaxed text-zinc-300">
-          {company.overview && (
+          {company.overview ? (
             <div>
               <div className="font-semibold text-zinc-400 mb-1 uppercase tracking-wider text-[10px]">
                 About the Company
               </div>
               <p className="text-zinc-200">{company.overview}</p>
+            </div>
+          ) : (
+            <div className="p-4 rounded-xl bg-[#1b1b22]/50 border border-dashed border-[#282836] text-center text-xs text-zinc-400">
+              <p className="mb-2">No company overview or mission statement added yet.</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData({
+                    name: company.name || '',
+                    logo: company.logo || '',
+                    overview: company.overview || '',
+                    industry: company.industry || '',
+                    sizeBand: company.sizeBand || '1-10',
+                    website: company.website || '',
+                    locations: company.locations || '',
+                    hiringFocus: company.hiringFocus || '',
+                  });
+                  setEditing(true);
+                }}
+                className="px-3 py-1.5 rounded-lg text-xs font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] transition-all"
+              >
+                + Complete Company Profile
+              </button>
             </div>
           )}
 

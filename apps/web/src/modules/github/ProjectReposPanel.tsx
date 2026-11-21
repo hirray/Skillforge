@@ -21,11 +21,24 @@ export interface ProjectRepoItem {
   }>;
 }
 
+export interface AvailableUserRepo {
+  name: string;
+  fullName: string;
+  owner: string;
+  description?: string | null;
+  stars?: number;
+  language?: string | null;
+  isPrivate?: boolean;
+  updatedAt?: string;
+  htmlUrl?: string;
+}
+
 export const ProjectReposPanel: React.FC<{ projectId: string; isOwner?: boolean }> = ({
   projectId,
   isOwner = true,
 }) => {
   const [repos, setRepos] = useState<ProjectRepoItem[]>([]);
+  const [availableUserRepos, setAvailableUserRepos] = useState<AvailableUserRepo[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncingRepoId, setSyncingRepoId] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -49,9 +62,35 @@ export const ProjectReposPanel: React.FC<{ projectId: string; isOwner?: boolean 
     }
   };
 
+  const fetchAvailableUserRepos = async () => {
+    try {
+      const res = await api<{ data: AvailableUserRepo[] }>('/integrations/github/user-repos');
+      setAvailableUserRepos(res.data || []);
+    } catch {
+      setAvailableUserRepos([]);
+    }
+  };
+
   useEffect(() => {
     fetchRepos();
+    fetchAvailableUserRepos();
   }, [projectId]);
+
+  const handleQuickLink = async (owner: string, name: string) => {
+    try {
+      setSubmitting(true);
+      setError(null);
+      await api(`/projects/${projectId}/repos`, {
+        method: 'POST',
+        body: JSON.stringify({ owner, name }),
+      });
+      await fetchRepos();
+    } catch (err: any) {
+      setError(err.message || 'Failed to link repository');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const handleLinkRepo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,6 +166,71 @@ export const ProjectReposPanel: React.FC<{ projectId: string; isOwner?: boolean 
       {error && (
         <div className="p-3 bg-red-950/40 border border-red-500/30 rounded-xl text-xs text-red-300">
           {error}
+        </div>
+      )}
+
+      {/* Available Repositories from Connected GitHub Account */}
+      {availableUserRepos.length > 0 && (
+        <div className="p-4 rounded-xl bg-[#1b1b22]/70 border border-[#282836]">
+          <div className="flex items-center justify-between mb-2.5 flex-wrap gap-2">
+            <div className="text-xs font-bold text-white flex items-center gap-2">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="#93B2F8">
+                <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+              </svg>
+              <span>Available Repositories from Your GitHub (@{availableUserRepos[0]?.owner})</span>
+            </div>
+            <span className="text-[11px] text-zinc-400">One-click link to project</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+            {availableUserRepos.map((r) => {
+              const isAlreadyLinked = repos.some(
+                (rp) =>
+                  rp.owner.toLowerCase() === r.owner.toLowerCase() &&
+                  rp.name.toLowerCase() === r.name.toLowerCase()
+              );
+              return (
+                <div
+                  key={r.fullName}
+                  className="p-3 rounded-xl bg-[#15151a] border border-[#282836] flex flex-col justify-between gap-2 hover:border-[#93B2F8]/30 transition-all"
+                >
+                  <div className="truncate">
+                    <div className="text-xs font-bold text-white truncate flex items-center gap-1.5">
+                      <span>{r.name}</span>
+                      {r.isPrivate && (
+                        <span className="text-[10px] px-1 py-0.2 bg-zinc-800 text-zinc-400 rounded">
+                          Private
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[11px] text-zinc-400 truncate mt-0.5">
+                      {r.description || (r.language ? `Stack: ${r.language}` : 'GitHub repository')}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1 border-t border-[#282836]/60">
+                    <span className="text-[10px] text-zinc-500">
+                      {r.language || 'Code'} • ★ {r.stars || 0}
+                    </span>
+                    {isAlreadyLinked ? (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-500/30">
+                        Linked ✓
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleQuickLink(r.owner, r.name)}
+                        disabled={submitting}
+                        className="px-2.5 py-1 rounded-lg text-[11px] font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] transition-all shadow-sm"
+                      >
+                        + Link to Project
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
@@ -267,6 +371,33 @@ export const ProjectReposPanel: React.FC<{ projectId: string; isOwner?: boolean 
             </p>
 
             <form onSubmit={handleLinkRepo} className="space-y-4">
+              {availableUserRepos.length > 0 && (
+                <div className="p-3 rounded-xl bg-[#1b1b22] border border-[#282836]">
+                  <label className="block text-xs font-semibold text-[#93B2F8] mb-1.5">
+                    Select from your GitHub Repositories:
+                  </label>
+                  <select
+                    aria-label="Select from your GitHub Repositories"
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val) {
+                        const [o, n] = val.split('/');
+                        setOwnerInput(o);
+                        setNameInput(n);
+                      }
+                    }}
+                    className="w-full px-3 py-2 rounded-lg bg-[#15151a] border border-[#282836] text-white text-xs focus:outline-none focus:border-[#93B2F8]"
+                  >
+                    <option value="">-- Choose a repository --</option>
+                    {availableUserRepos.map((r) => (
+                      <option key={r.fullName} value={`${r.owner}/${r.name}`}>
+                        {r.name} {r.language ? `(${r.language})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
                   Owner / Organization *

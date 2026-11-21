@@ -123,6 +123,51 @@ async function main() {
       skillsSnapshot: JSON.stringify(['Python', 'PyTorch', 'FastAPI', 'LLMs']),
     },
   });
+
+  // Seed demo company & recruiters (PRD Area 21)
+  await prisma.company.upsert({
+    where: { id: 'm2-demo-company' },
+    update: {
+      name: 'Northstar Labs · Demo',
+      logo: 'https://images.unsplash.com/photo-1549923746-c502d488b3ea?auto=format&fit=crop&w=200&h=200',
+      overview: 'Building next-generation collaborative AI infrastructure, autonomous agent orchestration, and distributed developer tooling.',
+      industry: 'Software & Cloud Infrastructure',
+      sizeBand: '51-200',
+      website: 'https://northstarlabs.example.com',
+      locations: 'San Francisco, CA • Remote',
+      hiringFocus: 'Machine Learning, Fullstack TypeScript, Distributed Systems, Python',
+      verificationStatus: 'verified',
+      verificationReason: 'Work domain verified: @northstarlabs.example.com',
+    },
+    create: {
+      id: 'm2-demo-company',
+      name: 'Northstar Labs · Demo',
+      logo: 'https://images.unsplash.com/photo-1549923746-c502d488b3ea?auto=format&fit=crop&w=200&h=200',
+      overview: 'Building next-generation collaborative AI infrastructure, autonomous agent orchestration, and distributed developer tooling.',
+      industry: 'Software & Cloud Infrastructure',
+      sizeBand: '51-200',
+      website: 'https://northstarlabs.example.com',
+      locations: 'San Francisco, CA • Remote',
+      hiringFocus: 'Machine Learning, Fullstack TypeScript, Distributed Systems, Python',
+      verificationStatus: 'verified',
+      verificationReason: 'Work domain verified: @northstarlabs.example.com',
+    },
+  });
+
+  await prisma.recruiterMember.upsert({
+    where: {
+      companyId_userId: {
+        companyId: 'm2-demo-company',
+        userId: 'recruiter-001',
+      },
+    },
+    update: { role: 'recruiter_admin' },
+    create: {
+      companyId: 'm2-demo-company',
+      userId: 'recruiter-001',
+      role: 'recruiter_admin',
+    },
+  });
   
   console.log('Database seeded.');
 }

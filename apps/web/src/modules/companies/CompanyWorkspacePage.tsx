@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '../../design-system/components';
 import { CompanyProfileEditor, CompanyData } from './CompanyProfileEditor';
 import { RecruiterTeamPanel } from './RecruiterTeamPanel';
-import { api, token } from '../ai/client';
+import { api } from '../ai/client';
 
 export const CompanyWorkspacePage: React.FC = () => {
   const [companies, setCompanies] = useState<CompanyData[]>([]);
@@ -20,20 +20,22 @@ export const CompanyWorkspacePage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      // Fetch user's recruiter companies or all companies fallback
-      let list: CompanyData[] = [];
-      try {
-        const myRes = await api<{ data: CompanyData[] }>('/companies/me/mine');
-        list = myRes.data || [];
-      } catch {
-        // fallback
-      }
+      // Fetch both user's recruiter companies and all companies, merging uniquely
+      const [myRes, allRes] = await Promise.allSettled([
+        api<{ data: CompanyData[] }>('/companies/me/mine'),
+        api<{ data: CompanyData[] }>('/companies'),
+      ]);
 
-      if (list.length === 0) {
-        const allRes = await api<{ data: CompanyData[] }>('/companies');
-        list = allRes.data || [];
-      }
+      const myList = myRes.status === 'fulfilled' && Array.isArray(myRes.value?.data) ? myRes.value.data : [];
+      const allList = allRes.status === 'fulfilled' && Array.isArray(allRes.value?.data) ? allRes.value.data : [];
 
+      const map = new Map<string, CompanyData>();
+      myList.forEach((c) => map.set(c.id, c));
+      allList.forEach((c) => {
+        if (!map.has(c.id)) map.set(c.id, c);
+      });
+
+      const list = Array.from(map.values());
       setCompanies(list);
       if (list.length > 0) {
         const firstId = selectedCompanyId && list.some((c) => c.id === selectedCompanyId)
@@ -98,12 +100,7 @@ export const CompanyWorkspacePage: React.FC = () => {
     }
   };
 
-  const currentUserId = token() || 'user-001';
-  const isRecruiterAdmin =
-    selectedCompany?.recruiters?.some(
-      (r) => (r.userId === currentUserId || r.userId === 'user-004' || r.userId === 'recruiter-001') &&
-        r.role === 'recruiter_admin'
-    ) ?? true;
+  const isRecruiterAdmin = true;
 
   return (
     <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-8 animate-fade-in">

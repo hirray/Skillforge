@@ -53,8 +53,13 @@ export const GitHubConnectCard: React.FC<{ onStatusChange?: (status: GitHubStatu
       setError(null);
 
       // Verify and link GitHub account
-      const usernameParam = githubUsername.trim();
-      const codePayload = accessToken.trim() ? `${usernameParam}::${accessToken.trim()}` : usernameParam;
+      const cleanUsername = githubUsername
+        .trim()
+        .replace(/^https?:\/\/(www\.)?github\.com\//i, '')
+        .replace(/^@/, '')
+        .split('/')[0]
+        .trim();
+      const codePayload = accessToken.trim() ? `${cleanUsername}::${accessToken.trim()}` : cleanUsername;
       await api(`/integrations/github/callback?code=${encodeURIComponent(codePayload)}`);
 
       setShowConnectModal(false);
@@ -129,14 +134,22 @@ export const GitHubConnectCard: React.FC<{ onStatusChange?: (status: GitHubStatu
             </div>
 
             {status?.connected ? (
-              <p className="text-xs text-zinc-400 mt-1">
-                Linked GitHub account: <strong className="text-[#93B2F8]">@{status.username}</strong>
-                {status.lastSyncedAt && (
-                  <span className="ml-2 text-zinc-500">
-                    • Active since {new Date(status.lastSyncedAt).toLocaleDateString()}
-                  </span>
-                )}
-              </p>
+              <div>
+                <p className="text-xs text-zinc-400 mt-1">
+                  Linked GitHub account:{' '}
+                  <strong className="text-[#93B2F8]">
+                    @{status.username?.replace(/^https?:\/\/(www\.)?github\.com\//i, '').replace(/^@/, '').split('/')[0]}
+                  </strong>
+                  {status.lastSyncedAt && (
+                    <span className="ml-2 text-zinc-500">
+                      • Active since {new Date(status.lastSyncedAt).toLocaleDateString()}
+                    </span>
+                  )}
+                </p>
+                <p className="text-[11px] text-zinc-500 mt-1">
+                  Identity linked. Select a target project below to link specific repositories and track verified proof.
+                </p>
+              </div>
             ) : (
               <p className="text-xs text-zinc-400 mt-1 max-w-lg">
                 Link your GitHub account or handle to ingest live commits, pull requests, and code reviews as verified evidence for your projects.

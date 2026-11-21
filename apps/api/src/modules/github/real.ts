@@ -70,14 +70,17 @@ export class RealService {
       }
     } else {
       // In local dev or direct connect, extract username and optional PAT
+      const sanitizeUsername = (raw: string) =>
+        raw.trim().replace(/^https?:\/\/(www\.)?github\.com\//i, '').replace(/^@/, '').split('/')[0].trim();
+
       if (code && code.includes('::')) {
         const [u, t] = code.split('::');
-        githubUsername = u.trim().replace(/^@/, '');
+        githubUsername = sanitizeUsername(u);
         if (t && t.trim()) {
           accessToken = t.trim();
         }
-      } else if (code && code.length > 2) {
-        githubUsername = code.trim().replace(/^@/, '');
+      } else if (code && code.length > 1) {
+        githubUsername = sanitizeUsername(code);
       }
     }
 
@@ -139,12 +142,74 @@ export class RealService {
       };
     }
 
+    const cleanUsername = integration.username
+      ? integration.username.trim().replace(/^https?:\/\/(www\.)?github\.com\//i, '').replace(/^@/, '').split('/')[0].trim()
+      : null;
+
     return {
       connected: true,
-      username: integration.username,
+      username: cleanUsername,
       scopes: integration.scopes,
       lastSyncedAt: integration.lastSyncedAt?.toISOString() || null,
     };
+  }
+
+  async getUserRepos(userId: string) {
+    const integration = await prisma.gitHubIntegration.findUnique({
+      where: { userId },
+    });
+
+    if (!integration || !integration.username) {
+      return [];
+    }
+
+    const username = integration.username
+      .trim()
+      .replace(/^https?:\/\/(www\.)?github\.com\//i, '')
+      .replace(/^@/, '')
+      .split('/')[0]
+      .trim();
+
+    try {
+      const headers: Record<string, string> = {
+        Accept: 'application/vnd.github.v3+json',
+        'User-Agent': 'SkillForge-GitHub-Sync',
+      };
+
+      if (integration.token) {
+        try {
+          const decrypted = decryptToken(integration.token);
+          if (decrypted && !decrypted.startsWith('mock_')) {
+            headers.Authorization = `Bearer ${decrypted}`;
+          }
+        } catch {
+          // ignore decrypt fallback
+        }
+      }
+
+      const res = await fetch(
+        `https://api.github.com/users/${encodeURIComponent(username)}/repos?sort=updated&per_page=30`,
+        { headers }
+      );
+      if (res.ok) {
+        const repos = (await res.json()) as any[];
+        return repos.map((r) => ({
+          name: r.name,
+          fullName: r.full_name,
+          owner: r.owner?.login || username,
+          description: r.description || null,
+          stars: r.stargazers_count || 0,
+          language: r.language || null,
+          isPrivate: !!r.private,
+          updatedAt: r.updated_at,
+          htmlUrl: r.html_url,
+        }));
+      }
+    } catch (err) {
+      console.warn('[GitHub RealService] Failed to fetch user repos live:', err);
+    }
+
+    return [];
   }
 
   async getProjectRepos(projectId: string) {

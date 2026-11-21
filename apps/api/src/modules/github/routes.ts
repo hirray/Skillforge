@@ -69,6 +69,19 @@ const handleStatus = async (req: any, res: any, next: any) => {
 router.get('/integrations/github/status', requireAuth, handleStatus);
 router.get('/status', requireAuth, handleStatus);
 
+// List user's available repositories from their connected GitHub account
+const handleGetUserRepos = async (req: any, res: any, next: any) => {
+  try {
+    const userId = getUserId(req);
+    const result = await getService().getUserRepos(userId);
+    res.json({ data: result });
+  } catch (err) {
+    next(err);
+  }
+};
+router.get('/integrations/github/user-repos', requireAuth, handleGetUserRepos);
+router.get('/user-repos', requireAuth, handleGetUserRepos);
+
 /* ====================================================================
  * PROJECT REPOSITORY ENDPOINTS
  * Frozen Contract: GET and POST /projects/{id}/repos
