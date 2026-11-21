@@ -129,6 +129,8 @@ export class RealService {
         projects: {
           include: {
             owner: { select: { id: true, email: true } },
+            roles: true,
+            requirements: true,
             members: {
               include: {
                 user: { select: { id: true, email: true } }

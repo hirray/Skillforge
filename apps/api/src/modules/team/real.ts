@@ -260,9 +260,11 @@ export class RealService {
       throw { status: 400, code: 'ALREADY_MEMBER', message: 'You are already an active member of this project' };
     }
 
-    const role = project.roles.find(r => r.title.toLowerCase() === data.role.toLowerCase());
+    let role = project.roles.find(r => r.title.toLowerCase() === data.role.toLowerCase());
     if (!role) {
-      throw { status: 400, code: 'ROLE_NOT_FOUND', message: `Role "${data.role}" does not exist on this project` };
+      role = await prisma.projectRole.create({
+        data: { projectId, title: data.role, openings: 1, filled: 0 }
+      });
     }
 
     const existing = await prisma.joinRequest.findFirst({

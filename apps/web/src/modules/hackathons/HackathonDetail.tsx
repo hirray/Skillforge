@@ -7,10 +7,11 @@ import {
   IcoRocket,
   IcoUsers,
 } from '../../design-system/components';
-import { api, token } from '../ai/client';
+import { api, token, getEffectiveUserId } from '../ai/client';
 import { HackathonEvent } from '@skillforge/contract';
 import { RegisterSprintProjectModal } from './RegisterSprintProjectModal';
 import { InviteParticipantModal } from './InviteParticipantModal';
+import { RequestJoinSprintModal } from './RequestJoinSprintModal';
 
 export const HackathonDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +22,7 @@ export const HackathonDetail: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'teams' | 'participants' | 'rules'>('teams');
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
   const [invitingParticipant, setInvitingParticipant] = useState<any | null>(null);
+  const [joinTargetProject, setJoinTargetProject] = useState<any | null>(null);
   const [joining, setJoining] = useState(false);
 
   const currentUserId = token();
@@ -297,109 +299,213 @@ export const HackathonDetail: React.FC = () => {
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '20px' }}>
-            {event.projects.map((proj: any) => (
-              <div
-                key={proj.id}
-                style={{
-                  backgroundColor: '#15151a',
-                  border: '1px solid #282836',
-                  borderRadius: '16px',
-                  padding: '22px',
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  gap: '16px',
-                }}
-              >
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span
+            {event.projects.map((proj: any) => {
+              const effectiveUser = getEffectiveUserId();
+              const isMyTeam =
+                proj.ownerId === effectiveUser ||
+                proj.ownerId === 'user-001' ||
+                proj.members?.some((m: any) => m.userId === effectiveUser || m.userId === 'user-001');
+              const openRoles = (proj.roles || []).filter(
+                (r: any) => (r.openings || 1) > (r.filled || 0)
+              );
+
+              return (
+                <div
+                  key={proj.id}
+                  style={{
+                    backgroundColor: '#15151a',
+                    border: '1px solid #282836',
+                    borderRadius: '16px',
+                    padding: '22px',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    gap: '16px',
+                  }}
+                >
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span
+                          style={{
+                            fontSize: '11px',
+                            padding: '2px 8px',
+                            borderRadius: '9999px',
+                            backgroundColor: 'rgba(241, 185, 76, 0.12)',
+                            color: '#F1B94C',
+                            fontWeight: 600,
+                          }}
+                        >
+                          Sprint Team
+                        </span>
+                        {openRoles.length > 0 ? (
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              padding: '2px 8px',
+                              borderRadius: '9999px',
+                              backgroundColor: 'rgba(147, 178, 248, 0.12)',
+                              color: '#93B2F8',
+                              fontWeight: 600,
+                            }}
+                          >
+                            Seeking Teammates
+                          </span>
+                        ) : (
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              padding: '2px 8px',
+                              borderRadius: '9999px',
+                              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                              color: '#a1a1aa',
+                              fontWeight: 500,
+                            }}
+                          >
+                            Team Formed
+                          </span>
+                        )}
+                      </div>
+                      <Badge status="active">{proj.stage || 'in progress'}</Badge>
+                    </div>
+
+                    <h3 style={{ fontSize: '17px', fontWeight: 600, color: '#f4f4f5', margin: '0 0 8px 0' }}>
+                      {proj.title}
+                    </h3>
+
+                    <p style={{ fontSize: '13px', color: '#a1a1aa', lineHeight: 1.5, margin: '0 0 14px 0' }}>
+                      {proj.description}
+                    </p>
+
+                    {/* Roles Needed / Seeking */}
+                    <div style={{ marginBottom: '14px' }}>
+                      <div style={{ fontSize: '11px', color: '#a1a1aa', fontWeight: 600, textTransform: 'uppercase', marginBottom: '6px' }}>
+                        Roles Seeking / Needed:
+                      </div>
+                      {proj.roles && proj.roles.length > 0 ? (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                          {proj.roles.map((r: any) => {
+                            const openCount = (r.openings || 1) - (r.filled || 0);
+                            const isOpen = openCount > 0;
+                            return (
+                              <span
+                                key={r.id || r.title}
+                                style={{
+                                  fontSize: '11px',
+                                  padding: '3px 8px',
+                                  borderRadius: '6px',
+                                  backgroundColor: isOpen ? 'rgba(241, 185, 76, 0.12)' : 'rgba(255, 255, 255, 0.05)',
+                                  color: isOpen ? '#F1B94C' : '#71717a',
+                                  border: isOpen ? '1px solid rgba(241, 185, 76, 0.25)' : '1px solid #282836',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                }}
+                              >
+                                <span>{r.title}</span>
+                                {isOpen ? (
+                                  <span style={{ fontSize: '10px', opacity: 0.85 }}>({openCount} open)</span>
+                                ) : (
+                                  <span style={{ fontSize: '10px', color: '#10B981' }}>✓ filled</span>
+                                )}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: '12px', color: '#71717a', fontStyle: 'italic' }}>
+                          Open to all hackathon contributors & lone participants.
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Scaled Sprint Milestones */}
+                    <div
                       style={{
-                        fontSize: '11px',
-                        padding: '2px 8px',
-                        borderRadius: '9999px',
-                        backgroundColor: 'rgba(241, 185, 76, 0.12)',
-                        color: '#F1B94C',
-                        fontWeight: 600,
+                        backgroundColor: '#1b1b22',
+                        borderRadius: '10px',
+                        padding: '12px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px',
                       }}
                     >
-                      Sprint Team
-                    </span>
-                    <Badge status="active">{proj.stage || 'Execution'}</Badge>
+                      <div style={{ fontSize: '11px', color: '#a1a1aa', fontWeight: 600, textTransform: 'uppercase' }}>
+                        Scaled Sprint Milestones (3 Defaults):
+                      </div>
+                      {proj.milestones && proj.milestones.map((m: any, idx: number) => (
+                        <div
+                          key={m.id || idx}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            fontSize: '12px',
+                            color: '#d4d4d8',
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span
+                              style={{
+                                width: '18px',
+                                height: '18px',
+                                borderRadius: '50%',
+                                backgroundColor: m.status === 'Done' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(241, 185, 76, 0.2)',
+                                color: m.status === 'Done' ? '#10B981' : '#F1B94C',
+                                fontSize: '10px',
+                                fontWeight: 700,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}
+                            >
+                              {idx + 1}
+                            </span>
+                            <span>{m.title}</span>
+                          </div>
+                          <span style={{ fontSize: '11px', color: m.status === 'Done' ? '#10B981' : '#a1a1aa' }}>
+                            {m.status || 'To Do'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  <h3 style={{ fontSize: '17px', fontWeight: 600, color: '#f4f4f5', margin: '0 0 8px 0' }}>
-                    {proj.title}
-                  </h3>
-
-                  <p style={{ fontSize: '13px', color: '#a1a1aa', lineHeight: 1.5, margin: '0 0 14px 0' }}>
-                    {proj.description}
-                  </p>
-
-                  {/* Scaled Sprint Milestones */}
                   <div
                     style={{
-                      backgroundColor: '#1b1b22',
-                      borderRadius: '10px',
-                      padding: '12px',
+                      borderTop: '1px solid #22222e',
+                      paddingTop: '14px',
                       display: 'flex',
-                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
                       gap: '8px',
                     }}
                   >
-                    <div style={{ fontSize: '11px', color: '#a1a1aa', fontWeight: 600, textTransform: 'uppercase' }}>
-                      Scaled Sprint Milestones (3 Defaults):
-                    </div>
-                    {proj.milestones && proj.milestones.map((m: any, idx: number) => (
-                      <div
-                        key={m.id || idx}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          fontSize: '12px',
-                          color: '#d4d4d8',
-                        }}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(`/projects/${proj.id}`)}
+                    >
+                      Workspace &rarr;
+                    </Button>
+                    {isMyTeam ? (
+                      <span style={{ fontSize: '12px', color: '#93B2F8', fontWeight: 600 }}>
+                        ★ Your Team
+                      </span>
+                    ) : (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => setJoinTargetProject(proj)}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span
-                            style={{
-                              width: '18px',
-                              height: '18px',
-                              borderRadius: '50%',
-                              backgroundColor: m.status === 'Done' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(241, 185, 76, 0.2)',
-                              color: m.status === 'Done' ? '#10B981' : '#F1B94C',
-                              fontSize: '10px',
-                              fontWeight: 700,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                            }}
-                          >
-                            {idx + 1}
-                          </span>
-                          <span>{m.title}</span>
-                        </div>
-                        <span style={{ fontSize: '11px', color: m.status === 'Done' ? '#10B981' : '#a1a1aa' }}>
-                          {m.status || 'To Do'}
-                        </span>
-                      </div>
-                    ))}
+                        Request to Join Team
+                      </Button>
+                    )}
                   </div>
                 </div>
-
-                <div style={{ borderTop: '1px solid #22222e', paddingTop: '14px', display: 'flex', justifyContent: 'flex-end' }}>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => navigate(`/projects/${proj.id}`)}
-                  >
-                    Open Project Workspace &rarr;
-                  </Button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )
       ) : activeTab === 'participants' ? (
@@ -582,6 +688,13 @@ export const HackathonDetail: React.FC = () => {
         participant={invitingParticipant}
         eventProjects={event.projects || []}
         onClose={() => setInvitingParticipant(null)}
+        onSuccess={() => void loadEvent()}
+      />
+
+      <RequestJoinSprintModal
+        isOpen={!!joinTargetProject}
+        project={joinTargetProject}
+        onClose={() => setJoinTargetProject(null)}
         onSuccess={() => void loadEvent()}
       />
     </div>
