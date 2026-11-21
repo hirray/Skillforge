@@ -57,6 +57,7 @@ import {
 import { MentorAdvisorySection } from './MentorAdvisorySection';
 import { ProjectReposPanel } from '../github';
 import { ContributionsTab } from '../contribution';
+import { ProjectCertificationTab } from './ProjectCertificationTab';
 
 const rolePresets = [
   'Frontend Developer', 'Backend Developer', 'Fullstack Engineer',
@@ -73,6 +74,15 @@ const TABS = [
   { id: 'Resources', icon: <IcoFile size={14} /> },
   { id: 'Discussions', icon: <IcoMsg size={14} /> },
   { id: 'Analytics', icon: <IcoBar size={14} /> },
+  {
+    id: 'Certification',
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="12" cy="8" r="6" />
+        <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" />
+      </svg>
+    ),
+  },
 ];
 
 const SKILL_COLORS = [
@@ -715,6 +725,11 @@ export const ProjectDetail = () => {
                         </button>
                       )}
                       {project.status === 'Active' && (
+                        <button className="more-item" onClick={() => handleTransition('Completed')}>
+                          <IcoCheck size={14} color="#34d399" /> Complete Project
+                        </button>
+                      )}
+                      {project.status === 'Active' && (
                         <button className="more-item" onClick={() => handleTransition('Paused')}>
                           <IcoPause size={14} color="#f59e0b" /> Pause Project
                         </button>
@@ -1043,6 +1058,14 @@ export const ProjectDetail = () => {
           </div>
         )}
         {activeTab === 'Analytics' && <ProjectAnalyticsTab projectId={id!} />}
+        {activeTab === 'Certification' && (
+          <ProjectCertificationTab
+            projectId={id!}
+            project={project}
+            isOwner={isOwner}
+            onProjectUpdated={fetchProject}
+          />
+        )}
       </div>
 
       {/* ── EDIT MODAL ────────────────────────────────────────────── */}

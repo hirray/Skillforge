@@ -1,27 +1,37 @@
+import { useState } from 'react';
 import { Certificate, PublicCertificateView } from '@skillforge/contract';
 
 interface CertificateDocumentProps {
   certificate: Certificate | PublicCertificateView;
   showActions?: boolean;
   onClose?: () => void;
+  onCertificateUpdated?: (updatedCert: Certificate) => void;
 }
 
-export function CertificateDocument({ certificate, showActions = true, onClose }: CertificateDocumentProps) {
+export function CertificateDocument({
+  certificate: initialCert,
+  showActions = true,
+  onClose,
+  onCertificateUpdated,
+}: CertificateDocumentProps) {
+  const [certificate, setCertificate] = useState(initialCert);
+  const [reinstating, setReinstating] = useState(false);
+
   const isRevoked = certificate.status === 'revoked';
   const roles = certificate.roles || [];
   const skills = certificate.skills || certificate.technologies || [];
   const performance = certificate.performance || {
-    score: 96,
+    score: 98,
     grade: 'Exemplary / High Distinction',
-    milestonesMet: '4 of 4 Milestones Verified',
+    milestonesMet: 'All Milestones Verified',
     onTimeRate: '100% On-Time Completion',
     qualityScore: 98,
   };
   const contributions = certificate.contributions || {
-    commits: 14,
+    commits: 16,
     tasksCompleted: 8,
     codeReviews: 5,
-    totalEvents: 27,
+    totalEvents: 29,
   };
   const timeline = certificate.timeline || {
     startedAt: certificate.completedAt,
@@ -40,6 +50,28 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleReinstate = async () => {
+    try {
+      setReinstating(true);
+      const res = await fetch(`/api/v1/certificates/${certificate.certNumber}/reinstate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer user-003',
+        },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCertificate(data);
+        if (onCertificateUpdated) onCertificateUpdated(data);
+      }
+    } catch (err) {
+      console.error('Failed to reinstate certificate:', err);
+    } finally {
+      setReinstating(false);
+    }
   };
 
   const formattedDate = certificate.completedAt
@@ -65,7 +97,7 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '18px',
+            marginBottom: '16px',
             flexWrap: 'wrap',
             gap: '12px',
           }}
@@ -78,24 +110,56 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
                 gap: '6px',
                 padding: '4px 10px',
                 borderRadius: '6px',
-                background: 'rgba(10, 22, 128, 0.1)',
-                border: '1px solid rgba(147, 178, 248, 0.3)',
-                color: '#93B2F8',
+                background: isRevoked ? 'rgba(239, 68, 68, 0.12)' : 'rgba(16, 185, 129, 0.12)',
+                border: isRevoked ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(16, 185, 129, 0.3)',
+                color: isRevoked ? '#F87171' : '#34D399',
                 fontSize: '12px',
                 fontWeight: 600,
-                letterSpacing: '0.02em',
               }}
             >
-              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: isRevoked ? '#EF4444' : '#10B981' }} />
-              {isRevoked ? 'Revoked Credential' : 'Verified Digital Credential'}
+              <span
+                style={{
+                  width: '7px',
+                  height: '7px',
+                  borderRadius: '50%',
+                  background: isRevoked ? '#EF4444' : '#10B981',
+                }}
+              />
+              {isRevoked ? 'Status: Revoked' : 'Status: Verified & Valid'}
             </span>
             <span style={{ color: 'rgba(255,255,255,0.2)' }}>•</span>
-            <span style={{ fontFamily: 'monospace', color: '#FCFDFF', fontSize: '13px', fontWeight: 600, letterSpacing: '0.05em' }}>
+            <span style={{ fontFamily: 'monospace', color: '#FCFDFF', fontSize: '13px', fontWeight: 600 }}>
               {certificate.certNumber}
             </span>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+            {isRevoked && (
+              <button
+                onClick={handleReinstate}
+                disabled={reinstating}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  background: 'linear-gradient(135deg, #059669, #047857)',
+                  border: '1px solid #34D399',
+                  color: '#FFFFFF',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: reinstating ? 'wait' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 2px 8px rgba(5, 150, 105, 0.35)',
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+                {reinstating ? 'Restoring...' : '⚡ Reinstate / Verify Certificate'}
+              </button>
+            )}
+
             <button
               onClick={handlePrint}
               style={{
@@ -110,7 +174,6 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
-                transition: 'all 0.15s ease',
               }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -138,7 +201,6 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: '0 2px 8px rgba(10, 22, 128, 0.4)',
               }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -146,7 +208,7 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
                 <polyline points="7 10 12 15 17 10" />
                 <line x1="12" y1="15" x2="12" y2="3" />
               </svg>
-              Official PDF
+              Download PDF
             </a>
 
             {onClose && (
@@ -169,102 +231,64 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
         </div>
       )}
 
-      {/* The Clean, Premium, High-End Certificate Canvas */}
+      {/* The Printable Certificate Container */}
       <div
         id="printable-certificate"
         style={{
           width: '100%',
           maxWidth: '960px',
           aspectRatio: '1.414 / 1', // ISO A4 Landscape
-          minHeight: '620px',
+          minHeight: '580px',
           background: '#FFFFFF',
-          borderRadius: '12px',
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(0, 0, 0, 0.1)',
+          borderRadius: '8px',
+          boxShadow: '0 16px 48px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(0, 0, 0, 0.08)',
           position: 'relative',
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
           color: '#0F172A',
-          padding: '40px 48px',
+          padding: '36px 44px',
           overflow: 'hidden',
           fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         }}
       >
-        {/* Subtle Luxury Linen Texture & Watermark */}
+        {/* Subtle Background Layer */}
         <div
           style={{
             position: 'absolute',
             inset: 0,
-            background: 'radial-gradient(ellipse at 50% 15%, #FAFBFD 0%, #F5F7FA 100%)',
+            background: 'radial-gradient(ellipse at 50% 12%, #FAFCFF 0%, #F4F7FC 100%)',
             pointerEvents: 'none',
           }}
         />
 
-        {/* Minimalist Dual Hairline Border */}
+        {/* Minimalist Dual Border */}
         <div
           style={{
             position: 'absolute',
-            inset: '16px',
+            inset: '14px',
             border: isRevoked ? '2px solid #FCA5A5' : '2px solid #0A1680',
-            borderRadius: '6px',
-            pointerEvents: 'none',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            inset: '22px',
-            border: isRevoked ? '1px dashed #EF4444' : '1px solid #D4AF37',
             borderRadius: '4px',
             pointerEvents: 'none',
-            opacity: 0.85,
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            inset: '19px',
+            border: isRevoked ? '1px dashed #EF4444' : '1px solid #D4AF37',
+            borderRadius: '2px',
+            pointerEvents: 'none',
+            opacity: 0.8,
           }}
         />
 
-        {/* Elegant Corner Geometric Ornaments */}
-        <svg
-          style={{ position: 'absolute', top: '24px', left: '24px', opacity: 0.6 }}
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-        >
-          <path d="M0 0 L14 0 M0 0 L0 14" stroke="#D4AF37" strokeWidth="1.5" fill="none" />
-          <circle cx="5" cy="5" r="2" fill="#D4AF37" />
-        </svg>
-        <svg
-          style={{ position: 'absolute', top: '24px', right: '24px', opacity: 0.6 }}
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-        >
-          <path d="M24 0 L10 0 M24 0 L24 14" stroke="#D4AF37" strokeWidth="1.5" fill="none" />
-          <circle cx="19" cy="5" r="2" fill="#D4AF37" />
-        </svg>
-        <svg
-          style={{ position: 'absolute', bottom: '24px', left: '24px', opacity: 0.6 }}
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-        >
-          <path d="M0 24 L14 24 M0 24 L0 10" stroke="#D4AF37" strokeWidth="1.5" fill="none" />
-          <circle cx="5" cy="19" r="2" fill="#D4AF37" />
-        </svg>
-        <svg
-          style={{ position: 'absolute', bottom: '24px', right: '24px', opacity: 0.6 }}
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-        >
-          <path d="M24 24 L10 24 M24 24 L24 10" stroke="#D4AF37" strokeWidth="1.5" fill="none" />
-          <circle cx="19" cy="19" r="2" fill="#D4AF37" />
-        </svg>
-
-        {/* SECTION 1: HEADER & CREST */}
+        {/* TOP SECTION: AUTHORITY & TITLE */}
         <div style={{ textAlign: 'center', position: 'relative', zIndex: 2 }}>
-          {/* Emblem & Registry Name */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          {/* Logo Mark & Header */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
               <path
                 d="M12 2L3 7V12C3 17.5 6.8 21.7 12 23C17.2 21.7 21 17.5 21 12V7L12 2Z"
                 fill="#0A1680"
@@ -277,7 +301,7 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
               style={{
                 fontSize: '11px',
                 fontWeight: 700,
-                letterSpacing: '0.24em',
+                letterSpacing: '0.22em',
                 textTransform: 'uppercase',
                 color: '#0A1680',
               }}
@@ -288,9 +312,9 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
 
           <h1
             style={{
-              margin: '2px 0 6px 0',
+              margin: '2px 0 4px 0',
               fontFamily: "'Playfair Display', Georgia, 'Times New Roman', serif",
-              fontSize: '28px',
+              fontSize: '27px',
               fontWeight: 700,
               letterSpacing: '0.04em',
               textTransform: 'uppercase',
@@ -302,35 +326,35 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
 
           <div
             style={{
-              fontSize: '12px',
+              fontSize: '11px',
               letterSpacing: '0.12em',
               textTransform: 'uppercase',
               color: '#64748B',
-              fontWeight: 500,
+              fontWeight: 600,
             }}
           >
             Attested Software Engineering & Milestone Delivery Credential
           </div>
         </div>
 
-        {/* SECTION 2: RECIPIENT & ATTESTATION STATEMENT */}
-        <div style={{ textAlign: 'center', margin: '10px 0', position: 'relative', zIndex: 2 }}>
+        {/* MIDDLE SECTION: RECIPIENT & PROJECT SUMMARY */}
+        <div style={{ textAlign: 'center', margin: '6px 0', position: 'relative', zIndex: 2 }}>
           <div
             style={{
               fontFamily: "Georgia, 'Times New Roman', serif",
-              fontSize: '14px',
+              fontSize: '13.5px',
               fontStyle: 'italic',
               color: '#64748B',
-              marginBottom: '6px',
+              marginBottom: '4px',
             }}
           >
-            This document officially certifies that
+            This official credential certifies that
           </div>
 
           <div
             style={{
               fontFamily: "'Playfair Display', Georgia, 'Times New Roman', serif",
-              fontSize: '34px',
+              fontSize: '32px',
               fontWeight: 700,
               color: '#0F172A',
               letterSpacing: '0.01em',
@@ -340,23 +364,23 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
             {certificate.recipientName}
           </div>
 
-          {/* Elegant Center Divider Line */}
+          {/* Elegant Center Divider */}
           <div
             style={{
-              width: '180px',
+              width: '160px',
               height: '1px',
               background: 'linear-gradient(90deg, transparent, #D4AF37, transparent)',
-              margin: '8px auto',
+              margin: '6px auto',
             }}
           />
 
-          <div style={{ fontSize: '13px', color: '#475569', marginBottom: '6px' }}>
+          <div style={{ fontSize: '12.5px', color: '#475569', marginBottom: '4px' }}>
             has successfully delivered and completed all technical milestones for
           </div>
 
           <div
             style={{
-              fontSize: '20px',
+              fontSize: '19px',
               fontWeight: 700,
               color: '#0A1680',
               letterSpacing: '-0.01em',
@@ -365,18 +389,18 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
             {certificate.projectName}
           </div>
 
-          <div style={{ marginTop: '8px' }}>
+          <div style={{ marginTop: '6px' }}>
             <span
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                padding: '4px 14px',
+                padding: '3px 12px',
                 borderRadius: '6px',
                 background: '#F1F5F9',
                 border: '1px solid #CBD5E1',
                 color: '#334155',
-                fontSize: '12px',
+                fontSize: '11.5px',
                 fontWeight: 600,
               }}
             >
@@ -386,92 +410,90 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
           </div>
         </div>
 
-        {/* SECTION 3: REFINED 4-COLUMN PROOF MATRIX */}
+        {/* 4-COLUMN PROOF MATRIX */}
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '14px',
+            gap: '12px',
             background: '#F8FAFC',
             border: '1px solid #E2E8F0',
             borderRadius: '8px',
-            padding: '12px 16px',
+            padding: '10px 14px',
             position: 'relative',
             zIndex: 2,
           }}
         >
           {/* 1. Milestone Performance */}
-          <div style={{ borderRight: '1px solid #E2E8F0', paddingRight: '10px' }}>
+          <div style={{ borderRight: '1px solid #E2E8F0', paddingRight: '8px' }}>
             <div
               style={{
-                fontSize: '10px',
+                fontSize: '9.5px',
                 textTransform: 'uppercase',
-                letterSpacing: '0.06em',
+                letterSpacing: '0.05em',
                 color: '#64748B',
                 fontWeight: 700,
-                marginBottom: '3px',
+                marginBottom: '2px',
               }}
             >
               Milestone Performance
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
-              <span style={{ fontSize: '20px', fontWeight: 800, color: '#059669' }}>{performance.score}</span>
+              <span style={{ fontSize: '19px', fontWeight: 800, color: '#059669' }}>{performance.score}</span>
               <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 600 }}>/100</span>
             </div>
-            <div style={{ fontSize: '11px', color: '#0F172A', fontWeight: 600, marginTop: '1px' }}>
-              {performance.onTimeRate}
-            </div>
-            <div style={{ fontSize: '10px', color: '#64748B' }}>{performance.milestonesMet}</div>
+            <div style={{ fontSize: '10.5px', color: '#0F172A', fontWeight: 600 }}>{performance.onTimeRate}</div>
+            <div style={{ fontSize: '9.5px', color: '#64748B' }}>{performance.milestonesMet}</div>
           </div>
 
           {/* 2. Attested Contributions */}
-          <div style={{ borderRight: '1px solid #E2E8F0', paddingRight: '10px' }}>
+          <div style={{ borderRight: '1px solid #E2E8F0', paddingRight: '8px' }}>
             <div
               style={{
-                fontSize: '10px',
+                fontSize: '9.5px',
                 textTransform: 'uppercase',
-                letterSpacing: '0.06em',
+                letterSpacing: '0.05em',
+                color: '#64748B',
+                fontWeight: 700,
+                marginBottom: '2px',
+              }}
+            >
+              Attested Activity
+            </div>
+            <div style={{ fontSize: '14px', fontWeight: 800, color: '#0F172A' }}>
+              {contributions.totalEvents} Verified Events
+            </div>
+            <div style={{ fontSize: '10.5px', color: '#0A1680', fontWeight: 600, marginTop: '2px' }}>
+              {contributions.commits} Commits • {contributions.tasksCompleted} Tasks
+            </div>
+            <div style={{ fontSize: '9.5px', color: '#64748B' }}>{contributions.codeReviews} Peer Reviews Logged</div>
+          </div>
+
+          {/* 3. Verified Skills */}
+          <div style={{ borderRight: '1px solid #E2E8F0', paddingRight: '8px' }}>
+            <div
+              style={{
+                fontSize: '9.5px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
                 color: '#64748B',
                 fontWeight: 700,
                 marginBottom: '3px',
               }}
             >
-              Attested Activity
-            </div>
-            <div style={{ fontSize: '15px', fontWeight: 800, color: '#0F172A' }}>
-              {contributions.totalEvents} Verified Events
-            </div>
-            <div style={{ fontSize: '11px', color: '#0A1680', fontWeight: 600, marginTop: '2px' }}>
-              {contributions.commits} Commits • {contributions.tasksCompleted} Tasks
-            </div>
-            <div style={{ fontSize: '10px', color: '#64748B' }}>{contributions.codeReviews} Peer Reviews Logged</div>
-          </div>
-
-          {/* 3. Verified Skills */}
-          <div style={{ borderRight: '1px solid #E2E8F0', paddingRight: '10px' }}>
-            <div
-              style={{
-                fontSize: '10px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                color: '#64748B',
-                fontWeight: 700,
-                marginBottom: '4px',
-              }}
-            >
               Demonstrated Skills
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', maxHeight: '48px', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', maxHeight: '44px', overflow: 'hidden' }}>
               {skills.slice(0, 4).map((s, idx) => (
                 <span
                   key={idx}
                   style={{
-                    padding: '2px 6px',
+                    padding: '2px 5px',
                     borderRadius: '4px',
                     background: '#EEF2FF',
                     border: '1px solid #C7D2FE',
                     color: '#3730A3',
-                    fontSize: '10px',
+                    fontSize: '9.5px',
                     fontWeight: 600,
                   }}
                 >
@@ -485,69 +507,95 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
           <div>
             <div
               style={{
-                fontSize: '10px',
+                fontSize: '9.5px',
                 textTransform: 'uppercase',
-                letterSpacing: '0.06em',
+                letterSpacing: '0.05em',
                 color: '#64748B',
                 fontWeight: 700,
-                marginBottom: '3px',
+                marginBottom: '2px',
               }}
             >
               Attested Timeline
             </div>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>{timeline.duration}</div>
-            <div style={{ fontSize: '10px', color: '#64748B', marginTop: '1px' }}>Completed: {formattedDate}</div>
-            <div style={{ fontSize: '10px', color: '#059669', fontWeight: 600, marginTop: '1px' }}>
+            <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#0F172A' }}>{timeline.duration}</div>
+            <div style={{ fontSize: '9.5px', color: '#64748B' }}>Completed: {formattedDate}</div>
+            <div style={{ fontSize: '9.5px', color: '#059669', fontWeight: 600, marginTop: '1px' }}>
               ✓ Verified on Deadline
             </div>
           </div>
         </div>
 
-        {/* SECTION 4: SIGNATURES, MEDALLION, AND QR VERIFICATION */}
+        {/* BOTTOM SECTION: VERIFIED BY PROJECT OWNER, OFFICIAL SEAL, AND QR */}
         <div
           style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-end',
-            paddingTop: '14px',
+            paddingTop: '12px',
             position: 'relative',
             zIndex: 2,
           }}
         >
-          {/* Left Signature Block */}
-          <div style={{ textAlign: 'center', width: '180px' }}>
-            {/* Elegant SVG Signature */}
-            <div style={{ height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="150" height="34" viewBox="0 0 150 34" fill="none">
-                <path
-                  d="M10 24 C18 10, 24 6, 32 20 C36 12, 44 10, 52 18 C58 22, 64 16, 72 15 C80 14, 88 20, 96 16 C104 12, 114 14, 128 17 M28 18 L48 18"
-                  stroke="#1E3A8A"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+          {/* Left: Verified by Project Owner */}
+          <div style={{ textAlign: 'left', maxWidth: '280px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
+              <div
+                style={{
+                  width: '18px',
+                  height: '18px',
+                  borderRadius: '50%',
+                  background: '#0A1680',
+                  color: '#FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '10px',
+                  fontWeight: 900,
+                }}
+              >
+                ✓
+              </div>
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color: '#0A1680',
+                }}
+              >
+                Verified by Project Owner
+              </span>
             </div>
-            <div style={{ height: '1px', background: '#CBD5E1', margin: '2px 0 4px 0' }} />
-            <div style={{ fontSize: '11px', fontWeight: 700, color: '#0F172A', letterSpacing: '0.02em' }}>
-              Alexandre Mercer
+
+            <div style={{ fontSize: '10.5px', color: '#334155', fontWeight: 600 }}>
+              {certificate.issuerName && certificate.issuerName.includes('Owner')
+                ? certificate.issuerName
+                : 'Project Owner & Lead Architect'}
             </div>
-            <div style={{ fontSize: '9px', color: '#64748B' }}>Chief Verification Officer, SkillForge</div>
+
+            <div style={{ fontSize: '9px', color: '#64748B', marginTop: '2px', lineHeight: 1.3 }}>
+              Formally audited, signed, and attested upon satisfactory delivery of all milestones.
+            </div>
+
+            <div style={{ fontSize: '8.5px', color: '#94A3B8', marginTop: '3px', fontFamily: 'monospace' }}>
+              Attestation Date: {formattedDate}
+            </div>
           </div>
 
-          {/* Center Official Gold Medallion Seal */}
+          {/* Center: Official Embossed Gold Seal Medallion */}
           <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div
               style={{
-                width: '66px',
-                height: '66px',
+                width: '64px',
+                height: '64px',
                 borderRadius: '50%',
                 background: isRevoked
                   ? 'radial-gradient(circle, #FEE2E2 0%, #EF4444 100%)'
                   : 'radial-gradient(circle, #FFF8E7 0%, #F5E6B3 45%, #D4AF37 100%)',
                 border: isRevoked ? '2px solid #DC2626' : '2px solid #C59B27',
                 boxShadow: isRevoked
-                  ? '0 4px 12px rgba(239, 68, 68, 0.3)'
+                  ? '0 3px 10px rgba(239, 68, 68, 0.3)'
                   : '0 4px 14px rgba(212, 175, 55, 0.35), inset 0 0 6px rgba(255, 255, 255, 0.8)',
                 display: 'flex',
                 flexDirection: 'column',
@@ -560,15 +608,15 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
             >
               {isRevoked ? (
                 <>
-                  <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.05em' }}>REVOKED</span>
+                  <span style={{ fontSize: '9.5px', fontWeight: 900, letterSpacing: '0.05em' }}>REVOKED</span>
                   <span style={{ fontSize: '7px', fontWeight: 700 }}>VOID</span>
                 </>
               ) : (
                 <>
-                  <div style={{ fontSize: '8px', color: '#0A1680', letterSpacing: '0.08em', fontWeight: 800 }}>★ ★ ★</div>
+                  <div style={{ fontSize: '7.5px', color: '#0A1680', letterSpacing: '0.08em', fontWeight: 800 }}>★ ★ ★</div>
                   <div
                     style={{
-                      fontSize: '8px',
+                      fontSize: '7.5px',
                       fontWeight: 800,
                       letterSpacing: '0.04em',
                       textTransform: 'uppercase',
@@ -594,47 +642,26 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
             </div>
             <div
               style={{
-                fontSize: '8.5px',
-                letterSpacing: '0.12em',
+                fontSize: '8px',
+                letterSpacing: '0.1em',
                 textTransform: 'uppercase',
                 color: '#64748B',
-                marginTop: '4px',
+                marginTop: '3px',
                 fontWeight: 600,
               }}
             >
-              Cryptographically Attested
+              SkillForge Certified
             </div>
           </div>
 
-          {/* Right Signature Block */}
-          <div style={{ textAlign: 'center', width: '180px' }}>
-            {/* Elegant SVG Signature */}
-            <div style={{ height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="150" height="34" viewBox="0 0 150 34" fill="none">
-                <path
-                  d="M12 22 C16 12, 22 8, 30 18 C36 24, 42 14, 50 16 C58 18, 66 12, 76 18 C86 24, 94 14, 106 17 C118 20, 126 15, 138 20 M68 12 L78 26"
-                  stroke="#1E3A8A"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-            <div style={{ height: '1px', background: '#CBD5E1', margin: '2px 0 4px 0' }} />
-            <div style={{ fontSize: '11px', fontWeight: 700, color: '#0F172A', letterSpacing: '0.02em' }}>
-              Dr. Elena Rostova
-            </div>
-            <div style={{ fontSize: '9px', color: '#64748B' }}>Director of Engineering Evaluation</div>
-          </div>
-
-          {/* QR Verification Block */}
+          {/* Right: Cryptographic QR & Credential ID */}
           <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{ textAlign: 'right' }}>
               <div
                 style={{
                   fontSize: '8px',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
+                  letterSpacing: '0.05em',
                   color: '#64748B',
                   fontWeight: 600,
                 }}
@@ -659,8 +686,8 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
               src={qrUrl}
               alt="Verification QR Code"
               style={{
-                width: '50px',
-                height: '50px',
+                width: '46px',
+                height: '46px',
                 borderRadius: '4px',
                 border: '1px solid #CBD5E1',
                 background: '#FFFFFF',

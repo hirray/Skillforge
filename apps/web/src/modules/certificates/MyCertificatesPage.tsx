@@ -605,6 +605,10 @@ export function MyCertificatesPage() {
               certificate={previewModalCert}
               showActions={true}
               onClose={() => setPreviewModalCert(null)}
+              onCertificateUpdated={(updated) => {
+                setPreviewModalCert(updated);
+                fetchCertificates();
+              }}
             />
           </div>
         </div>

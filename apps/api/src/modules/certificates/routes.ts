@@ -67,6 +67,61 @@ router.post('/:id/revoke', requireAuth, async (req, res, next) => {
   }
 });
 
+// GET /project/:projectId (Get all certificates issued for a project)
+router.get('/project/:projectId', async (req, res, next) => {
+  try {
+    const projectId = req.params.projectId;
+    const certs = await (getService() as any).getCertificatesByProject(projectId);
+    res.json(certs);
+  } catch (e) {
+    next(e);
+  }
+});
+
+// POST /certificates/:id/reinstate & /:id/reinstate (Reinstate/restore a revoked certificate)
+router.post('/certificates/:id/reinstate', requireAuth, async (req, res, next) => {
+  try {
+    const certId = req.params.id;
+    const result = await (getService() as any).reinstateCertificate(certId);
+    res.json(result);
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.post('/:id/reinstate', requireAuth, async (req, res, next) => {
+  try {
+    const certId = req.params.id;
+    const result = await (getService() as any).reinstateCertificate(certId);
+    res.json(result);
+  } catch (e) {
+    next(e);
+  }
+});
+
+// POST /certificates/:id/approve & /:id/approve (Project owner verification & approval)
+router.post('/certificates/:id/approve', requireAuth, async (req, res, next) => {
+  try {
+    const certId = req.params.id;
+    const ownerName = req.body?.ownerName || (req as any).user?.name || (req as any).user?.id || 'Project Owner';
+    const result = await (getService() as any).approveCertificate(certId, ownerName);
+    res.json(result);
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.post('/:id/approve', requireAuth, async (req, res, next) => {
+  try {
+    const certId = req.params.id;
+    const ownerName = req.body?.ownerName || (req as any).user?.name || (req as any).user?.id || 'Project Owner';
+    const result = await (getService() as any).approveCertificate(certId, ownerName);
+    res.json(result);
+  } catch (e) {
+    next(e);
+  }
+});
+
 // GET /certificates/:id/pdf (Download PDF credential)
 router.get('/:id/pdf', async (req, res, next) => {
   try {

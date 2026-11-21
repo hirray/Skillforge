@@ -152,6 +152,35 @@ export class MockService {
     return cert;
   }
 
+  async reinstateCertificate(id: string): Promise<Certificate> {
+    const cert = this.mockCerts.find(c => c.id === id || c.certNumber === id);
+    if (!cert) {
+      throw { status: 404, code: ErrorCode.NOT_FOUND, message: 'Certificate not found' };
+    }
+    cert.status = 'valid';
+    cert.revokedReason = undefined;
+    cert.revokedAt = undefined;
+    cert.revokedBy = undefined;
+    return cert;
+  }
+
+  async approveCertificate(id: string, ownerName: string): Promise<Certificate> {
+    const cert = this.mockCerts.find(c => c.id === id || c.certNumber === id);
+    if (!cert) {
+      throw { status: 404, code: ErrorCode.NOT_FOUND, message: 'Certificate not found' };
+    }
+    cert.status = 'valid';
+    cert.issuerName = `Verified & Signed by Project Owner (${ownerName})`;
+    cert.revokedReason = undefined;
+    cert.revokedAt = undefined;
+    cert.revokedBy = undefined;
+    return cert;
+  }
+
+  async getCertificatesByProject(projectId: string): Promise<Certificate[]> {
+    return this.mockCerts.filter(c => c.projectId === projectId);
+  }
+
   async updateShareSettings(id: string, settings: { showTechnologies?: boolean; showDuration?: boolean }, userId: string): Promise<Certificate> {
     const cert = this.mockCerts.find(c => (c.id === id || c.certNumber === id) && c.userId === userId);
     if (!cert) {
