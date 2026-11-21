@@ -126,9 +126,15 @@ export class RealService {
     active?: boolean;
   }) {
     // Ensure user exists
-    const user = await prisma.user.findUnique({ where: { id: userId } });
+    let user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
-      throw { status: 404, code: ErrorCode.NOT_FOUND, message: 'User not found' };
+      user = await prisma.user.create({
+        data: {
+          id: userId,
+          email: `${userId}@example.com`,
+          roles: JSON.stringify(['user']),
+        }
+      });
     }
 
     const expertiseSkillIdsJson = JSON.stringify(data.expertiseSkillIds || []);

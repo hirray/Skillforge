@@ -179,6 +179,18 @@ export class RealService {
       };
     }
 
+    // Ensure organizer user exists in database
+    const existingOrganizer = await prisma.user.findUnique({ where: { id: organizerId } });
+    if (!existingOrganizer) {
+      await prisma.user.create({
+        data: {
+          id: organizerId,
+          email: `${organizerId}@example.com`,
+          roles: JSON.stringify(['user']),
+        }
+      });
+    }
+
     const suggestedSkillIdsJson = JSON.stringify(data.suggestedSkillIds || []);
     const now = new Date();
     const initialStatus = startsAt <= now && endsAt >= now ? 'running' : 'open';
@@ -244,6 +256,18 @@ export class RealService {
     const event = await prisma.hackathonEvent.findUnique({ where: { id: eventId } });
     if (!event) {
       throw { status: 404, code: ErrorCode.NOT_FOUND, message: 'Hackathon event not found' };
+    }
+
+    // Ensure participant user exists in database to avoid foreign key failure
+    const existingUser = await prisma.user.findUnique({ where: { id: userId } });
+    if (!existingUser) {
+      await prisma.user.create({
+        data: {
+          id: userId,
+          email: `${userId}@example.com`,
+          roles: JSON.stringify(['user']),
+        }
+      });
     }
 
     const skillsJson = JSON.stringify(data.skillsSnapshot || []);
@@ -312,6 +336,18 @@ export class RealService {
         code: ErrorCode.VALIDATION_ERROR,
         message: 'You have already registered a team project in this hackathon'
       };
+    }
+
+    // Ensure creator user exists in database
+    const existingOwner = await prisma.user.findUnique({ where: { id: callerId } });
+    if (!existingOwner) {
+      await prisma.user.create({
+        data: {
+          id: callerId,
+          email: `${callerId}@example.com`,
+          roles: JSON.stringify(['user']),
+        }
+      });
     }
 
     // Scale sprint milestones across event time window

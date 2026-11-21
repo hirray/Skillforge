@@ -94,11 +94,28 @@ export const HackathonDetail: React.FC = () => {
           &larr; Back to all Hackathons
         </Link>
 
-        <div style={{ display: 'flex', gap: '10px' }}>
-          {!isUserParticipant && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {!isUserParticipant ? (
             <Button variant="secondary" size="sm" onClick={handleJoinPool} disabled={joining}>
               {joining ? 'Joining...' : 'Join as Lone Hacker (Find Team)'}
             </Button>
+          ) : (
+            <span
+              style={{
+                fontSize: '12px',
+                color: '#10B981',
+                backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                border: '1px solid rgba(16, 185, 129, 0.25)',
+                padding: '6px 14px',
+                borderRadius: '9999px',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+            >
+              ✓ In Participant Pool
+            </span>
           )}
 
           <Button variant="primary" size="sm" onClick={() => setRegisterModalOpen(true)}>

@@ -3,6 +3,10 @@ import { RealService } from './real';
 import { ErrorCode } from '@skillforge/contract';
 
 const mockPrisma = vi.hoisted(() => ({
+  user: {
+    findUnique: vi.fn(),
+    create: vi.fn(),
+  },
   hackathonEvent: {
     findMany: vi.fn(),
     findUnique: vi.fn(),
@@ -39,6 +43,7 @@ describe('Module 29: Hackathon / Sprint Mode RealService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     service = new RealService();
+    mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-001', email: 'user-001@example.com' });
     mockPrisma.hackathonEvent.findMany.mockResolvedValue([]);
   });
 
