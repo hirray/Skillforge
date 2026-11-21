@@ -299,8 +299,9 @@ export const CreateHackathonModal: React.FC<Props> = ({ isOpen, onClose, onSucce
                 Suggested Skills / Stacks
               </label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
-                {COMMON_SKILLS.map((sk) => {
+                {Array.from(new Set([...COMMON_SKILLS, ...suggestedSkills])).map((sk) => {
                   const selected = suggestedSkills.includes(sk);
+                  const isCustom = !COMMON_SKILLS.includes(sk);
                   return (
                     <button
                       type="button"
@@ -315,9 +316,30 @@ export const CreateHackathonModal: React.FC<Props> = ({ isOpen, onClose, onSucce
                         backgroundColor: selected ? 'rgba(147, 178, 248, 0.15)' : '#1b1b22',
                         color: selected ? '#93B2F8' : '#d4d4d8',
                         transition: 'all 150ms ease-out',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
                       }}
                     >
-                      {sk} {selected && '✓'}
+                      <span>{sk}</span>
+                      {selected && <span>✓</span>}
+                      {isCustom && (
+                        <span
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSuggestedSkills(prev => prev.filter(s => s !== sk));
+                          }}
+                          style={{
+                            marginLeft: '4px',
+                            fontSize: '12px',
+                            opacity: 0.7,
+                            cursor: 'pointer',
+                          }}
+                          title="Remove custom skill"
+                        >
+                          ✕
+                        </span>
+                      )}
                     </button>
                   );
                 })}

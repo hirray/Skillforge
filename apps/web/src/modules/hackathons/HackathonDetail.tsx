@@ -424,7 +424,17 @@ export const HackathonDetail: React.FC = () => {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
             {event.participants.map((p) => {
-              const email = p.user?.email || p.userId;
+              let email = p.user?.email || p.userId || '';
+              // If email or userId happens to be an unparsed raw JWT token, parse or sanitize it
+              if (email.startsWith('eyJ') && email.includes('.')) {
+                try {
+                  const parts = email.split('.');
+                  const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+                  email = payload.email || (payload.nickname ? `${payload.nickname}@example.com` : `${payload.name || 'Developer'}@example.com`);
+                } catch {
+                  email = 'developer@skillforge.io';
+                }
+              }
               const name = email.split('@')[0];
               return (
                 <div

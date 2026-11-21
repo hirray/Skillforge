@@ -262,8 +262,9 @@ export const MentorProfileModal: React.FC<Props> = ({ isOpen, onClose, onSaved }
                 Skills & Technologies You Mentor
               </label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
-                {COMMON_SKILLS.map((skill) => {
+                {Array.from(new Set([...COMMON_SKILLS, ...skills])).map((skill) => {
                   const selected = skills.includes(skill);
+                  const isCustom = !COMMON_SKILLS.includes(skill);
                   return (
                     <button
                       type="button"
@@ -278,9 +279,30 @@ export const MentorProfileModal: React.FC<Props> = ({ isOpen, onClose, onSaved }
                         backgroundColor: selected ? 'rgba(147, 178, 248, 0.15)' : '#1b1b22',
                         color: selected ? '#93B2F8' : '#d4d4d8',
                         transition: 'all 150ms ease-out',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
                       }}
                     >
-                      {skill} {selected && '✓'}
+                      <span>{skill}</span>
+                      {selected && <span>✓</span>}
+                      {isCustom && (
+                        <span
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSkills(prev => prev.filter(s => s !== skill));
+                          }}
+                          style={{
+                            marginLeft: '4px',
+                            fontSize: '12px',
+                            opacity: 0.7,
+                            cursor: 'pointer',
+                          }}
+                          title="Remove custom skill"
+                        >
+                          ✕
+                        </span>
+                      )}
                     </button>
                   );
                 })}
@@ -314,8 +336,9 @@ export const MentorProfileModal: React.FC<Props> = ({ isOpen, onClose, onSaved }
                 Industry & Engineering Domains
               </label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
-                {COMMON_DOMAINS.map((dom) => {
+                {Array.from(new Set([...COMMON_DOMAINS, ...domains])).map((dom) => {
                   const selected = domains.includes(dom);
+                  const isCustom = !COMMON_DOMAINS.includes(dom);
                   return (
                     <button
                       type="button"
@@ -330,9 +353,30 @@ export const MentorProfileModal: React.FC<Props> = ({ isOpen, onClose, onSaved }
                         backgroundColor: selected ? 'rgba(241, 185, 76, 0.15)' : '#1b1b22',
                         color: selected ? '#F1B94C' : '#d4d4d8',
                         transition: 'all 150ms ease-out',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
                       }}
                     >
-                      {dom} {selected && '✓'}
+                      <span>{dom}</span>
+                      {selected && <span>✓</span>}
+                      {isCustom && (
+                        <span
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDomains(prev => prev.filter(d => d !== dom));
+                          }}
+                          style={{
+                            marginLeft: '4px',
+                            fontSize: '12px',
+                            opacity: 0.7,
+                            cursor: 'pointer',
+                          }}
+                          title="Remove custom domain"
+                        >
+                          ✕
+                        </span>
+                      )}
                     </button>
                   );
                 })}
