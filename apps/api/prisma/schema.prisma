@@ -514,30 +514,34 @@ model ProjectVerification {
 }
 
 model Certificate {
-  id               String    @id @default(uuid())
-  userId           String
-  projectId        String
-  certNumber       String    @default("")
-  recipientName    String    @default("")
-  projectName      String    @default("")
-  rolesJson        String    @default("[]")
-  technologiesJson String    @default("[]")
-  duration         String?
-  completedAt      DateTime  @default(now())
-  issuerName       String    @default("SkillForge Attestation Authority")
-  url              String    @default("")
-  pdfUrl           String?
-  qrCodeUrl        String?
-  status           String    @default("valid") // "valid" | "revoked"
-  revokedReason    String?
-  revokedAt        DateTime?
-  revokedBy        String?
-  version          Int       @default(1)
-  supersedesId     String?
-  showTechnologies Boolean   @default(true)
-  showDuration     Boolean   @default(true)
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @default(now()) @updatedAt
+  id                String    @id @default(uuid())
+  userId            String
+  projectId         String
+  certNumber        String    @default("")
+  recipientName     String    @default("")
+  projectName       String    @default("")
+  rolesJson         String    @default("[]")
+  technologiesJson  String    @default("[]")
+  duration          String?
+  completedAt       DateTime  @default(now())
+  issuerName        String    @default("SkillForge Attestation Authority")
+  url               String    @default("")
+  pdfUrl            String?
+  qrCodeUrl         String?
+  status            String    @default("valid") // "valid" | "revoked"
+  revokedReason     String?
+  revokedAt         DateTime?
+  revokedBy         String?
+  version           Int       @default(1)
+  supersedesId      String?
+  showTechnologies  Boolean   @default(true)
+  showDuration      Boolean   @default(true)
+  performanceJson   String?   @default("{}")
+  contributionsJson String?   @default("{}")
+  timelineJson      String?   @default("{}")
+  skillsJson        String?   @default("[]")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @default(now()) @updatedAt
 
   @@index([userId])
   @@index([certNumber])

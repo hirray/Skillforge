@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { PublicCertificateView } from '@skillforge/contract';
+import { CertificateDocument } from './CertificateDocument';
 import '../ai/studio.css';
 
 export function PublicVerifyPage() {
@@ -47,7 +48,6 @@ export function PublicVerifyPage() {
   };
 
   const cert = data?.certificate;
-  const isRevoked = data?.status === 'revoked' || cert?.status === 'revoked';
 
   return (
     <div style={{ minHeight: '100vh', background: '#0e0e13', color: '#FCFDFF', padding: '40px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -137,220 +137,9 @@ export function PublicVerifyPage() {
           </div>
         )}
 
-        {/* Certificate Found: Valid or Revoked */}
+        {/* Certificate Found: Authentic Certificate Presentation */}
         {!loading && cert && (
-          <div
-            style={{
-              borderRadius: '22px',
-              background: 'linear-gradient(155deg, #181824, #121217)',
-              border: isRevoked ? '2px solid rgba(239, 68, 68, 0.5)' : '2px solid rgba(241, 185, 76, 0.45)',
-              boxShadow: '0 24px 60px rgba(0, 0, 0, 0.6)',
-              overflow: 'hidden',
-            }}
-          >
-            {/* Verification Status Header */}
-            <div
-              style={{
-                padding: '20px 28px',
-                background: isRevoked
-                  ? 'linear-gradient(90deg, rgba(239, 68, 68, 0.2), transparent)'
-                  : 'linear-gradient(90deg, rgba(16, 185, 129, 0.18), transparent)',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '12px',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div
-                  style={{
-                    width: '38px',
-                    height: '38px',
-                    borderRadius: '12px',
-                    background: isRevoked ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)',
-                    color: isRevoked ? '#F87171' : '#34D399',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {isRevoked ? (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <circle cx="12" cy="12" r="10"/>
-                      <line x1="12" y1="8" x2="12" y2="12"/>
-                      <line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                  ) : (
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                      <polyline points="22 4 12 14.01 9 11.01"/>
-                    </svg>
-                  )}
-                </div>
-                <div>
-                  <div style={{ fontSize: '16px', fontWeight: 800, color: isRevoked ? '#F87171' : '#34D399' }}>
-                    {isRevoked ? 'CERTIFICATE REVOKED' : 'OFFICIALLY VERIFIED CREDENTIAL'}
-                  </div>
-                  <div style={{ fontSize: '12px', color: 'rgba(252, 253, 255, 0.6)' }}>
-                    {isRevoked ? 'This credential has been permanently revoked by authority.' : 'Attested by SkillForge cryptographic ledger.'}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '11px', textTransform: 'uppercase', color: 'rgba(252, 253, 255, 0.4)', fontWeight: 600 }}>
-                  Credential ID
-                </div>
-                <div style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '14px', color: '#FCFDFF' }}>
-                  {cert.certNumber}
-                </div>
-              </div>
-            </div>
-
-            {/* Certificate Details Body */}
-            <div style={{ padding: '32px 28px' }}>
-              <div style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.06em', color: '#F1B94C', fontWeight: 700, marginBottom: '6px' }}>
-                Recipient
-              </div>
-              <div style={{ fontSize: '26px', fontWeight: 800, color: '#FCFDFF', marginBottom: '24px' }}>
-                {cert.recipientName}
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '28px' }}>
-                <div>
-                  <div style={{ fontSize: '12px', color: 'rgba(252, 253, 255, 0.45)', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-                    Project Delivered
-                  </div>
-                  <div style={{ fontSize: '16px', fontWeight: 700, color: '#93B2F8' }}>
-                    {cert.projectName}
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{ fontSize: '12px', color: 'rgba(252, 253, 255, 0.45)', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-                    Attested Role(s)
-                  </div>
-                  <div style={{ fontSize: '15px', fontWeight: 600, color: '#FCFDFF' }}>
-                    {cert.roles.join(', ')}
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{ fontSize: '12px', color: 'rgba(252, 253, 255, 0.45)', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-                    Completion Date
-                  </div>
-                  <div style={{ fontSize: '15px', fontWeight: 600, color: '#FCFDFF' }}>
-                    {new Date(cert.completedAt).toLocaleDateString()}
-                  </div>
-                </div>
-
-                {cert.duration && (
-                  <div>
-                    <div style={{ fontSize: '12px', color: 'rgba(252, 253, 255, 0.45)', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-                      Attested Duration
-                    </div>
-                    <div style={{ fontSize: '15px', fontWeight: 600, color: '#FCFDFF' }}>
-                      {cert.duration}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Technologies if visible */}
-              {cert.technologies && cert.technologies.length > 0 && (
-                <div style={{ marginBottom: '28px' }}>
-                  <div style={{ fontSize: '12px', color: 'rgba(252, 253, 255, 0.45)', textTransform: 'uppercase', fontWeight: 600, marginBottom: '8px' }}>
-                    Verified Technical Capabilities
-                  </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                    {cert.technologies.map((t, idx) => (
-                      <span
-                        key={idx}
-                        style={{
-                          padding: '4px 10px',
-                          borderRadius: '8px',
-                          background: 'rgba(147, 178, 248, 0.1)',
-                          border: '1px solid rgba(147, 178, 248, 0.25)',
-                          color: '#FCFDFF',
-                          fontSize: '12px',
-                          fontWeight: 500,
-                        }}
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Revocation notice */}
-              {isRevoked && (
-                <div style={{ padding: '16px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.35)', color: '#FCA5A5', marginBottom: '24px' }}>
-                  <div style={{ fontWeight: 700, marginBottom: '4px' }}>Official Revocation Record:</div>
-                  <div style={{ fontSize: '14px' }}>{cert.revokedReason || 'Revoked by administration.'}</div>
-                  {cert.revokedAt && (
-                    <div style={{ fontSize: '12px', color: 'rgba(252, 253, 255, 0.5)', marginTop: '4px' }}>
-                      Revoked on {new Date(cert.revokedAt).toLocaleString()}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Download / Action Row */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '20px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', flexWrap: 'wrap', gap: '12px' }}>
-                <div style={{ fontSize: '12px', color: 'rgba(252, 253, 255, 0.5)' }}>
-                  Issuer: <strong>{cert.issuerName}</strong>
-                </div>
-
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <a
-                    href={`/api/v1/certificates/${cert.certNumber}/pdf`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    download
-                    style={{
-                      padding: '10px 18px',
-                      borderRadius: '10px',
-                      background: '#0A1680',
-                      border: '1px solid #93B2F8',
-                      color: '#FCFDFF',
-                      fontWeight: 600,
-                      fontSize: '13px',
-                      textDecoration: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                    }}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                      <polyline points="7 10 12 15 17 10"/>
-                      <line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
-                    Download Official PDF Credential
-                  </a>
-
-                  <Link
-                    to="/projects"
-                    style={{
-                      padding: '10px 16px',
-                      borderRadius: '10px',
-                      background: '#1b1b22',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      color: '#FCFDFF',
-                      fontWeight: 600,
-                      fontSize: '13px',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    Return to Workspace
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
+          <CertificateDocument certificate={cert} showActions={true} />
         )}
       </div>
     </div>

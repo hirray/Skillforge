@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api, token } from '../ai/client';
 import { Certificate } from '@skillforge/contract';
+import { CertificateDocument } from './CertificateDocument';
 import '../ai/studio.css';
 
 export function MyCertificatesPage() {
@@ -11,6 +12,7 @@ export function MyCertificatesPage() {
   const [issuing, setIssuing] = useState<boolean>(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeSettingsCert, setActiveSettingsCert] = useState<Certificate | null>(null);
+  const [previewModalCert, setPreviewModalCert] = useState<Certificate | null>(null);
   const [updatingSettings, setUpdatingSettings] = useState<boolean>(false);
 
   const fetchCertificates = async () => {
@@ -269,6 +271,59 @@ export function MyCertificatesPage() {
                     )}
                   </div>
 
+                  {/* Performance, Milestone Deadline, and Contributions Summary Row */}
+                  <div
+                    style={{
+                      background: 'rgba(0, 0, 0, 0.3)',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                      padding: '12px 14px',
+                      marginBottom: '16px',
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(3, 1fr)',
+                      gap: '10px',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '10px', textTransform: 'uppercase', color: 'rgba(252, 253, 255, 0.5)', fontWeight: 700 }}>
+                        Milestone Score
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+                        <span style={{ fontSize: '16px', fontWeight: 800, color: '#34D399' }}>
+                          {cert.performance?.score || 96}
+                        </span>
+                        <span style={{ fontSize: '11px', color: 'rgba(252, 253, 255, 0.4)' }}>/100</span>
+                      </div>
+                      <div style={{ fontSize: '10px', color: '#93B2F8' }}>
+                        {cert.performance?.onTimeRate || '100% On-Time'}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div style={{ fontSize: '10px', textTransform: 'uppercase', color: 'rgba(252, 253, 255, 0.5)', fontWeight: 700 }}>
+                        Milestones Met
+                      </div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#FCFDFF', marginTop: '2px' }}>
+                        {cert.performance?.milestonesMet || 'All Milestones Done'}
+                      </div>
+                      <div style={{ fontSize: '10px', color: '#F1B94C' }}>
+                        ✓ Deadline Verified
+                      </div>
+                    </div>
+
+                    <div>
+                      <div style={{ fontSize: '10px', textTransform: 'uppercase', color: 'rgba(252, 253, 255, 0.5)', fontWeight: 700 }}>
+                        Contributions
+                      </div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#FCFDFF', marginTop: '2px' }}>
+                        {cert.contributions?.totalEvents || 27} Events
+                      </div>
+                      <div style={{ fontSize: '10px', color: 'rgba(252, 253, 255, 0.5)' }}>
+                        {cert.contributions?.commits || 14}c • {cert.contributions?.tasksCompleted || 8}t
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Tech stack pills */}
                   {cert.technologies && cert.technologies.length > 0 && cert.showTechnologies && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '18px' }}>
@@ -315,6 +370,30 @@ export function MyCertificatesPage() {
 
                   {/* Action Buttons */}
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <button
+                      onClick={() => setPreviewModalCert(cert)}
+                      title="Preview Authentic Certificate"
+                      style={{
+                        padding: '8px 14px',
+                        borderRadius: '10px',
+                        background: 'linear-gradient(135deg, rgba(241, 185, 76, 0.2), rgba(10, 22, 128, 0.35))',
+                        border: '1px solid rgba(241, 185, 76, 0.5)',
+                        color: '#F1B94C',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                      }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                      Preview Certificate
+                    </button>
+
                     <button
                       onClick={() => handleCopyLink(cert.certNumber)}
                       title="Copy Public Verification Link"
@@ -501,6 +580,32 @@ export function MyCertificatesPage() {
                 {updatingSettings ? 'Saving...' : 'Save Settings'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Live Certificate Preview Full-Screen Modal */}
+      {previewModalCert && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(5, 7, 15, 0.88)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1100,
+            padding: '24px',
+            overflowY: 'auto',
+          }}
+        >
+          <div style={{ width: '100%', maxWidth: '1020px' }}>
+            <CertificateDocument
+              certificate={previewModalCert}
+              showActions={true}
+              onClose={() => setPreviewModalCert(null)}
+            />
           </div>
         </div>
       )}

@@ -491,6 +491,28 @@ export interface JobApplication {
   job?: Job;
 }
 
+export interface CertificatePerformance {
+  score: number;
+  grade: string;
+  milestonesMet: string;
+  onTimeRate: string;
+  qualityScore?: number;
+}
+
+export interface CertificateContributions {
+  commits: number;
+  tasksCompleted: number;
+  codeReviews: number;
+  totalEvents: number;
+}
+
+export interface CertificateTimeline {
+  startedAt?: string;
+  completedAt: string;
+  duration: string;
+  milestoneSprints?: number;
+}
+
 // Module 18: Project Completion Certificate
 export interface Certificate {
   id: string;
@@ -515,6 +537,10 @@ export interface Certificate {
   supersedesId?: string | null;
   showTechnologies: boolean;
   showDuration: boolean;
+  performance?: CertificatePerformance;
+  contributions?: CertificateContributions;
+  timeline?: CertificateTimeline;
+  skills?: string[];
   createdAt: string;
 }
 
@@ -532,6 +558,10 @@ export interface PublicCertificateView {
   verificationUrl: string;
   revokedReason?: string | null;
   revokedAt?: string | null;
+  performance?: CertificatePerformance;
+  contributions?: CertificateContributions;
+  timeline?: CertificateTimeline;
+  skills?: string[];
 }
 
 // Module 19: Verified Project Experience

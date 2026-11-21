@@ -22,6 +22,26 @@ export class MockService {
       version: 1,
       showTechnologies: true,
       showDuration: true,
+      performance: {
+        score: 98,
+        grade: 'Exemplary / High Distinction',
+        milestonesMet: '4 of 4 Milestones Verified',
+        onTimeRate: '100% On-Time Delivery',
+        qualityScore: 99,
+      },
+      contributions: {
+        commits: 24,
+        tasksCompleted: 12,
+        codeReviews: 7,
+        totalEvents: 43,
+      },
+      timeline: {
+        startedAt: '2026-08-01T00:00:00.000Z',
+        completedAt: '2026-11-20T12:00:00.000Z',
+        duration: '16 weeks',
+        milestoneSprints: 4,
+      },
+      skills: ['TypeScript', 'React', 'Node.js', 'Prisma', 'SQLite', 'Distributed Systems'],
       createdAt: '2026-11-20T12:00:00.000Z',
     },
     {
@@ -43,6 +63,26 @@ export class MockService {
       version: 1,
       showTechnologies: true,
       showDuration: true,
+      performance: {
+        score: 95,
+        grade: 'Distinction / High Velocity',
+        milestonesMet: '3 of 3 Milestones Verified',
+        onTimeRate: '100% On-Time Delivery',
+        qualityScore: 96,
+      },
+      contributions: {
+        commits: 18,
+        tasksCompleted: 9,
+        codeReviews: 5,
+        totalEvents: 32,
+      },
+      timeline: {
+        startedAt: '2026-10-01T00:00:00.000Z',
+        completedAt: '2026-11-15T10:00:00.000Z',
+        duration: '6 weeks',
+        milestoneSprints: 3,
+      },
+      skills: ['Python', 'FastAPI', 'Redis', 'Docker', 'Async Architecture'],
       createdAt: '2026-11-15T10:00:00.000Z',
     },
   ];
@@ -92,6 +132,10 @@ export class MockService {
         issuerName: cert.issuerName,
         verifiedAt: cert.completedAt,
         verificationUrl: `/verify/${cert.certNumber}`,
+        performance: cert.performance,
+        contributions: cert.contributions,
+        timeline: cert.timeline,
+        skills: cert.skills || cert.technologies,
       },
     };
   }
