@@ -3,7 +3,7 @@ import { MockService } from './mock';
 import { RealService } from './real';
 
 export const getService = () => {
-  const sourceKey = 'AUTH_SOURCE';
+  const sourceKey = 'COMPANIES_SOURCE';
   const isReal = config[sourceKey as keyof typeof config] === 'real';
   return isReal ? new RealService() : new MockService();
 };

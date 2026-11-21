@@ -55,6 +55,7 @@ import {
   InactiveMemberItem,
 } from './rescue';
 import { MentorAdvisorySection } from './MentorAdvisorySection';
+import { ProjectReposPanel } from '../github';
 
 const rolePresets = [
   'Frontend Developer', 'Backend Developer', 'Fullstack Engineer',
@@ -1011,6 +1012,11 @@ export const ProjectDetail = () => {
 
             {/* Mentor & Advisory Section */}
             <MentorAdvisorySection projectId={id!} />
+
+            {/* GitHub Repositories & Evidence Panel */}
+            <div style={{ marginTop: 24 }}>
+              <ProjectReposPanel projectId={id!} isOwner={true} />
+            </div>
           </div>
         )}
 

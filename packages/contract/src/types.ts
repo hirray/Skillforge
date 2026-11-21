@@ -358,4 +358,138 @@ export interface EventParticipant {
   };
 }
 
+// Module 13: GitHub Integration
+export interface GitHubIntegration {
+  id: string;
+  userId: string;
+  username?: string | null;
+  scopes?: string | null;
+  status: 'connected' | 'revoked' | string;
+  lastSyncedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProjectRepo {
+  id: string;
+  projectId: string;
+  owner: string;
+  name: string;
+  githubRepoId?: string | null;
+  lastSyncedAt?: string | null;
+  status: 'active' | 'syncing' | 'error' | string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ContributionEvent {
+  id: string;
+  userId: string;
+  projectId: string;
+  detail: string;
+  type: 'commit' | 'pr' | 'review' | 'issue' | 'task' | string;
+  source: 'github' | 'manual' | 'task' | string;
+  externalId?: string | null;
+  externalLogin?: string | null;
+  referenceUrl?: string | null;
+  occurredAt: string;
+  metadataJson?: string | null;
+  createdAt: string;
+  user?: User;
+  project?: Project;
+}
+
+// Module 21: Company & Recruiter Accounts
+export interface Company {
+  id: string;
+  name: string;
+  logo?: string | null;
+  overview?: string | null;
+  industry?: string | null;
+  sizeBand?: string | null;
+  website?: string | null;
+  locations?: string | null;
+  hiringFocus?: string | null;
+  verificationStatus: 'unverified' | 'pending' | 'verified' | 'rejected' | string;
+  verificationReason?: string | null;
+  verifiedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  recruiters?: RecruiterMember[];
+  jobs?: Job[];
+}
+
+export interface RecruiterMember {
+  id: string;
+  companyId: string;
+  userId: string;
+  role: 'recruiter_admin' | 'recruiter_member' | string;
+  joinedAt: string;
+  company?: Company;
+  user?: User;
+}
+
+export interface RecruiterInvite {
+  id: string;
+  companyId: string;
+  email: string;
+  role: 'recruiter_admin' | 'recruiter_member' | string;
+  token: string;
+  status: 'pending' | 'accepted' | 'expired' | 'revoked' | string;
+  expiresAt: string;
+  createdAt: string;
+}
+
+// Module 22: Job / Opportunity Posting
+export interface JobRequirement {
+  id: string;
+  jobId?: string;
+  skillName: string;
+  skillId?: string | null;
+  importance: 'required' | 'preferred' | string;
+  minProficiency: 'beginner' | 'intermediate' | 'advanced' | 'expert' | string;
+}
+
+export interface Job {
+  id: string;
+  companyId: string;
+  title: string;
+  department?: string | null;
+  employmentType?: 'Full-time' | 'Internship' | 'Contract' | 'Freelance' | string | null;
+  description?: string | null;
+  responsibilities?: string | null;
+  location?: string | null;
+  workMode: 'remote' | 'hybrid' | 'on-site' | string;
+  salaryMin?: number | null;
+  salaryMax?: number | null;
+  currency: string;
+  benefits?: string | null;
+  applicationUrl?: string | null;
+  status: 'Draft' | 'Active' | 'Paused' | 'Closed' | 'Archived' | string;
+  stale?: boolean;
+  createdAt: string;
+  updatedAt: string;
+  company?: Company;
+  requirements?: JobRequirement[];
+  applications?: JobApplication[];
+  _count?: {
+    applications?: number;
+    matches?: number;
+  };
+}
+
+export interface JobApplication {
+  id: string;
+  jobId: string;
+  userId: string;
+  status: 'submitted' | 'reviewed' | 'shortlisted' | 'rejected' | string;
+  resumeId?: string | null;
+  coverLetter?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user?: User;
+  job?: Job;
+}
+
+
 

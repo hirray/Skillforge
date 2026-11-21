@@ -21,6 +21,7 @@ import MyInvitations from '../team/MyInvitations';
 import ChatModule from '../chat';
 import MentorsModule from '../mentors';
 import HackathonsModule from '../hackathons';
+import { GitHubIntegrationPage } from '../github';
 import './studio.css';
 
 const tools = [
@@ -373,6 +374,10 @@ export default function Member2Workspace() {
             <Icon name="rocket" />
             Hackathons & Sprints
           </NavLink>
+          <NavLink to="/integrations/github" onClick={() => setMobileNav(false)}>
+            <Icon name="document" />
+            GitHub Integration
+          </NavLink>
 
           <span className="st-nav-label">Intelligence</span>
           <NavLink end to="/ai" onClick={() => setMobileNav(false)}>
@@ -472,6 +477,7 @@ export default function Member2Workspace() {
               <Route path="/chat/*" element={<ChatModule />} />
               <Route path="/mentors/*" element={<MentorsModule />} />
               <Route path="/hackathons/*" element={<HackathonsModule />} />
+              <Route path="/integrations/github/*" element={<GitHubIntegrationPage />} />
               
               <Route path="/ai" element={<Overview context={activeContext} />} />
               <Route
