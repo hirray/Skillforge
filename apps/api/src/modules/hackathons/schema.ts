@@ -24,4 +24,6 @@ export const registerProjectSchema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters').max(1500),
   category: z.string().optional().default('Hackathon Sprint'),
   skills: z.array(z.string()).optional().default([]),
+  lookingForMembers: z.boolean().optional().default(true),
+  roles: z.array(z.string()).optional().default([]),
 });

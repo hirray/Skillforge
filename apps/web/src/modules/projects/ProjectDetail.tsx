@@ -457,12 +457,16 @@ export const ProjectDetail = () => {
   const handleOpenEditModal = () => {
     if (!project) return;
     setShowMoreMenu(false);
+    const validStages = ['idea', 'planning', 'in progress', 'near completion'];
+    const safeStage = (project.stage && validStages.includes(project.stage.toLowerCase()))
+      ? project.stage.toLowerCase()
+      : 'idea';
     setEditFormData({
       title: project.title || '',
       description: project.description || '',
       problemStatement: project.problemStatement || '',
       category: project.category || 'Web App',
-      stage: project.stage || 'idea',
+      stage: safeStage,
       duration: project.duration || '',
       targetDate: project.targetDate ? project.targetDate.split('T')[0] : '',
       minTeamSize: project.minTeamSize || 1,

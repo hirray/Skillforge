@@ -20,6 +20,15 @@ const COMMON_SKILLS = [
   'TailwindCSS', 'PostgreSQL', 'Docker', 'GraphQL', 'PyTorch'
 ];
 
+const COMMON_ROLES = [
+  'Frontend Developer',
+  'Backend Developer',
+  'Fullstack Developer',
+  'AI / ML Engineer',
+  'UI/UX Designer',
+  'DevOps Engineer',
+];
+
 export const RegisterSprintProjectModal: React.FC<Props> = ({
   isOpen,
   eventId,
@@ -31,6 +40,9 @@ export const RegisterSprintProjectModal: React.FC<Props> = ({
   const [description, setDescription] = useState('');
   const [skills, setSkills] = useState<string[]>(['React', 'TypeScript']);
   const [skillInput, setSkillInput] = useState('');
+  const [lookingForMembers, setLookingForMembers] = useState(true);
+  const [roles, setRoles] = useState<string[]>(['Frontend Developer', 'Backend Developer']);
+  const [roleInput, setRoleInput] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,6 +56,18 @@ export const RegisterSprintProjectModal: React.FC<Props> = ({
     if (skillInput.trim() && !skills.includes(skillInput.trim())) {
       setSkills(prev => [...prev, skillInput.trim()]);
       setSkillInput('');
+    }
+  };
+
+  const toggleRole = (r: string) => {
+    setRoles(prev => prev.includes(r) ? prev.filter(x => x !== r) : [...prev, r]);
+  };
+
+  const addCustomRole = () => {
+    const trimmed = roleInput.trim();
+    if (trimmed && !roles.includes(trimmed)) {
+      setRoles(prev => [...prev, trimmed]);
+      setRoleInput('');
     }
   };
 
@@ -69,6 +93,8 @@ export const RegisterSprintProjectModal: React.FC<Props> = ({
           description: description.trim(),
           category: 'Hackathon Sprint',
           skills,
+          lookingForMembers,
+          roles: lookingForMembers ? roles : [],
         }),
       });
       onSuccess(res.id);
@@ -303,6 +329,110 @@ export const RegisterSprintProjectModal: React.FC<Props> = ({
                 <Button variant="secondary" size="sm" type="button" onClick={addCustomSkill}>
                   Add
                 </Button>
+              </div>
+            </div>
+
+            {/* Team & Member Recruitment Settings */}
+            <div
+              style={{
+                backgroundColor: '#1b1b22',
+                border: '1px solid #282836',
+                borderRadius: '10px',
+                padding: '14px 16px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '13px', color: '#f4f4f5' }}>
+                    Recruiting Sprint Teammates
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#a1a1aa' }}>
+                    Signal on the hackathon board that your project is actively seeking collaborators.
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={lookingForMembers}
+                  onChange={(e) => setLookingForMembers(e.target.checked)}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#93B2F8' }}
+                />
+              </div>
+
+              {lookingForMembers && (
+                <div style={{ borderTop: '1px solid #282836', paddingTop: '10px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#d4d4d8', marginBottom: '6px' }}>
+                    Open Roles You Want to Fill
+                  </label>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
+                    {Array.from(new Set([...COMMON_ROLES, ...roles])).map((r) => {
+                      const selected = roles.includes(r);
+                      const isCustom = !COMMON_ROLES.includes(r);
+                      return (
+                        <button
+                          type="button"
+                          key={r}
+                          onClick={() => toggleRole(r)}
+                          style={{
+                            padding: '4px 10px',
+                            fontSize: '11px',
+                            borderRadius: '9999px',
+                            cursor: 'pointer',
+                            border: selected ? '1px solid #F1B94C' : '1px solid #2c2c3b',
+                            backgroundColor: selected ? 'rgba(241, 185, 76, 0.15)' : '#15151a',
+                            color: selected ? '#F1B94C' : '#d4d4d8',
+                            transition: 'all 150ms ease-out',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                          }}
+                        >
+                          <span>{r}</span>
+                          {selected && <span>✓</span>}
+                          {isCustom && (
+                            <span
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setRoles(prev => prev.filter(x => x !== r));
+                              }}
+                              style={{ marginLeft: '4px', fontSize: '11px', opacity: 0.7 }}
+                              title="Remove custom role"
+                            >
+                              ✕
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input
+                      type="text"
+                      placeholder="Add custom role (e.g. Prompt Engineer)..."
+                      value={roleInput}
+                      onChange={(e) => setRoleInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCustomRole(); } }}
+                      style={{
+                        flex: 1,
+                        backgroundColor: '#15151a',
+                        border: '1px solid #2c2c3b',
+                        borderRadius: '6px',
+                        padding: '6px 10px',
+                        fontSize: '12px',
+                        color: '#fff',
+                      }}
+                    />
+                    <Button variant="secondary" size="sm" type="button" onClick={addCustomRole}>
+                      Add Role
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              <div style={{ fontSize: '11px', color: '#a1a1aa', borderTop: '1px solid #282836', paddingTop: '8px' }}>
+                💡 <em>Note:</em> You are registered as Project Lead. After launching, invite members directly from the Hackathon Participant Pool or Project Workspace.
               </div>
             </div>
           </form>

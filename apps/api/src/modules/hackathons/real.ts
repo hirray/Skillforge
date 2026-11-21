@@ -312,6 +312,8 @@ export class RealService {
     description: string;
     category?: string;
     skills?: string[];
+    lookingForMembers?: boolean;
+    roles?: string[];
   }) {
     const event = await prisma.hackathonEvent.findUnique({ where: { id: eventId } });
     if (!event) {
@@ -366,10 +368,17 @@ export class RealService {
         ownerId: callerId,
         eventId,
         status: 'active',
-        stage: 'Execution',
+        stage: 'in progress',
         duration: 'Hackathon Sprint',
         minTeamSize: 1,
         maxTeamSize: 5,
+        roles: {
+          create: (data.roles || []).map((rTitle) => ({
+            title: rTitle,
+            openings: 1,
+            filled: 0,
+          }))
+        },
         requirements: {
           create: (data.skills || []).map((skill) => ({
             skillName: skill,

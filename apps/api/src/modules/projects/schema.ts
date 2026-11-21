@@ -15,7 +15,7 @@ export const baseProjectSchema = z.object({
   
   duration: optionalString,
   targetDate: dateSchema,
-  stage: z.enum(['idea', 'planning', 'in progress', 'near completion']).default('idea'),
+  stage: z.enum(['idea', 'planning', 'in progress', 'near completion', 'Execution', 'execution']).transform(s => (s.toLowerCase() === 'execution' ? 'in progress' : s)).default('idea'),
   minTeamSize: z.number().min(1).default(1),
   maxTeamSize: z.number().min(1).default(5),
   budget: z.number().optional().nullable(),
