@@ -21,6 +21,7 @@
     "setup:member2": "node scripts/setup-member2.js",
     "seed:member2": "npm run seed:member2 -w apps/api",
     "dev:fake-activity": "npm run dev:fake-activity -w apps/api",
+    "dev:fake-contributions": "npm run dev:fake-contributions -w apps/api",
     "eval:matching": "node scripts/eval-matching.js",
     "test:member2": "npm run test:member2 -w apps/api && node scripts/test-ai.js",
     "check:member2-contract": "npm run check:member2-contract -w apps/api",

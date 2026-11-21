@@ -61,6 +61,9 @@ describe('Module 22: Job / Opportunity Posting', () => {
         title: 'Fullstack Systems Engineer',
         description: 'Develop mission-critical agentic orchestration web services.',
         status: 'Draft',
+        workMode: 'remote',
+        employmentType: 'Full-time',
+        currency: 'USD',
         requirements: [
           { skillName: 'TypeScript', importance: 'required', minProficiency: 'advanced' },
         ],

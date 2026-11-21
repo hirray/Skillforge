@@ -31,6 +31,8 @@ const envSchema = z.object({
   GITHUB_SOURCE: z.enum(['mock', 'real']).default('mock'),
   COMPANIES_SOURCE: z.enum(['mock', 'real']).default('mock'),
   JOBS_SOURCE: z.enum(['mock', 'real']).default('mock'),
+  CONTRIBUTION_SOURCE: z.enum(['mock', 'real']).default('real'),
+  TALENT_SOURCE: z.enum(['mock', 'real']).default('real'),
   GITHUB_CLIENT_ID: z.string().optional(),
   GITHUB_CLIENT_SECRET: z.string().optional(),
   GITHUB_CALLBACK_URL: z.string().optional(),

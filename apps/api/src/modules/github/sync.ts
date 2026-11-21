@@ -238,6 +238,6 @@ export async function syncRepository(
 
 // Register background job handler
 jobQueue.process('github:sync', async (job) => {
-  const { projectId, repoId, options } = job.data;
+  const { projectId, repoId, options } = job.data as { projectId: string; repoId: string; options?: any };
   await syncRepository(projectId, repoId, options);
 });

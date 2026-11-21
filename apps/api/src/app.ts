@@ -76,6 +76,8 @@ app.use('/api/v1', milestonesRouter);
 app.use('/api/v1', resourcesRouter);
 app.use('/api/v1', mentorsRouter);
 app.use('/api/v1', githubRouter);
+app.use('/api/v1', contributionRouter);
+app.use('/api/v1', talentRouter);
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/verification', verificationRouter);
 app.use('/api/v1', member2Router);

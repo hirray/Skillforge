@@ -24,6 +24,8 @@ import HackathonsModule from '../hackathons';
 import { GitHubIntegrationPage } from '../github';
 import { CompanyWorkspacePage } from '../companies';
 import { JobsBoardPage } from '../jobs';
+import { ContributionsHubPage } from '../contribution';
+import { TalentSearchPage } from '../talent';
 import './studio.css';
 
 const tools = [
@@ -376,6 +378,10 @@ export default function Member2Workspace() {
             <Icon name="rocket" />
             Hackathons & Sprints
           </NavLink>
+          <NavLink to="/contributions" onClick={() => setMobileNav(false)}>
+            <Icon name="overview" />
+            Documented Contributions
+          </NavLink>
           <NavLink to="/integrations/github" onClick={() => setMobileNav(false)}>
             <Icon name="document" />
             GitHub Integration
@@ -387,6 +393,10 @@ export default function Member2Workspace() {
           <NavLink to="/jobs" onClick={() => setMobileNav(false)}>
             <Icon name="job" />
             Opportunities & Jobs
+          </NavLink>
+          <NavLink to="/talent" onClick={() => setMobileNav(false)}>
+            <Icon name="team" />
+            Recruiter Talent Search
           </NavLink>
 
           <span className="st-nav-label">Intelligence</span>
@@ -487,9 +497,11 @@ export default function Member2Workspace() {
               <Route path="/chat/*" element={<ChatModule />} />
               <Route path="/mentors/*" element={<MentorsModule />} />
               <Route path="/hackathons/*" element={<HackathonsModule />} />
+              <Route path="/contributions/*" element={<ContributionsHubPage />} />
               <Route path="/integrations/github/*" element={<GitHubIntegrationPage />} />
               <Route path="/companies/*" element={<CompanyWorkspacePage />} />
               <Route path="/jobs/*" element={<JobsBoardPage />} />
+              <Route path="/talent/*" element={<TalentSearchPage />} />
               
               <Route path="/ai" element={<Overview context={activeContext} />} />
               <Route

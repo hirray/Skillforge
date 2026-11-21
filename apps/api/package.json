@@ -14,6 +14,7 @@
     "check:contract": "tsx scripts/check-contract.ts",
     "seed:member2": "tsx scripts/seed-member2.ts",
     "dev:fake-activity": "tsx scripts/fake-activity.ts",
+    "dev:fake-contributions": "tsx scripts/fake-contributions.ts",
     "test:member2": "vitest run src/modules/ai/member2/integration.test.ts --test-timeout=20000 --threads=false",
     "check:member2-contract": "tsx scripts/check-member2-contract.ts"
   },

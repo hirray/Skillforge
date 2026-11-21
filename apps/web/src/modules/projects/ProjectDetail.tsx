@@ -56,6 +56,7 @@ import {
 } from './rescue';
 import { MentorAdvisorySection } from './MentorAdvisorySection';
 import { ProjectReposPanel } from '../github';
+import { ContributionsTab } from '../contribution';
 
 const rolePresets = [
   'Frontend Developer', 'Backend Developer', 'Fullstack Engineer',
@@ -68,6 +69,7 @@ const TABS = [
   { id: 'Team', icon: <IcoUsers size={14} /> },
   { id: 'Tasks', icon: <IcoCheck size={14} /> },
   { id: 'Milestones', icon: <IcoStar size={14} /> },
+  { id: 'Contributions', icon: <IcoFlash size={14} /> },
   { id: 'Resources', icon: <IcoFile size={14} /> },
   { id: 'Discussions', icon: <IcoMsg size={14} /> },
   { id: 'Analytics', icon: <IcoBar size={14} /> },
@@ -301,7 +303,7 @@ export const ProjectDetail = () => {
   const currentUserId = localStorage.getItem('token') || 'user-001';
 
   const [project, setProject] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState(() => { const tab = new URLSearchParams(window.location.search).get('tab') || 'Overview'; return ['Overview', 'Team', 'Tasks', 'Milestones', 'Resources', 'Discussions', 'Analytics'].includes(tab) ? tab : 'Overview'; });
+  const [activeTab, setActiveTab] = useState(() => { const tab = new URLSearchParams(window.location.search).get('tab') || 'Overview'; return ['Overview', 'Team', 'Tasks', 'Milestones', 'Contributions', 'Resources', 'Discussions', 'Analytics'].includes(tab) ? tab : 'Overview'; });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [myPendingInvitation, setMyPendingInvitation] = useState<any>(null);
@@ -1033,6 +1035,7 @@ export const ProjectDetail = () => {
         )}
         {activeTab === 'Tasks' && <TasksSection projectId={id!} project={project} onProjectUpdated={fetchProject} />}
         {activeTab === 'Milestones' && <MilestonesSection projectId={id!} project={project} onProjectUpdated={fetchProject} />}
+        {activeTab === 'Contributions' && <ContributionsTab projectId={id!} isOwner={isOwner} />}
         {activeTab === 'Resources' && <ResourcesHub projectId={id!} isOwner={isOwner} />}
         {activeTab === 'Discussions' && (
           <div className="pdcard" style={{ padding: 0, overflow: 'hidden' }}>

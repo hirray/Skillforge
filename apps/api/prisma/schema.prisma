@@ -829,3 +829,34 @@ model EventParticipant {
   @@unique([eventId, userId])
 }
 
+model ContributionAdjustment {
+  id        String   @id @default(uuid())
+  eventId   String
+  actorId   String
+  action    String
+  reason    String
+  before    String   @default("")
+  after     String   @default("")
+  createdAt DateTime @default(now())
+}
+
+model ContributionDispute {
+  id        String   @id @default(uuid())
+  eventId   String
+  raisedBy  String
+  reason    String
+  status    String   @default("open") // open | owner_resolved | escalated | closed
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model SavedSearch {
+  id          String   @id @default(uuid())
+  companyId   String?
+  recruiterId String
+  name        String
+  filtersJson String   @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+}
+
