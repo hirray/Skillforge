@@ -150,17 +150,47 @@ export const ProjectReposPanel: React.FC<{ projectId: string; isOwner?: boolean 
           </p>
         </div>
 
-        {isOwner && (
+        <div className="flex items-center gap-2 shrink-0">
           <button
-            onClick={() => setShowAddModal(true)}
-            className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] transition-all duration-150 flex items-center gap-1.5 shadow-md shadow-[#93B2F8]/10"
+            type="button"
+            onClick={() => {
+              fetchRepos();
+              fetchAvailableUserRepos();
+            }}
+            disabled={loading}
+            className="px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-300 hover:text-white bg-[#1b1b22] hover:bg-[#282836] border border-[#282836] transition-all flex items-center gap-1.5"
+            title="Refresh repositories"
           >
-            <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
-              <path d="M8 2a.75.75 0 01.75.75v4.5h4.5a.75.75 0 010 1.5h-4.5v4.5a.75.75 0 01-1.5 0v-4.5h-4.5a.75.75 0 010-1.5h4.5v-4.5A.75.75 0 018 2z" />
+            <svg
+              viewBox="0 0 24 24"
+              width="13"
+              height="13"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className={loading ? 'animate-spin text-[#93B2F8]' : ''}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
             </svg>
-            <span>Link Repository</span>
+            <span>Refresh</span>
           </button>
-        )}
+
+          {isOwner && (
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] transition-all duration-150 flex items-center gap-1.5 shadow-md shadow-[#93B2F8]/10"
+            >
+              <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+                <path d="M8 2a.75.75 0 01.75.75v4.5h4.5a.75.75 0 010 1.5h-4.5v4.5a.75.75 0 01-1.5 0v-4.5h-4.5a.75.75 0 010-1.5h4.5v-4.5A.75.75 0 018 2z" />
+              </svg>
+              <span>Link Repository</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {error && (
