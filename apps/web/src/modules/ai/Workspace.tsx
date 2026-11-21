@@ -22,6 +22,7 @@ import ChatModule from '../chat';
 import MentorsModule from '../mentors';
 import HackathonsModule from '../hackathons';
 import { GitHubIntegrationPage } from '../github';
+import { CompanyWorkspacePage } from '../companies';
 import './studio.css';
 
 const tools = [
@@ -378,6 +379,10 @@ export default function Member2Workspace() {
             <Icon name="document" />
             GitHub Integration
           </NavLink>
+          <NavLink to="/companies" onClick={() => setMobileNav(false)}>
+            <Icon name="job" />
+            Company & Recruiters
+          </NavLink>
 
           <span className="st-nav-label">Intelligence</span>
           <NavLink end to="/ai" onClick={() => setMobileNav(false)}>
@@ -478,6 +483,7 @@ export default function Member2Workspace() {
               <Route path="/mentors/*" element={<MentorsModule />} />
               <Route path="/hackathons/*" element={<HackathonsModule />} />
               <Route path="/integrations/github/*" element={<GitHubIntegrationPage />} />
+              <Route path="/companies/*" element={<CompanyWorkspacePage />} />
               
               <Route path="/ai" element={<Overview context={activeContext} />} />
               <Route
