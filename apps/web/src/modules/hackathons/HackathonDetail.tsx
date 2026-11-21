@@ -10,6 +10,7 @@ import {
 import { api, token } from '../ai/client';
 import { HackathonEvent } from '@skillforge/contract';
 import { RegisterSprintProjectModal } from './RegisterSprintProjectModal';
+import { InviteParticipantModal } from './InviteParticipantModal';
 
 export const HackathonDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +20,7 @@ export const HackathonDetail: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'teams' | 'participants' | 'rules'>('teams');
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
+  const [invitingParticipant, setInvitingParticipant] = useState<any | null>(null);
   const [joining, setJoining] = useState(false);
 
   const currentUserId = token();
@@ -506,11 +508,14 @@ export const HackathonDetail: React.FC = () => {
 
                   {p.lookingForTeam && (
                     <div style={{ borderTop: '1px solid #22222e', paddingTop: '10px' }}>
-                      <Link to="/team">
-                        <Button variant="secondary" size="sm" style={{ width: '100%' }}>
-                          Invite to Project Team
-                        </Button>
-                      </Link>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        style={{ width: '100%' }}
+                        onClick={() => setInvitingParticipant(p)}
+                      >
+                        Invite to Project Team
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -570,6 +575,14 @@ export const HackathonDetail: React.FC = () => {
         onSuccess={(newProjId) => {
           navigate(`/projects/${newProjId}`);
         }}
+      />
+
+      <InviteParticipantModal
+        isOpen={!!invitingParticipant}
+        participant={invitingParticipant}
+        eventProjects={event.projects || []}
+        onClose={() => setInvitingParticipant(null)}
+        onSuccess={() => void loadEvent()}
       />
     </div>
   );

@@ -36,18 +36,14 @@ export class RealService {
     // Role check
     let role = project.roles.find(r => r.title.toLowerCase() === data.role.toLowerCase());
     if (!role) {
-      if (data.gapId) {
-        role = await prisma.projectRole.create({
-          data: {
-            projectId,
-            title: data.role,
-            openings: 1,
-            filled: 0
-          }
-        });
-      } else {
-        throw { status: 400, code: 'ROLE_NOT_FOUND', message: `Role "${data.role}" does not exist on this project` };
-      }
+      role = await prisma.projectRole.create({
+        data: {
+          projectId,
+          title: data.role,
+          openings: 1,
+          filled: 0
+        }
+      });
     }
     if (role.openings <= role.filled && !data.gapId) {
       throw { status: 400, code: 'ROLE_FULL', message: `No open positions available for role "${data.role}"` };

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Badge } from '../../design-system/components';
+import { getUserDisplayName } from '../ai/client';
 
 export const MyInvitations = () => {
   const [invitations, setInvitations] = useState<any[]>([]);
@@ -89,7 +90,7 @@ export const MyInvitations = () => {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-primary">My Invitations</h1>
-          <p className="text-muted text-sm mt-1">Logged in as: <span className="font-semibold text-mainText">{currentUserId}</span></p>
+          <p className="text-muted text-sm mt-1">Logged in as: <span className="font-semibold text-mainText">{getUserDisplayName()}</span></p>
         </div>
         <Button variant="outline" size="sm" onClick={fetchInvitations}>Refresh</Button>
       </div>

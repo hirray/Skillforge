@@ -7,6 +7,34 @@ export class ApiError extends Error {
   }
 }
 export const token = () => localStorage.getItem('token') || 'user-001';
+
+export const getEffectiveUserId = (): string => {
+  const t = token();
+  if (t.startsWith('eyJ') && t.includes('.')) {
+    try {
+      const parts = t.split('.');
+      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      return payload._id || payload.id || payload.userId || payload.sub || t;
+    } catch {
+      return t;
+    }
+  }
+  return t;
+};
+
+export const getUserDisplayName = (): string => {
+  const t = token();
+  if (t.startsWith('eyJ') && t.includes('.')) {
+    try {
+      const parts = t.split('.');
+      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      return payload.name || payload.nickname || payload.email || payload._id || 'You';
+    } catch {
+      return t;
+    }
+  }
+  return t;
+};
 export async function api<T = any>(
   path: string,
   options: RequestInit = {}
