@@ -27,7 +27,6 @@ export const GitHubConnectCard: React.FC<{ onStatusChange?: (status: GitHubStatu
       setError(null);
       const res = await api<{ data: GitHubStatus }>('/integrations/github/status');
       setStatus(res.data);
-      if (onStatusChange) onStatusChange(res.data);
     } catch (err: any) {
       setStatus({ connected: false, username: null, scopes: null, lastSyncedAt: null });
     } finally {
@@ -66,6 +65,7 @@ export const GitHubConnectCard: React.FC<{ onStatusChange?: (status: GitHubStatu
       setGithubUsername('');
       setAccessToken('');
       await fetchStatus();
+      if (onStatusChange) onStatusChange({ connected: true, username: cleanUsername, scopes: 'read:user,repo', lastSyncedAt: new Date().toISOString() });
     } catch (err: any) {
       setError(err.message || 'Failed to connect GitHub account');
     } finally {
@@ -80,6 +80,7 @@ export const GitHubConnectCard: React.FC<{ onStatusChange?: (status: GitHubStatu
       await api('/integrations/github', { method: 'DELETE' });
       setShowDisconnectModal(false);
       await fetchStatus();
+      if (onStatusChange) onStatusChange({ connected: false, username: null, scopes: null, lastSyncedAt: null });
     } catch (err: any) {
       setError(err.message || 'Failed to disconnect GitHub account');
     } finally {

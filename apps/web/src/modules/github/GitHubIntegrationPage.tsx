@@ -29,7 +29,7 @@ export const GitHubIntegrationPage: React.FC = () => {
 
   useEffect(() => {
     fetchProjects();
-  }, [syncKey]);
+  }, []);
 
   const handleGlobalRefresh = () => {
     setIsRefreshing(true);
@@ -87,7 +87,6 @@ export const GitHubIntegrationPage: React.FC = () => {
           1. Your Developer Account Identity
         </h2>
         <GitHubConnectCard
-          key={`connect-card-${syncKey}`}
           onStatusChange={() => setSyncKey((k) => k + 1)}
         />
       </section>
