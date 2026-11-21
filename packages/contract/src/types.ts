@@ -319,3 +319,43 @@ export interface MentorFeedback {
   };
 }
 
+export interface HackathonEvent {
+  id: string;
+  name: string;
+  description: string;
+  theme: string;
+  startsAt: string;
+  endsAt: string;
+  rules?: string | null;
+  suggestedSkillIds: string[];
+  status: 'draft' | 'open' | 'running' | 'ended' | 'archived' | string;
+  organizerId: string;
+  createdAt: string;
+  updatedAt: string;
+  organizer?: {
+    id: string;
+    email: string;
+  };
+  participants?: EventParticipant[];
+  projects?: any[];
+  _count?: {
+    participants?: number;
+    projects?: number;
+  };
+}
+
+export interface EventParticipant {
+  id: string;
+  eventId: string;
+  userId: string;
+  lookingForTeam: boolean;
+  skillsSnapshot: string[];
+  createdAt: string;
+  updatedAt: string;
+  user?: {
+    id: string;
+    email: string;
+  };
+}
+
+

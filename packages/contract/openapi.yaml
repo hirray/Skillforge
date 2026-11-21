@@ -824,3 +824,32 @@ paths:
       responses:
         '200':
           description: Successful response
+  /hackathons/{id}:
+    get:
+      summary: GET /hackathons/{id}
+      responses:
+        '200':
+          description: Successful response
+    delete:
+      summary: DELETE /hackathons/{id}
+      responses:
+        '200':
+          description: Successful response
+  /hackathons/{id}/join:
+    post:
+      summary: POST /hackathons/{id}/join
+      responses:
+        '200':
+          description: Successful response
+  /hackathons/{id}/projects:
+    post:
+      summary: POST /hackathons/{id}/projects
+      responses:
+        '200':
+          description: Successful response
+  /hackathons/{id}/status:
+    patch:
+      summary: PATCH /hackathons/{id}/status
+      responses:
+        '200':
+          description: Successful response

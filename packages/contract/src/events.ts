@@ -28,7 +28,11 @@ export enum DomainEvent {
   HandoverCreated = 'HandoverCreated',
   MentorshipRequested = 'MentorshipRequested',
   MentorshipRequestResponded = 'MentorshipRequestResponded',
-  MentorFeedbackCreated = 'MentorFeedbackCreated'
+  MentorFeedbackCreated = 'MentorFeedbackCreated',
+  HackathonCreated = 'HackathonCreated',
+  HackathonStatusUpdated = 'HackathonStatusUpdated',
+  HackathonParticipantJoined = 'HackathonParticipantJoined',
+  HackathonTeamRegistered = 'HackathonTeamRegistered'
 }
 
 export type EventPayloads = {
@@ -62,4 +66,8 @@ export type EventPayloads = {
   [DomainEvent.MentorshipRequested]: { requestId: string; projectId: string; mentorId: string };
   [DomainEvent.MentorshipRequestResponded]: { requestId: string; projectId: string; status: string };
   [DomainEvent.MentorFeedbackCreated]: { feedbackId: string; projectId: string; mentorId: string };
+  [DomainEvent.HackathonCreated]: { eventId: string; organizerId: string };
+  [DomainEvent.HackathonStatusUpdated]: { eventId: string; status: string };
+  [DomainEvent.HackathonParticipantJoined]: { eventId: string; userId: string; lookingForTeam: boolean };
+  [DomainEvent.HackathonTeamRegistered]: { eventId: string; projectId: string };
 };

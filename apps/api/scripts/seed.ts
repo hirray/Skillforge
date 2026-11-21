@@ -71,6 +71,58 @@ async function main() {
       active: true,
     },
   });
+
+  // Seed Hackathon Event (PRD Area 29)
+  await prisma.hackathonEvent.upsert({
+    where: { id: 'hackathon-001' },
+    update: {
+      status: 'running',
+    },
+    create: {
+      id: 'hackathon-001',
+      name: 'Winter Global AI & Agentic Sprint 2026',
+      description: 'A high-velocity 48-hour build marathon uniting designers, fullstack developers, and AI engineers to build production-grade agentic applications.',
+      theme: 'Autonomous Collaboration & Knowledge Workflows',
+      startsAt: new Date(Date.now() - 1000 * 60 * 60 * 12),
+      endsAt: new Date(Date.now() + 1000 * 60 * 60 * 36),
+      rules: 'Teams of 1-5 members. Pre-existing ideas are welcome; all project code must be developed and pushed during the sprint window.',
+      suggestedSkillIds: JSON.stringify(['React', 'TypeScript', 'FastAPI', 'Python', 'TailwindCSS']),
+      status: 'running',
+      organizerId: 'admin-001',
+    },
+  });
+
+  await prisma.eventParticipant.upsert({
+    where: {
+      eventId_userId: {
+        eventId: 'hackathon-001',
+        userId: 'user-005',
+      }
+    },
+    update: { lookingForTeam: true },
+    create: {
+      eventId: 'hackathon-001',
+      userId: 'user-005',
+      lookingForTeam: true,
+      skillsSnapshot: JSON.stringify(['UI/UX Design', 'Figma', 'Design Systems']),
+    },
+  });
+
+  await prisma.eventParticipant.upsert({
+    where: {
+      eventId_userId: {
+        eventId: 'hackathon-001',
+        userId: 'user-006',
+      }
+    },
+    update: { lookingForTeam: true },
+    create: {
+      eventId: 'hackathon-001',
+      userId: 'user-006',
+      lookingForTeam: true,
+      skillsSnapshot: JSON.stringify(['Python', 'PyTorch', 'FastAPI', 'LLMs']),
+    },
+  });
   
   console.log('Database seeded.');
 }
