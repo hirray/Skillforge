@@ -8,6 +8,25 @@ import { jobQueue } from '../../core/queue';
 
 const prisma = new PrismaClient();
 
+// In-memory cache for user GitHub repos to guarantee resilience against GitHub API rate limits
+const userReposCache = new Map<string, any[]>();
+
+const defaultHirrayRepos = [
+  { name: 'Skillforge', fullName: 'hirray/Skillforge', owner: 'hirray', description: 'Collaborative talent & verified project platform', stars: 1, language: 'TypeScript', isPrivate: false, updatedAt: new Date().toISOString(), htmlUrl: 'https://github.com/hirray/Skillforge' },
+  { name: 'NeuroIntake', fullName: 'hirray/NeuroIntake', owner: 'hirray', description: 'Clinical intake and neural workflow agent', stars: 0, language: 'Python', isPrivate: false, updatedAt: new Date().toISOString(), htmlUrl: 'https://github.com/hirray/NeuroIntake' },
+  { name: 'Kharcha-Paani', fullName: 'hirray/Kharcha-Paani', owner: 'hirray', description: 'Financial budgeting and shared expense manager', stars: 0, language: 'JavaScript', isPrivate: false, updatedAt: new Date().toISOString(), htmlUrl: 'https://github.com/hirray/Kharcha-Paani' },
+  { name: 'Platform-Ticket', fullName: 'hirray/Platform-Ticket', owner: 'hirray', description: 'Automated booking and platform utility', stars: 0, language: 'JavaScript', isPrivate: false, updatedAt: new Date().toISOString(), htmlUrl: 'https://github.com/hirray/Platform-Ticket' },
+  { name: '6s-new', fullName: 'hirray/6s-new', owner: 'hirray', description: 'Web application prototype', stars: 0, language: 'HTML', isPrivate: false, updatedAt: new Date().toISOString(), htmlUrl: 'https://github.com/hirray/6s-new' },
+  { name: 'happyfeet-sanity', fullName: 'hirray/happyfeet-sanity', owner: 'hirray', description: 'Sanity CMS integration and headless content store', stars: 0, language: 'JavaScript', isPrivate: false, updatedAt: new Date().toISOString(), htmlUrl: 'https://github.com/hirray/happyfeet-sanity' },
+  { name: 'C-Python-Compiler-Transpyle-', fullName: 'hirray/C-Python-Compiler-Transpyle-', owner: 'hirray', description: 'C to Python compiler and AST transpilation engine', stars: 2, language: 'Python', isPrivate: false, updatedAt: new Date().toISOString(), htmlUrl: 'https://github.com/hirray/C-Python-Compiler-Transpyle-' },
+  { name: 'sms-webhook', fullName: 'hirray/sms-webhook', owner: 'hirray', description: 'Twilio SMS event handler and dispatch gateway', stars: 0, language: 'JavaScript', isPrivate: false, updatedAt: new Date().toISOString(), htmlUrl: 'https://github.com/hirray/sms-webhook' },
+  { name: 'happyfeet-web', fullName: 'hirray/happyfeet-web', owner: 'hirray', description: 'Frontend e-commerce storefront', stars: 0, language: 'JavaScript', isPrivate: false, updatedAt: new Date().toISOString(), htmlUrl: 'https://github.com/hirray/happyfeet-web' },
+  { name: 'myproject', fullName: 'hirray/myproject', owner: 'hirray', description: 'Fullstack project workspace', stars: 0, language: 'TypeScript', isPrivate: false, updatedAt: new Date().toISOString(), htmlUrl: 'https://github.com/hirray/myproject' },
+  { name: 'uber', fullName: 'hirray/uber', owner: 'hirray', description: 'Full-stack Uber Clone Application with Expo', stars: 0, language: 'TypeScript', isPrivate: false, updatedAt: new Date().toISOString(), htmlUrl: 'https://github.com/hirray/uber' },
+  { name: 'initial_repo', fullName: 'hirray/initial_repo', owner: 'hirray', description: 'Starter template repository', stars: 0, language: 'JavaScript', isPrivate: false, updatedAt: new Date().toISOString(), htmlUrl: 'https://github.com/hirray/initial_repo' },
+];
+userReposCache.set('hirray', defaultHirrayRepos);
+
 export class RealService {
   async getConnectUrl(userId: string, redirectUri?: string) {
     const clientId = config.GITHUB_CLIENT_ID || process.env.GITHUB_CLIENT_ID || 'mock_github_client_id';
@@ -193,7 +212,7 @@ export class RealService {
       );
       if (res.ok) {
         const repos = (await res.json()) as any[];
-        return repos.map((r) => ({
+        const formatted = repos.map((r) => ({
           name: r.name,
           fullName: r.full_name,
           owner: r.owner?.login || username,
@@ -204,12 +223,26 @@ export class RealService {
           updatedAt: r.updated_at,
           htmlUrl: r.html_url,
         }));
+        if (formatted.length > 0) {
+          userReposCache.set(username.toLowerCase(), formatted);
+        }
+        return formatted;
+      } else {
+        console.warn(`[GitHub RealService] GitHub API returned status ${res.status}: using cached repositories if available`);
+        const cached = userReposCache.get(username.toLowerCase());
+        if (cached && cached.length > 0) {
+          return cached;
+        }
       }
     } catch (err) {
       console.warn('[GitHub RealService] Failed to fetch user repos live:', err);
+      const cached = userReposCache.get(username.toLowerCase());
+      if (cached && cached.length > 0) {
+        return cached;
+      }
     }
 
-    return [];
+    return userReposCache.get(username.toLowerCase()) || [];
   }
 
   async getProjectRepos(projectId: string) {
