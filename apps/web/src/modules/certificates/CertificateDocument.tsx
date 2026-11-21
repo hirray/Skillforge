@@ -30,51 +30,95 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
     milestoneSprints: 4,
   };
 
-  const verificationUrl = (certificate as any).verificationUrl || (certificate as any).url || `https://skillforge.dev/verify/${certificate.certNumber}`;
-  const qrUrl = (certificate as any).qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(verificationUrl)}`;
+  const verificationUrl =
+    (certificate as any).verificationUrl ||
+    (certificate as any).url ||
+    `https://skillforge.dev/verify/${certificate.certNumber}`;
+  const qrUrl =
+    (certificate as any).qrCodeUrl ||
+    `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(verificationUrl)}`;
 
   const handlePrint = () => {
     window.print();
   };
 
+  const formattedDate = certificate.completedAt
+    ? new Date(certificate.completedAt).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+
   return (
     <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      {/* Top Action Toolbar (if enabled) */}
+      {/* Top Action Toolbar */}
       {showActions && (
-        <div style={{ width: '100%', maxWidth: '980px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '13px', color: '#93B2F8', fontWeight: 600 }}>
-              Live Credential Preview
+        <div
+          style={{
+            width: '100%',
+            maxWidth: '960px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '18px',
+            flexWrap: 'wrap',
+            gap: '12px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                background: 'rgba(10, 22, 128, 0.1)',
+                border: '1px solid rgba(147, 178, 248, 0.3)',
+                color: '#93B2F8',
+                fontSize: '12px',
+                fontWeight: 600,
+                letterSpacing: '0.02em',
+              }}
+            >
+              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: isRevoked ? '#EF4444' : '#10B981' }} />
+              {isRevoked ? 'Revoked Credential' : 'Verified Digital Credential'}
             </span>
-            <span style={{ color: 'rgba(255,255,255,0.3)' }}>•</span>
-            <span style={{ fontFamily: 'monospace', color: '#FCFDFF', fontSize: '13px', fontWeight: 700 }}>
+            <span style={{ color: 'rgba(255,255,255,0.2)' }}>•</span>
+            <span style={{ fontFamily: 'monospace', color: '#FCFDFF', fontSize: '13px', fontWeight: 600, letterSpacing: '0.05em' }}>
               {certificate.certNumber}
             </span>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
             <button
               onClick={handlePrint}
               style={{
                 padding: '8px 16px',
-                borderRadius: '10px',
+                borderRadius: '8px',
                 background: '#1b1b22',
                 border: '1px solid rgba(255, 255, 255, 0.15)',
                 color: '#FCFDFF',
                 fontSize: '13px',
-                fontWeight: 600,
+                fontWeight: 500,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
+                transition: 'all 0.15s ease',
               }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="6 9 6 2 18 2 18 9"/>
-                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-                <rect x="6" y="14" width="12" height="8"/>
+                <polyline points="6 9 6 2 18 2 18 9" />
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                <rect x="6" y="14" width="12" height="8" />
               </svg>
-              Print Certificate
+              Print / Save as PDF
             </button>
 
             <a
@@ -84,7 +128,7 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
               download
               style={{
                 padding: '8px 16px',
-                borderRadius: '10px',
+                borderRadius: '8px',
                 background: '#0A1680',
                 border: '1px solid #93B2F8',
                 color: '#FCFDFF',
@@ -94,14 +138,15 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
+                boxShadow: '0 2px 8px rgba(10, 22, 128, 0.4)',
               }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
               </svg>
-              Download PDF
+              Official PDF
             </a>
 
             {onClose && (
@@ -109,7 +154,7 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
                 onClick={onClose}
                 style={{
                   padding: '8px 14px',
-                  borderRadius: '10px',
+                  borderRadius: '8px',
                   background: 'transparent',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   color: '#FCFDFF',
@@ -124,162 +169,310 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
         </div>
       )}
 
-      {/* The Printable & Displayable Authentic Certificate Container */}
+      {/* The Clean, Premium, High-End Certificate Canvas */}
       <div
         id="printable-certificate"
         style={{
           width: '100%',
-          maxWidth: '980px',
-          aspectRatio: '1.414 / 1', // A4 Landscape aspect ratio
+          maxWidth: '960px',
+          aspectRatio: '1.414 / 1', // ISO A4 Landscape
           minHeight: '620px',
-          background: 'radial-gradient(ellipse at 50% 30%, #171b2e 0%, #0d101d 100%)',
-          borderRadius: '24px',
-          border: isRevoked ? '3px solid #EF4444' : '3px solid #D4AF37',
-          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(212, 175, 55, 0.15)',
-          padding: '36px',
+          background: '#FFFFFF',
+          borderRadius: '12px',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(0, 0, 0, 0.1)',
           position: 'relative',
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          color: '#FCFDFF',
+          color: '#0F172A',
+          padding: '40px 48px',
           overflow: 'hidden',
+          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         }}
       >
-        {/* Intricate Inner Guilloche / Gold Border */}
+        {/* Subtle Luxury Linen Texture & Watermark */}
         <div
           style={{
             position: 'absolute',
-            inset: '14px',
-            border: '1.5px solid rgba(212, 175, 55, 0.4)',
-            borderRadius: '18px',
+            inset: 0,
+            background: 'radial-gradient(ellipse at 50% 15%, #FAFBFD 0%, #F5F7FA 100%)',
+            pointerEvents: 'none',
+          }}
+        />
+
+        {/* Minimalist Dual Hairline Border */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: '16px',
+            border: isRevoked ? '2px solid #FCA5A5' : '2px solid #0A1680',
+            borderRadius: '6px',
             pointerEvents: 'none',
           }}
         />
         <div
           style={{
             position: 'absolute',
-            inset: '18px',
-            border: '1px dashed rgba(212, 175, 55, 0.25)',
-            borderRadius: '14px',
+            inset: '22px',
+            border: isRevoked ? '1px dashed #EF4444' : '1px solid #D4AF37',
+            borderRadius: '4px',
             pointerEvents: 'none',
+            opacity: 0.85,
           }}
         />
 
-        {/* Decorative Gold Corner Badges */}
-        <div style={{ position: 'absolute', top: '24px', left: '24px', color: '#D4AF37', fontSize: '20px', opacity: 0.7 }}>❖</div>
-        <div style={{ position: 'absolute', top: '24px', right: '24px', color: '#D4AF37', fontSize: '20px', opacity: 0.7 }}>❖</div>
-        <div style={{ position: 'absolute', bottom: '24px', left: '24px', color: '#D4AF37', fontSize: '20px', opacity: 0.7 }}>❖</div>
-        <div style={{ position: 'absolute', bottom: '24px', right: '24px', color: '#D4AF37', fontSize: '20px', opacity: 0.7 }}>❖</div>
+        {/* Elegant Corner Geometric Ornaments */}
+        <svg
+          style={{ position: 'absolute', top: '24px', left: '24px', opacity: 0.6 }}
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+        >
+          <path d="M0 0 L14 0 M0 0 L0 14" stroke="#D4AF37" strokeWidth="1.5" fill="none" />
+          <circle cx="5" cy="5" r="2" fill="#D4AF37" />
+        </svg>
+        <svg
+          style={{ position: 'absolute', top: '24px', right: '24px', opacity: 0.6 }}
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+        >
+          <path d="M24 0 L10 0 M24 0 L24 14" stroke="#D4AF37" strokeWidth="1.5" fill="none" />
+          <circle cx="19" cy="5" r="2" fill="#D4AF37" />
+        </svg>
+        <svg
+          style={{ position: 'absolute', bottom: '24px', left: '24px', opacity: 0.6 }}
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+        >
+          <path d="M0 24 L14 24 M0 24 L0 10" stroke="#D4AF37" strokeWidth="1.5" fill="none" />
+          <circle cx="5" cy="19" r="2" fill="#D4AF37" />
+        </svg>
+        <svg
+          style={{ position: 'absolute', bottom: '24px', right: '24px', opacity: 0.6 }}
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+        >
+          <path d="M24 24 L10 24 M24 24 L24 10" stroke="#D4AF37" strokeWidth="1.5" fill="none" />
+          <circle cx="19" cy="19" r="2" fill="#D4AF37" />
+        </svg>
 
-        {/* TOP AUTHORITY HEADER */}
+        {/* SECTION 1: HEADER & CREST */}
         <div style={{ textAlign: 'center', position: 'relative', zIndex: 2 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'linear-gradient(135deg, #0A1680, #16279E)', border: '1.5px solid #F1B94C', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F1B94C', fontWeight: 900, fontSize: '15px' }}>
-              SF
-            </div>
-            <span style={{ fontSize: '14px', fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#D4AF37' }}>
-              SkillForge Attestation Authority
+          {/* Emblem & Registry Name */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 2L3 7V12C3 17.5 6.8 21.7 12 23C17.2 21.7 21 17.5 21 12V7L12 2Z"
+                fill="#0A1680"
+                stroke="#D4AF37"
+                strokeWidth="1.5"
+              />
+              <path d="M9 12L11 14L15 10" stroke="#FCFDFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span
+              style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                letterSpacing: '0.24em',
+                textTransform: 'uppercase',
+                color: '#0A1680',
+              }}
+            >
+              SkillForge Attestation & Verification Registry
             </span>
           </div>
 
-          <h1 style={{ margin: '4px 0 6px 0', fontSize: '26px', fontWeight: 900, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#FCFDFF', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+          <h1
+            style={{
+              margin: '2px 0 6px 0',
+              fontFamily: "'Playfair Display', Georgia, 'Times New Roman', serif",
+              fontSize: '28px',
+              fontWeight: 700,
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              color: '#0A1680',
+            }}
+          >
             Certificate of Project Completion
           </h1>
-          <div style={{ fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(252, 253, 255, 0.6)' }}>
-            Attested Engineering & Milestone Delivery Credential
+
+          <div
+            style={{
+              fontSize: '12px',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              color: '#64748B',
+              fontWeight: 500,
+            }}
+          >
+            Attested Software Engineering & Milestone Delivery Credential
           </div>
         </div>
 
-        {/* RECIPIENT & PROJECT SUMMARY */}
-        <div style={{ textAlign: 'center', margin: '14px 0', position: 'relative', zIndex: 2 }}>
-          <div style={{ fontSize: '13px', fontStyle: 'italic', color: 'rgba(252, 253, 255, 0.7)', marginBottom: '6px' }}>
-            This officially attests that
+        {/* SECTION 2: RECIPIENT & ATTESTATION STATEMENT */}
+        <div style={{ textAlign: 'center', margin: '10px 0', position: 'relative', zIndex: 2 }}>
+          <div
+            style={{
+              fontFamily: "Georgia, 'Times New Roman', serif",
+              fontSize: '14px',
+              fontStyle: 'italic',
+              color: '#64748B',
+              marginBottom: '6px',
+            }}
+          >
+            This document officially certifies that
           </div>
 
-          <div style={{ fontSize: '30px', fontWeight: 900, color: '#F1B94C', letterSpacing: '-0.01em', textShadow: '0 2px 12px rgba(241, 185, 76, 0.3)' }}>
+          <div
+            style={{
+              fontFamily: "'Playfair Display', Georgia, 'Times New Roman', serif",
+              fontSize: '34px',
+              fontWeight: 700,
+              color: '#0F172A',
+              letterSpacing: '0.01em',
+              textTransform: 'capitalize',
+            }}
+          >
             {certificate.recipientName}
           </div>
 
-          <div style={{ fontSize: '13px', color: 'rgba(252, 253, 255, 0.75)', margin: '6px 0 8px 0' }}>
+          {/* Elegant Center Divider Line */}
+          <div
+            style={{
+              width: '180px',
+              height: '1px',
+              background: 'linear-gradient(90deg, transparent, #D4AF37, transparent)',
+              margin: '8px auto',
+            }}
+          />
+
+          <div style={{ fontSize: '13px', color: '#475569', marginBottom: '6px' }}>
             has successfully delivered and completed all technical milestones for
           </div>
 
-          <div style={{ fontSize: '20px', fontWeight: 800, color: '#FCFDFF', letterSpacing: '0.01em' }}>
+          <div
+            style={{
+              fontSize: '20px',
+              fontWeight: 700,
+              color: '#0A1680',
+              letterSpacing: '-0.01em',
+            }}
+          >
             {certificate.projectName}
           </div>
 
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginTop: '8px', padding: '4px 14px', borderRadius: '999px', background: 'rgba(10, 22, 128, 0.4)', border: '1px solid rgba(147, 178, 248, 0.3)', color: '#93B2F8', fontSize: '13px', fontWeight: 600 }}>
-            <span>Attested Role:</span>
-            <strong style={{ color: '#FCFDFF' }}>{roles.join(', ') || 'Lead Contributor'}</strong>
+          <div style={{ marginTop: '8px' }}>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 14px',
+                borderRadius: '6px',
+                background: '#F1F5F9',
+                border: '1px solid #CBD5E1',
+                color: '#334155',
+                fontSize: '12px',
+                fontWeight: 600,
+              }}
+            >
+              <span style={{ color: '#64748B', fontWeight: 500 }}>Attested Role:</span>
+              <strong style={{ color: '#0A1680' }}>{roles.join(', ') || 'Lead Contributor'}</strong>
+            </span>
           </div>
         </div>
 
-        {/* 4-COLUMN PROOF MATRICES: PERFORMANCE, CONTRIBUTIONS, TIMELINE, SKILLS */}
+        {/* SECTION 3: REFINED 4-COLUMN PROOF MATRIX */}
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '12px',
-            background: 'rgba(21, 21, 26, 0.85)',
-            border: '1px solid rgba(212, 175, 55, 0.25)',
-            borderRadius: '14px',
-            padding: '14px',
+            gap: '14px',
+            background: '#F8FAFC',
+            border: '1px solid #E2E8F0',
+            borderRadius: '8px',
+            padding: '12px 16px',
             position: 'relative',
             zIndex: 2,
-            boxShadow: 'inset 0 2px 6px rgba(0,0,0,0.5)',
           }}
         >
-          {/* 1. Milestone Performance Score */}
-          <div style={{ borderRight: '1px solid rgba(255, 255, 255, 0.08)', paddingRight: '10px' }}>
-            <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#D4AF37', fontWeight: 800, marginBottom: '4px' }}>
+          {/* 1. Milestone Performance */}
+          <div style={{ borderRight: '1px solid #E2E8F0', paddingRight: '10px' }}>
+            <div
+              style={{
+                fontSize: '10px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                color: '#64748B',
+                fontWeight: 700,
+                marginBottom: '3px',
+              }}
+            >
               Milestone Performance
             </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-              <span style={{ fontSize: '22px', fontWeight: 900, color: '#34D399' }}>{performance.score}</span>
-              <span style={{ fontSize: '12px', color: 'rgba(252,253,255,0.5)' }}>/100</span>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+              <span style={{ fontSize: '20px', fontWeight: 800, color: '#059669' }}>{performance.score}</span>
+              <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 600 }}>/100</span>
             </div>
-            <div style={{ fontSize: '11px', color: '#FCFDFF', fontWeight: 600, marginTop: '2px' }}>
+            <div style={{ fontSize: '11px', color: '#0F172A', fontWeight: 600, marginTop: '1px' }}>
               {performance.onTimeRate}
             </div>
-            <div style={{ fontSize: '10px', color: 'rgba(252, 253, 255, 0.55)' }}>
-              {performance.milestonesMet}
-            </div>
+            <div style={{ fontSize: '10px', color: '#64748B' }}>{performance.milestonesMet}</div>
           </div>
 
-          {/* 2. Documented Contributions */}
-          <div style={{ borderRight: '1px solid rgba(255, 255, 255, 0.08)', paddingRight: '10px' }}>
-            <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#D4AF37', fontWeight: 800, marginBottom: '4px' }}>
-              Attested Contributions
+          {/* 2. Attested Contributions */}
+          <div style={{ borderRight: '1px solid #E2E8F0', paddingRight: '10px' }}>
+            <div
+              style={{
+                fontSize: '10px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                color: '#64748B',
+                fontWeight: 700,
+                marginBottom: '3px',
+              }}
+            >
+              Attested Activity
             </div>
-            <div style={{ fontSize: '16px', fontWeight: 800, color: '#FCFDFF' }}>
+            <div style={{ fontSize: '15px', fontWeight: 800, color: '#0F172A' }}>
               {contributions.totalEvents} Verified Events
             </div>
-            <div style={{ fontSize: '11px', color: '#93B2F8', marginTop: '2px' }}>
+            <div style={{ fontSize: '11px', color: '#0A1680', fontWeight: 600, marginTop: '2px' }}>
               {contributions.commits} Commits • {contributions.tasksCompleted} Tasks
             </div>
-            <div style={{ fontSize: '10px', color: 'rgba(252, 253, 255, 0.55)' }}>
-              {contributions.codeReviews} Peer Reviews Logged
-            </div>
+            <div style={{ fontSize: '10px', color: '#64748B' }}>{contributions.codeReviews} Peer Reviews Logged</div>
           </div>
 
           {/* 3. Verified Skills */}
-          <div style={{ borderRight: '1px solid rgba(255, 255, 255, 0.08)', paddingRight: '10px' }}>
-            <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#D4AF37', fontWeight: 800, marginBottom: '4px' }}>
+          <div style={{ borderRight: '1px solid #E2E8F0', paddingRight: '10px' }}>
+            <div
+              style={{
+                fontSize: '10px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                color: '#64748B',
+                fontWeight: 700,
+                marginBottom: '4px',
+              }}
+            >
               Demonstrated Skills
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', maxHeight: '52px', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', maxHeight: '48px', overflow: 'hidden' }}>
               {skills.slice(0, 4).map((s, idx) => (
                 <span
                   key={idx}
                   style={{
                     padding: '2px 6px',
                     borderRadius: '4px',
-                    background: 'rgba(147, 178, 248, 0.12)',
-                    border: '1px solid rgba(147, 178, 248, 0.25)',
-                    color: '#FCFDFF',
+                    background: '#EEF2FF',
+                    border: '1px solid #C7D2FE',
+                    color: '#3730A3',
                     fontSize: '10px',
-                    fontWeight: 500,
+                    fontWeight: 600,
                   }}
                 >
                   {s}
@@ -288,113 +481,189 @@ export function CertificateDocument({ certificate, showActions = true, onClose }
             </div>
           </div>
 
-          {/* 4. Timeline & Delivery Duration */}
+          {/* 4. Timeline */}
           <div>
-            <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#D4AF37', fontWeight: 800, marginBottom: '4px' }}>
+            <div
+              style={{
+                fontSize: '10px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                color: '#64748B',
+                fontWeight: 700,
+                marginBottom: '3px',
+              }}
+            >
               Attested Timeline
             </div>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: '#FCFDFF' }}>
-              {timeline.duration}
-            </div>
-            <div style={{ fontSize: '10px', color: 'rgba(252, 253, 255, 0.6)', marginTop: '2px' }}>
-              Completed: {new Date(certificate.completedAt).toLocaleDateString()}
-            </div>
-            <div style={{ fontSize: '10px', color: '#34D399', fontWeight: 600 }}>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>{timeline.duration}</div>
+            <div style={{ fontSize: '10px', color: '#64748B', marginTop: '1px' }}>Completed: {formattedDate}</div>
+            <div style={{ fontSize: '10px', color: '#059669', fontWeight: 600, marginTop: '1px' }}>
               ✓ Verified on Deadline
             </div>
           </div>
         </div>
 
-        {/* BOTTOM ROW: SIGNATURES, GOLD MEDALLION SEAL, AND CRYPTOGRAPHIC QR CODE */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', paddingTop: '16px', position: 'relative', zIndex: 2 }}>
-          {/* Left Signature */}
-          <div style={{ textAlign: 'center', width: '190px' }}>
-            <div style={{ fontFamily: 'cursive', fontSize: '18px', color: 'rgba(241, 185, 76, 0.9)', marginBottom: '2px', letterSpacing: '1px' }}>
+        {/* SECTION 4: SIGNATURES, MEDALLION, AND QR VERIFICATION */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-end',
+            paddingTop: '14px',
+            position: 'relative',
+            zIndex: 2,
+          }}
+        >
+          {/* Left Signature Block */}
+          <div style={{ textAlign: 'center', width: '180px' }}>
+            {/* Elegant SVG Signature */}
+            <div style={{ height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="150" height="34" viewBox="0 0 150 34" fill="none">
+                <path
+                  d="M10 24 C18 10, 24 6, 32 20 C36 12, 44 10, 52 18 C58 22, 64 16, 72 15 C80 14, 88 20, 96 16 C104 12, 114 14, 128 17 M28 18 L48 18"
+                  stroke="#1E3A8A"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+            <div style={{ height: '1px', background: '#CBD5E1', margin: '2px 0 4px 0' }} />
+            <div style={{ fontSize: '11px', fontWeight: 700, color: '#0F172A', letterSpacing: '0.02em' }}>
               Alexandre Mercer
             </div>
-            <div style={{ height: '1px', background: 'rgba(255, 255, 255, 0.3)', margin: '2px 0 4px 0' }} />
-            <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: '#FCFDFF' }}>
-              Alexandre Mercer
-            </div>
-            <div style={{ fontSize: '9px', color: 'rgba(252, 253, 255, 0.5)' }}>
-              Chief Verification Officer, SkillForge
-            </div>
+            <div style={{ fontSize: '9px', color: '#64748B' }}>Chief Verification Officer, SkillForge</div>
           </div>
 
-          {/* Center Embossed Gold Seal Medallion */}
+          {/* Center Official Gold Medallion Seal */}
           <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div
               style={{
-                width: '64px',
-                height: '64px',
+                width: '66px',
+                height: '66px',
                 borderRadius: '50%',
                 background: isRevoked
-                  ? 'radial-gradient(circle, #EF4444 0%, #991B1B 100%)'
-                  : 'radial-gradient(circle, #F1B94C 0%, #B8860B 70%, #8B6508 100%)',
-                border: '2px solid #FFF',
+                  ? 'radial-gradient(circle, #FEE2E2 0%, #EF4444 100%)'
+                  : 'radial-gradient(circle, #FFF8E7 0%, #F5E6B3 45%, #D4AF37 100%)',
+                border: isRevoked ? '2px solid #DC2626' : '2px solid #C59B27',
                 boxShadow: isRevoked
-                  ? '0 0 20px rgba(239, 68, 68, 0.5)'
-                  : '0 0 25px rgba(241, 185, 76, 0.6), inset 0 0 10px rgba(255,255,255,0.4)',
+                  ? '0 4px 12px rgba(239, 68, 68, 0.3)'
+                  : '0 4px 14px rgba(212, 175, 55, 0.35), inset 0 0 6px rgba(255, 255, 255, 0.8)',
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#0A1680',
-                fontWeight: 900,
-                fontSize: '11px',
-                textTransform: 'uppercase',
-                textAlign: 'center',
-                lineHeight: 1.1,
-                padding: '4px',
+                color: isRevoked ? '#991B1B' : '#0A1680',
+                padding: '3px',
+                boxSizing: 'border-box',
               }}
             >
               {isRevoked ? (
-                <span style={{ color: '#FFF', fontSize: '9px' }}>REVOKED</span>
+                <>
+                  <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.05em' }}>REVOKED</span>
+                  <span style={{ fontSize: '7px', fontWeight: 700 }}>VOID</span>
+                </>
               ) : (
-                <span>OFFICIAL SEAL</span>
+                <>
+                  <div style={{ fontSize: '8px', color: '#0A1680', letterSpacing: '0.08em', fontWeight: 800 }}>★ ★ ★</div>
+                  <div
+                    style={{
+                      fontSize: '8px',
+                      fontWeight: 800,
+                      letterSpacing: '0.04em',
+                      textTransform: 'uppercase',
+                      lineHeight: 1.1,
+                      marginTop: '1px',
+                    }}
+                  >
+                    OFFICIAL
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '7px',
+                      fontWeight: 800,
+                      letterSpacing: '0.06em',
+                      textTransform: 'uppercase',
+                      color: '#785A12',
+                    }}
+                  >
+                    SEAL
+                  </div>
+                </>
               )}
             </div>
-            <div style={{ fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#D4AF37', marginTop: '4px', fontWeight: 700 }}>
-              Immutable Attestation
+            <div
+              style={{
+                fontSize: '8.5px',
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: '#64748B',
+                marginTop: '4px',
+                fontWeight: 600,
+              }}
+            >
+              Cryptographically Attested
             </div>
           </div>
 
-          {/* Right Signature */}
-          <div style={{ textAlign: 'center', width: '190px' }}>
-            <div style={{ fontFamily: 'cursive', fontSize: '18px', color: 'rgba(241, 185, 76, 0.9)', marginBottom: '2px', letterSpacing: '1px' }}>
+          {/* Right Signature Block */}
+          <div style={{ textAlign: 'center', width: '180px' }}>
+            {/* Elegant SVG Signature */}
+            <div style={{ height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="150" height="34" viewBox="0 0 150 34" fill="none">
+                <path
+                  d="M12 22 C16 12, 22 8, 30 18 C36 24, 42 14, 50 16 C58 18, 66 12, 76 18 C86 24, 94 14, 106 17 C118 20, 126 15, 138 20 M68 12 L78 26"
+                  stroke="#1E3A8A"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+            <div style={{ height: '1px', background: '#CBD5E1', margin: '2px 0 4px 0' }} />
+            <div style={{ fontSize: '11px', fontWeight: 700, color: '#0F172A', letterSpacing: '0.02em' }}>
               Dr. Elena Rostova
             </div>
-            <div style={{ height: '1px', background: 'rgba(255, 255, 255, 0.3)', margin: '2px 0 4px 0' }} />
-            <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: '#FCFDFF' }}>
-              Dr. Elena Rostova
-            </div>
-            <div style={{ fontSize: '9px', color: 'rgba(252, 253, 255, 0.5)' }}>
-              Head of Engineering Evaluation
-            </div>
+            <div style={{ fontSize: '9px', color: '#64748B' }}>Director of Engineering Evaluation</div>
           </div>
 
-          {/* Cryptographic QR Code & ID Tag */}
-          <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* QR Verification Block */}
+          <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(252,253,255,0.5)', fontWeight: 600 }}>
+              <div
+                style={{
+                  fontSize: '8px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  color: '#64748B',
+                  fontWeight: 600,
+                }}
+              >
                 Credential ID
               </div>
-              <div style={{ fontSize: '12px', fontWeight: 800, color: '#D4AF37', fontFamily: 'monospace' }}>
+              <div
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  color: '#0A1680',
+                  fontFamily: 'monospace',
+                  letterSpacing: '0.02em',
+                }}
+              >
                 {certificate.certNumber}
               </div>
-              <div style={{ fontSize: '9px', color: 'rgba(252, 253, 255, 0.45)' }}>
-                Scan to Verify Proof
-              </div>
+              <div style={{ fontSize: '8.5px', color: '#94A3B8' }}>Scan to Verify Proof</div>
             </div>
 
             <img
               src={qrUrl}
               alt="Verification QR Code"
               style={{
-                width: '54px',
-                height: '54px',
-                borderRadius: '6px',
-                border: '1.5px solid rgba(212, 175, 55, 0.6)',
-                background: '#FFF',
+                width: '50px',
+                height: '50px',
+                borderRadius: '4px',
+                border: '1px solid #CBD5E1',
+                background: '#FFFFFF',
                 padding: '2px',
               }}
             />

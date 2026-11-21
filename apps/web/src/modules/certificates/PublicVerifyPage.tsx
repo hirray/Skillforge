@@ -67,7 +67,7 @@ export function PublicVerifyPage() {
       </div>
 
       {/* Main Verification Card */}
-      <div style={{ width: '100%', maxWidth: '720px' }}>
+      <div style={{ width: '100%', maxWidth: '1000px' }}>
         {/* Verification Lookup Bar */}
         <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
           <input
