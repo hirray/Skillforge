@@ -23,6 +23,7 @@ import MentorsModule from '../mentors';
 import HackathonsModule from '../hackathons';
 import { GitHubIntegrationPage } from '../github';
 import { CompanyWorkspacePage } from '../companies';
+import { JobsBoardPage } from '../jobs';
 import './studio.css';
 
 const tools = [
@@ -380,8 +381,12 @@ export default function Member2Workspace() {
             GitHub Integration
           </NavLink>
           <NavLink to="/companies" onClick={() => setMobileNav(false)}>
-            <Icon name="job" />
+            <Icon name="shield" />
             Company & Recruiters
+          </NavLink>
+          <NavLink to="/jobs" onClick={() => setMobileNav(false)}>
+            <Icon name="job" />
+            Opportunities & Jobs
           </NavLink>
 
           <span className="st-nav-label">Intelligence</span>
@@ -484,6 +489,7 @@ export default function Member2Workspace() {
               <Route path="/hackathons/*" element={<HackathonsModule />} />
               <Route path="/integrations/github/*" element={<GitHubIntegrationPage />} />
               <Route path="/companies/*" element={<CompanyWorkspacePage />} />
+              <Route path="/jobs/*" element={<JobsBoardPage />} />
               
               <Route path="/ai" element={<Overview context={activeContext} />} />
               <Route
