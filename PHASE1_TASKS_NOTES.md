@@ -79,6 +79,7 @@ The **Tasks module (PRD area 10)** is now fully real and backed by SQLite / Pris
    - Confirm both completion events appear in the history log without overwriting.
 5. **Member Removal & Reassignment**:
    - In the **Team** tab, remove the assigned member from the project.
+   
    - Return to the **Tasks** tab; verify the task card displays `⚠️ Needs Reassignment` with `assigneeId` cleared.
 6. **Automated Unit Tests**:
    ```bash

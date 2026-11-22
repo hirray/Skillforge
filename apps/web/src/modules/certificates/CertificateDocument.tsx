@@ -18,6 +18,11 @@ export function CertificateDocument({
   const [reinstating, setReinstating] = useState(false);
 
   const isRevoked = certificate.status === 'revoked';
+  const isPending =
+    !isRevoked &&
+    (certificate.status === 'pending' ||
+      (certificate as any).status === 'pending_owner_approval' ||
+      certificate.issuerName?.toLowerCase().includes('pending'));
   const roles = certificate.roles || [];
   const skills = certificate.skills || certificate.technologies || [];
   const performance = certificate.performance || {
@@ -110,9 +115,17 @@ export function CertificateDocument({
                 gap: '6px',
                 padding: '4px 10px',
                 borderRadius: '6px',
-                background: isRevoked ? 'rgba(239, 68, 68, 0.12)' : 'rgba(16, 185, 129, 0.12)',
-                border: isRevoked ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(16, 185, 129, 0.3)',
-                color: isRevoked ? '#F87171' : '#34D399',
+                background: isRevoked
+                  ? 'rgba(239, 68, 68, 0.12)'
+                  : isPending
+                  ? 'rgba(245, 158, 11, 0.15)'
+                  : 'rgba(16, 185, 129, 0.12)',
+                border: isRevoked
+                  ? '1px solid rgba(239, 68, 68, 0.3)'
+                  : isPending
+                  ? '1px solid rgba(245, 158, 11, 0.4)'
+                  : '1px solid rgba(16, 185, 129, 0.3)',
+                color: isRevoked ? '#F87171' : isPending ? '#F59E0B' : '#34D399',
                 fontSize: '12px',
                 fontWeight: 600,
               }}
@@ -122,10 +135,14 @@ export function CertificateDocument({
                   width: '7px',
                   height: '7px',
                   borderRadius: '50%',
-                  background: isRevoked ? '#EF4444' : '#10B981',
+                  background: isRevoked ? '#EF4444' : isPending ? '#F59E0B' : '#10B981',
                 }}
               />
-              {isRevoked ? 'Status: Revoked' : 'Status: Verified & Valid'}
+              {isRevoked
+                ? 'Status: Revoked'
+                : isPending
+                ? 'Status: Pending Owner Verification (Draft Preview)'
+                : 'Status: Verified & Signed by Owner'}
             </span>
             <span style={{ color: 'rgba(255,255,255,0.2)' }}>•</span>
             <span style={{ fontFamily: 'monospace', color: '#FCFDFF', fontSize: '13px', fontWeight: 600 }}>
@@ -544,7 +561,7 @@ export function CertificateDocument({
                   width: '18px',
                   height: '18px',
                   borderRadius: '50%',
-                  background: '#0A1680',
+                  background: isRevoked ? '#DC2626' : isPending ? '#D97706' : '#0A1680',
                   color: '#FFFFFF',
                   display: 'flex',
                   alignItems: 'center',
@@ -553,7 +570,7 @@ export function CertificateDocument({
                   fontWeight: 900,
                 }}
               >
-                ✓
+                {isRevoked ? '✕' : isPending ? '⏳' : '✓'}
               </div>
               <span
                 style={{
@@ -561,25 +578,37 @@ export function CertificateDocument({
                   fontWeight: 800,
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em',
-                  color: '#0A1680',
+                  color: isRevoked ? '#DC2626' : isPending ? '#B45309' : '#0A1680',
                 }}
               >
-                Verified by Project Owner
+                {isRevoked
+                  ? 'Revoked Credential'
+                  : isPending
+                  ? 'Awaiting Owner Sign-Off'
+                  : 'Verified by Project Owner'}
               </span>
             </div>
 
             <div style={{ fontSize: '10.5px', color: '#334155', fontWeight: 600 }}>
-              {certificate.issuerName && certificate.issuerName.includes('Owner')
+              {isRevoked
+                ? 'Credential marked invalid by administration'
+                : isPending
+                ? 'Draft Credential — Pending Owner Review'
+                : certificate.issuerName && certificate.issuerName.includes('Owner')
                 ? certificate.issuerName
-                : 'Project Owner & Lead Architect'}
+                : 'Verified & Signed by Project Owner'}
             </div>
 
             <div style={{ fontSize: '9px', color: '#64748B', marginTop: '2px', lineHeight: 1.3 }}>
-              Formally audited, signed, and attested upon satisfactory delivery of all milestones.
+              {isRevoked
+                ? 'This completion credential was revoked and is no longer attested.'
+                : isPending
+                ? 'Generated upon completion. Requires official owner review and sign-off before being finalized.'
+                : 'Formally audited, signed, and attested upon satisfactory delivery of all milestones.'}
             </div>
 
             <div style={{ fontSize: '8.5px', color: '#94A3B8', marginTop: '3px', fontFamily: 'monospace' }}>
-              Attestation Date: {formattedDate}
+              {isPending ? 'Draft Generated' : 'Attestation Date'}: {formattedDate}
             </div>
           </div>
 
@@ -592,16 +621,20 @@ export function CertificateDocument({
                 borderRadius: '50%',
                 background: isRevoked
                   ? 'radial-gradient(circle, #FEE2E2 0%, #EF4444 100%)'
+                  : isPending
+                  ? 'radial-gradient(circle, #FFFBEB 0%, #FEF3C7 45%, #F59E0B 100%)'
                   : 'radial-gradient(circle, #FFF8E7 0%, #F5E6B3 45%, #D4AF37 100%)',
-                border: isRevoked ? '2px solid #DC2626' : '2px solid #C59B27',
+                border: isRevoked ? '2px solid #DC2626' : isPending ? '2px solid #D97706' : '2px solid #C59B27',
                 boxShadow: isRevoked
                   ? '0 3px 10px rgba(239, 68, 68, 0.3)'
+                  : isPending
+                  ? '0 4px 14px rgba(245, 158, 11, 0.25)'
                   : '0 4px 14px rgba(212, 175, 55, 0.35), inset 0 0 6px rgba(255, 255, 255, 0.8)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: isRevoked ? '#991B1B' : '#0A1680',
+                color: isRevoked ? '#991B1B' : isPending ? '#78350F' : '#0A1680',
                 padding: '3px',
                 boxSizing: 'border-box',
               }}
@@ -610,6 +643,33 @@ export function CertificateDocument({
                 <>
                   <span style={{ fontSize: '9.5px', fontWeight: 900, letterSpacing: '0.05em' }}>REVOKED</span>
                   <span style={{ fontSize: '7px', fontWeight: 700 }}>VOID</span>
+                </>
+              ) : isPending ? (
+                <>
+                  <div style={{ fontSize: '7.5px', color: '#92400E', letterSpacing: '0.08em', fontWeight: 800 }}>★ PENDING ★</div>
+                  <div
+                    style={{
+                      fontSize: '7.5px',
+                      fontWeight: 800,
+                      letterSpacing: '0.04em',
+                      textTransform: 'uppercase',
+                      lineHeight: 1.1,
+                      marginTop: '1px',
+                    }}
+                  >
+                    DRAFT
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '7px',
+                      fontWeight: 800,
+                      letterSpacing: '0.06em',
+                      textTransform: 'uppercase',
+                      color: '#78350F',
+                    }}
+                  >
+                    AUDIT
+                  </div>
                 </>
               ) : (
                 <>
@@ -650,7 +710,7 @@ export function CertificateDocument({
                 fontWeight: 600,
               }}
             >
-              SkillForge Certified
+              {isPending ? 'Awaiting Owner Sign-off' : 'SkillForge Certified'}
             </div>
           </div>
 

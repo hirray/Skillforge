@@ -765,9 +765,14 @@ export const ProjectDetail = () => {
               </button>
             )}
             {isOwner && project.status === 'Active' && (
-              <button className="pdghost" style={{ color: '#f59e0b', borderColor: '#f59e0b40', background: '#2a1e12' }} onClick={() => handleTransition('Paused')}>
-                Pause
-              </button>
+              <>
+                <button className="pdghost" style={{ color: '#34d399', borderColor: '#34d39940', background: '#112920' }} onClick={() => handleTransition('Completed')}>
+                  ✓ Complete Project
+                </button>
+                <button className="pdghost" style={{ color: '#f59e0b', borderColor: '#f59e0b40', background: '#2a1e12' }} onClick={() => handleTransition('Paused')}>
+                  Pause
+                </button>
+              </>
             )}
             {isOwner && project.status === 'Paused' && (
               <button className="pdghost" style={{ color: '#6ad4bb', borderColor: '#6ad4bb40', background: '#132822' }} onClick={() => handleTransition('Active')}>
