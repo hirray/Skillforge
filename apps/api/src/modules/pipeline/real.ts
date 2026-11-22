@@ -623,18 +623,27 @@ export class RealService {
     return messages.map((m) => {
       const entry = entryMap.get(m.entryId);
       const company = entry?.companyId ? companyMap.get(entry.companyId) : null;
+      const compName = company?.name || 'Northstar Labs · Verified Partner';
+      const isVerified = company ? company.verificationStatus === 'verified' : true;
       return {
         id: m.id,
         entryId: m.entryId,
+        recruiterId: m.recruiterId,
+        candidateId: m.candidateId,
         text: m.text,
         status: m.status, // sent | accepted | declined
+        createdAt: m.createdAt.toISOString(),
         sentAt: m.createdAt.toISOString(),
+        companyName: compName,
+        verifiedCompany: isVerified,
         company: {
-          name: company?.name || 'Northstar Labs · Verified Partner',
+          id: company?.id || 'm2-demo-company',
+          name: compName,
           logo: company?.logo || null,
-          verified: company ? company.verificationStatus === 'verified' : true,
+          verified: isVerified,
         },
-        job: entry?.job || { title: 'Engineering Collaboration' },
+        jobTitle: entry?.job?.title || 'Distributed Systems Engineering',
+        job: entry?.job || { title: 'Distributed Systems Engineering' },
       };
     });
   }

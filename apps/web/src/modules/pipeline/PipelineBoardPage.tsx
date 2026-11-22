@@ -109,6 +109,10 @@ export const PipelineBoardPage: React.FC = () => {
   const [compareLoading, setCompareLoading] = useState(false);
   const [compareResult, setCompareResult] = useState<any>(null);
 
+  // Drag-and-Drop Kanban State
+  const [draggingEntryId, setDraggingEntryId] = useState<string | null>(null);
+  const [dragOverCol, setDragOverCol] = useState<string | null>(null);
+
   const fetchPipeline = async () => {
     try {
       setLoading(true);
@@ -140,6 +144,14 @@ export const PipelineBoardPage: React.FC = () => {
   }, [companyId, jobId]);
 
   const handleStageChange = async (entryId: string, newStage: string) => {
+    // Optimistic UI update so drag-and-drop moves immediately
+    setEntries((prev) =>
+      prev.map((e) => (e.id === entryId ? { ...e, stage: newStage } : e))
+    );
+    if (selectedEntry?.id === entryId) {
+      setSelectedEntry((prev) => (prev ? { ...prev, stage: newStage } : null));
+    }
+
     try {
       const res = await fetch(`/api/v1/pipeline/${entryId}?companyId=${encodeURIComponent(companyId)}`, {
         method: 'PATCH',
@@ -156,9 +168,12 @@ export const PipelineBoardPage: React.FC = () => {
         if (selectedEntry?.id === entryId) {
           setSelectedEntry((prev) => (prev ? { ...prev, ...updated } : null));
         }
+      } else {
+        fetchPipeline();
       }
     } catch (err) {
       console.error('Failed to update stage:', err);
+      fetchPipeline();
     }
   };
 
@@ -380,14 +395,48 @@ export const PipelineBoardPage: React.FC = () => {
           {error}
         </div>
       ) : (
-        /* Kanban Board Grid */
+        /* Kanban Board Grid with Drag & Drop */
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 overflow-x-auto pb-4">
           {STAGES.map((col) => {
             const colEntries = entries.filter((e) => e.stage === col.id);
+            const isColumnOver = dragOverCol === col.id;
             return (
               <div
                 key={col.id}
-                className="bg-[#121217] rounded-2xl border border-[#282836] p-4 flex flex-col min-w-[270px] shadow-lg"
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = 'move';
+                  if (dragOverCol !== col.id) {
+                    setDragOverCol(col.id);
+                  }
+                }}
+                onDragLeave={(e) => {
+                  if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+                  if (dragOverCol === col.id) {
+                    setDragOverCol(null);
+                  }
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragOverCol(null);
+                  setDraggingEntryId(null);
+                  const dataStr = e.dataTransfer.getData('text/plain');
+                  if (dataStr) {
+                    try {
+                      const { entryId, fromStage } = JSON.parse(dataStr);
+                      if (entryId && fromStage !== col.id) {
+                        handleStageChange(entryId, col.id);
+                      }
+                    } catch (err) {
+                      console.error('Failed to parse drag payload:', err);
+                    }
+                  }
+                }}
+                className={`bg-[#121217] rounded-2xl border transition-all duration-200 p-4 flex flex-col min-w-[270px] shadow-lg ${
+                  isColumnOver
+                    ? 'border-[#93B2F8] bg-[#171b30] ring-2 ring-[#93B2F8]/40 shadow-xl'
+                    : 'border-[#282836]'
+                }`}
               >
                 {/* Column Header */}
                 <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#282836]/60">
@@ -401,6 +450,16 @@ export const PipelineBoardPage: React.FC = () => {
                   </span>
                 </div>
 
+                {/* Drop Highlight Indicator */}
+                {isColumnOver && (
+                  <div className="mb-3 py-2 px-3 rounded-xl bg-[#0A1680]/30 border border-[#93B2F8]/60 text-[#93B2F8] text-[11px] font-semibold text-center animate-pulse flex items-center justify-center gap-2 shadow-inner">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 5v14M5 12l7 7 7-7" />
+                    </svg>
+                    <span>Drop here to move to {col.label}</span>
+                  </div>
+                )}
+
                 {/* Candidate Cards */}
                 <div className="space-y-3 flex-1 overflow-y-auto max-h-[620px] pr-1">
                   {colEntries.length === 0 ? (
@@ -413,20 +472,50 @@ export const PipelineBoardPage: React.FC = () => {
                       const candidateId = candidate?.id || entry.userId;
                       const isSelectedForCompare = selectedCandidateIds.includes(candidateId);
                       const isWithdrawn = candidate && !candidate.recruiterVisible;
+                      const isDraggingThis = draggingEntryId === entry.id;
 
                       return (
                         <div
                           key={entry.id}
-                          className={`p-3.5 rounded-xl bg-[#171720] border transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md cursor-pointer ${
-                            isSelectedForCompare
+                          draggable={true}
+                          onDragStart={(e) => {
+                            e.dataTransfer.setData(
+                              'text/plain',
+                              JSON.stringify({ entryId: entry.id, fromStage: entry.stage })
+                            );
+                            e.dataTransfer.effectAllowed = 'move';
+                            setDraggingEntryId(entry.id);
+                          }}
+                          onDragEnd={() => {
+                            setDraggingEntryId(null);
+                            setDragOverCol(null);
+                          }}
+                          className={`p-3.5 rounded-xl bg-[#171720] border transition-all duration-150 cursor-grab active:cursor-grabbing select-none ${
+                            isDraggingThis
+                              ? 'opacity-40 border-dashed border-[#93B2F8] scale-[0.98]'
+                              : isSelectedForCompare
                               ? 'border-[#93B2F8] shadow-md shadow-[#93B2F8]/10'
-                              : 'border-[#282836] hover:border-zinc-500'
+                              : 'border-[#282836] hover:border-zinc-500 hover:-translate-y-0.5 hover:shadow-md'
                           }`}
                           onClick={() => setSelectedEntry(entry)}
                         >
-                          {/* Card Top Row: Checkbox, Name, & Withdrawn status */}
+                          {/* Card Top Row: Drag Grip, Checkbox, Name, & Info */}
                           <div className="flex items-start justify-between gap-2 mb-2">
                             <div className="flex items-center gap-2">
+                              {/* 6-dot drag handle indicator */}
+                              <div
+                                className="text-zinc-500 hover:text-zinc-300 cursor-grab active:cursor-grabbing shrink-0"
+                                title="Drag to reorder or move stage"
+                              >
+                                <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                                  <circle cx="8" cy="6" r="1.5" />
+                                  <circle cx="16" cy="6" r="1.5" />
+                                  <circle cx="8" cy="12" r="1.5" />
+                                  <circle cx="16" cy="12" r="1.5" />
+                                  <circle cx="8" cy="18" r="1.5" />
+                                  <circle cx="16" cy="18" r="1.5" />
+                                </svg>
+                              </div>
                               <input
                                 type="checkbox"
                                 aria-label={`Select ${candidate?.name || 'candidate'} for comparison`}
@@ -463,8 +552,11 @@ export const PipelineBoardPage: React.FC = () => {
 
                           {/* Verified Proof Badges */}
                           <div className="flex items-center gap-2 mb-2 text-[10px]">
-                            <span className="px-2 py-0.5 rounded-md bg-[#0A1680]/30 text-[#93B2F8] border border-[#93B2F8]/20 font-bold">
-                              ✓ {candidate?.verifiedProjectCount || 1} Verified Projects
+                            <span className="px-2 py-0.5 rounded-md bg-[#0A1680]/30 text-[#93B2F8] border border-[#93B2F8]/20 font-bold flex items-center gap-1">
+                              <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor">
+                                <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" />
+                              </svg>
+                              <span>{candidate?.verifiedProjectCount || 1} Verified Projects</span>
                             </span>
                             <span className="text-zinc-400 font-medium">
                               {candidate?.experienceYears || 1}y exp
@@ -501,7 +593,7 @@ export const PipelineBoardPage: React.FC = () => {
                             >
                               {STAGES.map((s) => (
                                 <option key={s.id} value={s.id}>
-                                  → {s.label}
+                                  Move to {s.label}
                                 </option>
                               ))}
                             </select>
@@ -511,9 +603,13 @@ export const PipelineBoardPage: React.FC = () => {
                                 setOutreachEntry(entry);
                                 setShowOutreachModal(true);
                               }}
-                              className="px-2 py-1 rounded-lg text-[10px] font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] transition-colors"
+                              className="px-2.5 py-1 rounded-lg text-[10px] font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] transition-colors flex items-center gap-1"
                             >
-                              Contact
+                              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="m22 2-7 20-4-9-9-4Z" />
+                                <path d="M22 2 11 13" />
+                              </svg>
+                              <span>Contact</span>
                             </button>
                           </div>
                         </div>
@@ -777,9 +873,14 @@ export const PipelineBoardPage: React.FC = () => {
                     !outreachText.trim() ||
                     Boolean(outreachEntry.candidate && !outreachEntry.candidate.recruiterVisible)
                   }
-                  className="px-5 py-2.5 rounded-xl text-xs font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] disabled:opacity-50 transition-all shadow-md shadow-[#93B2F8]/20"
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] disabled:opacity-50 transition-all shadow-md shadow-[#93B2F8]/20 flex items-center gap-1.5"
                 >
-                  {sendingOutreach ? 'Sending...' : 'Send Message →'}
+                  <span>{sendingOutreach ? 'Sending...' : 'Send Message'}</span>
+                  {!sendingOutreach && (
+                    <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 8h10M9 4l4 4-4 4" />
+                    </svg>
+                  )}
                 </button>
               </div>
             </form>
@@ -868,13 +969,18 @@ export const PipelineBoardPage: React.FC = () => {
                             {c.skills.map((s) => (
                               <span
                                 key={s.skill}
-                                className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                                className={`px-2 py-0.5 rounded text-[10px] font-semibold border flex items-center gap-1 w-fit ${
                                   s.evidenceLevel === 'verified'
                                     ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/30'
                                     : 'bg-zinc-800 text-zinc-400 border-zinc-700'
                                 }`}
                               >
-                                {s.skill} {s.evidenceLevel === 'verified' ? '✓' : ''}
+                                {s.evidenceLevel === 'verified' && (
+                                  <svg viewBox="0 0 16 16" width="9" height="9" fill="currentColor">
+                                    <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" />
+                                  </svg>
+                                )}
+                                <span>{s.skill}</span>
                               </span>
                             ))}
                           </div>
@@ -927,9 +1033,12 @@ export const PipelineBoardPage: React.FC = () => {
                                   navigate(`/portfolio/candidate?userId=${c.candidateId}`);
                                 }
                               }}
-                              className="px-3.5 py-1.5 rounded-lg text-xs font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] transition-colors"
+                              className="px-3.5 py-1.5 rounded-lg text-xs font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] transition-colors flex items-center gap-1"
                             >
-                              Open Profile →
+                              <span>Open Profile</span>
+                              <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M3 8h10M9 4l4 4-4 4" />
+                              </svg>
                             </button>
                           </td>
                         );

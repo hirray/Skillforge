@@ -112,17 +112,17 @@ export class ChallengeService {
         updatedAt: c.updatedAt.toISOString(),
         company: comp
           ? {
-              id: comp.id,
-              name: comp.name,
-              logo: comp.logo || null,
-              verified: comp.verificationStatus === 'verified',
-            }
+            id: comp.id,
+            name: comp.name,
+            logo: comp.logo || null,
+            verified: comp.verificationStatus === 'verified',
+          }
           : {
-              id: c.companyId,
-              name: 'Northstar Labs · Verified Partner',
-              logo: null,
-              verified: true,
-            },
+            id: c.companyId,
+            name: 'Northstar Labs · Verified Partner',
+            logo: null,
+            verified: true,
+          },
         entriesCount: countMap.get(c.id) || 0,
       };
     });
@@ -178,17 +178,17 @@ export class ChallengeService {
       updatedAt: created.updatedAt.toISOString(),
       company: comp
         ? {
-            id: comp.id,
-            name: comp.name,
-            logo: comp.logo || null,
-            verified: comp.verificationStatus === 'verified',
-          }
+          id: comp.id,
+          name: comp.name,
+          logo: comp.logo || null,
+          verified: comp.verificationStatus === 'verified',
+        }
         : {
-            id: created.companyId,
-            name: 'Northstar Labs · Verified Partner',
-            logo: null,
-            verified: true,
-          },
+          id: created.companyId,
+          name: 'Northstar Labs · Verified Partner',
+          logo: null,
+          verified: true,
+        },
       entriesCount: 0,
     };
   }
@@ -350,11 +350,11 @@ export class ChallengeService {
         updatedAt: e.updatedAt.toISOString(),
         project: proj
           ? {
-              id: proj.id,
-              title: proj.title,
-              category: proj.category,
-              membersCount: proj.members.length || 1,
-            }
+            id: proj.id,
+            title: proj.title,
+            category: proj.category,
+            membersCount: proj.members.length || 1,
+          }
           : undefined,
       };
     });

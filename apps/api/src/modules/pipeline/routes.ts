@@ -61,7 +61,7 @@ router.post('/compare', async (req: Request, res: Response, next: NextFunction) 
 });
 
 // Candidate Opportunities Inbox (candidate-facing, never includes recruiter notes or internal stages)
-router.get('/opportunities', async (req: Request, res: Response, next: NextFunction) => {
+router.get(['/opportunities', '/opportunities/me'], async (req: Request, res: Response, next: NextFunction) => {
   try {
     const candidateId = getAuthUser(req);
     const result = await getService().getCandidateOpportunities(candidateId);
@@ -84,11 +84,15 @@ router.post('/opportunities/:id/respond', async (req: Request, res: Response, ne
 });
 
 // Candidate toggle contact consent
-router.post('/opportunities/consent', async (req: Request, res: Response, next: NextFunction) => {
+router.post(['/opportunities/consent', '/candidate/consent'], async (req: Request, res: Response, next: NextFunction) => {
   try {
     const candidateId = getAuthUser(req);
-    const data = contactConsentSchema.parse(req.body);
-    const result = await getService().setContactConsent(candidateId, data.consent);
+    const consent = req.body.consent !== undefined
+      ? req.body.consent
+      : req.body.recruiterVisible !== undefined
+      ? req.body.recruiterVisible
+      : true;
+    const result = await getService().setContactConsent(candidateId, consent);
     res.json(result);
   } catch (e) {
     next(e);

@@ -226,11 +226,13 @@ export const ChallengeBoardPage: React.FC = () => {
                         {c.company?.name ? c.company.name[0] : 'C'}
                       </div>
                       <div>
-                        <span className="text-xs font-bold text-white flex items-center gap-1">
-                          {c.company?.name || 'Enterprise Sponsor'}
+                        <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <span>{c.company?.name || 'Enterprise Sponsor'}</span>
                           {c.company?.verificationStatus === 'verified' && (
                             <span className="text-[#93B2F8]" title="Verified Enterprise Sponsor">
-                              ✓
+                              <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor">
+                                <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" />
+                              </svg>
                             </span>
                           )}
                         </span>
@@ -279,10 +281,12 @@ export const ChallengeBoardPage: React.FC = () => {
 
                   <button
                     onClick={() => navigate(`/challenges/${c.id}`)}
-                    className="px-4 py-2 rounded-xl text-xs font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] transition-all shadow-md shadow-[#93B2F8]/20 flex items-center gap-1"
+                    className="px-4 py-2 rounded-xl text-xs font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] transition-all shadow-md shadow-[#93B2F8]/20 flex items-center gap-1.5"
                   >
                     <span>View Challenge & Compete</span>
-                    <span>→</span>
+                    <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 8h10M9 4l4 4-4 4" />
+                    </svg>
                   </button>
                 </div>
               </div>

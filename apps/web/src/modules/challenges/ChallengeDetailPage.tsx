@@ -243,8 +243,11 @@ export const ChallengeDetailPage: React.FC = () => {
                 {challenge.company?.name || 'Enterprise Sponsor'}
               </span>
               {challenge.company?.verificationStatus === 'verified' && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#0A1680] text-[#93B2F8] border border-[#93B2F8]/30">
-                  ✓ Verified Enterprise Sponsor
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#0A1680] text-[#93B2F8] border border-[#93B2F8]/30 flex items-center gap-1">
+                  <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor">
+                    <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" />
+                  </svg>
+                  <span>Verified Enterprise Sponsor</span>
                 </span>
               )}
             </div>
@@ -273,9 +276,14 @@ export const ChallengeDetailPage: React.FC = () => {
             <button
               disabled={isClosed}
               onClick={() => setShowSubmitModal(true)}
-              className="px-5 py-2.5 rounded-xl text-xs font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] disabled:opacity-50 transition-all shadow-md shadow-[#93B2F8]/20"
+              className="px-5 py-2.5 rounded-xl text-xs font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] disabled:opacity-50 transition-all shadow-md shadow-[#93B2F8]/20 flex items-center justify-center gap-1.5"
             >
-              {isClosed ? 'Submissions Closed' : 'Submit Team Solution →'}
+              <span>{isClosed ? 'Submissions Closed' : 'Submit Team Solution'}</span>
+              {!isClosed && (
+                <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 8h10M9 4l4 4-4 4" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
