@@ -68,6 +68,30 @@ describe('Member 1 Phase 1 & 2 Unit Suite', () => {
     });
     expect(updated.user.headline).toBe('Principal Distributed Systems Architect');
     expect(updated.user.workMode).toBe('remote');
+
+    // Test user's specific inputs from screenshot:
+    const customUpdate = await userService.updateMe(testUserId, {
+      name: 'Hir Nirav Ray',
+      displayName: 'Hir Ray',
+      headline: 'Software Engineer',
+      city: 'San Francisco',
+      country: 'United States',
+      workMode: 'remote',
+    });
+    expect(customUpdate.user.name).toBe('Hir Nirav Ray');
+    expect(customUpdate.user.displayName).toBe('Hir Ray');
+  });
+
+  it('Module 2: 1-Click prefill demo profile yields 100% completeness and rich dashboard data', async () => {
+    const demo = await userService.prefillDemoProfile(testUserId);
+    expect(demo.completeness.percentage).toBe(100);
+    expect(demo.user.skills.length).toBeGreaterThanOrEqual(5);
+    expect(demo.user.experiences.length).toBeGreaterThanOrEqual(2);
+    expect(demo.user.educations.length).toBeGreaterThanOrEqual(1);
+    expect(demo.user.certifications.length).toBeGreaterThanOrEqual(1);
+
+    // Also prefill user-001 so it is ready for the browser session
+    await userService.prefillDemoProfile('user-001');
   });
 
   it('Module 2: Updates availability status', async () => {

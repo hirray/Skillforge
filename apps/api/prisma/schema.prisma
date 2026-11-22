@@ -32,6 +32,9 @@ model User {
   companyName        String?
   workEmailDomain    String?
   jobTitle           String?
+  githubUsername     String?
+  linkedinUrl        String?
+  portfolioUrl       String?
   visibilitySettings String?           @default("{\"bio\":\"public\",\"skills\":\"public\",\"experience\":\"platform\",\"education\":\"platform\",\"certifications\":\"public\",\"links\":\"public\",\"availability\":\"recruiters\"}")
   matchingOptIn      Boolean           @default(true)
   deactivated        Boolean           @default(false)

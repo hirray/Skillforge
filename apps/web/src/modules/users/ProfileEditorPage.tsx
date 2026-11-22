@@ -92,24 +92,52 @@ export const ProfileEditorPage: React.FC = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          name: profile.name,
-          displayName: profile.displayName,
-          headline: profile.headline,
-          bio: profile.bio,
-          pronouns: profile.pronouns,
-          city: profile.city,
-          country: profile.country,
-          workMode: profile.workMode,
-          githubUsername: profile.githubUsername,
-          linkedinUrl: profile.linkedinUrl,
-          portfolioUrl: profile.portfolioUrl,
+          name: profile.name || undefined,
+          displayName: profile.displayName || undefined,
+          headline: profile.headline || undefined,
+          bio: profile.bio || undefined,
+          pronouns: profile.pronouns || undefined,
+          city: profile.city || undefined,
+          country: profile.country || undefined,
+          workMode: profile.workMode || 'remote',
+          githubUsername: profile.githubUsername || undefined,
+          linkedinUrl: profile.linkedinUrl || undefined,
+          portfolioUrl: profile.portfolioUrl || undefined,
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Failed to update profile');
+      if (!res.ok) {
+        const msg = data.error?.message || data.message || (data.error?.issues ? data.error.issues.map((i: any) => i.message).join(', ') : 'Failed to update profile');
+        throw new Error(msg);
+      }
       setProfile(data.user);
       setCompleteness(data.completeness);
       setStatus({ success: 'Profile successfully updated.' });
+    } catch (err: any) {
+      setStatus({ error: err.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePrefillDemo = async () => {
+    try {
+      setSaving(true);
+      setStatus(null);
+      const res = await fetch('/api/v1/users/me/prefill-demo', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        const msg = data.error?.message || data.message || 'Failed to prefill demo profile';
+        throw new Error(msg);
+      }
+      setProfile(data.user);
+      setCompleteness(data.completeness);
+      setStatus({ success: 'Profile successfully prefilled with 100% complete demo credentials!' });
     } catch (err: any) {
       setStatus({ error: err.message });
     } finally {
@@ -279,17 +307,30 @@ export const ProfileEditorPage: React.FC = () => {
             Universal engineer profile powering your talent discovery dossier, AI job-matching, and team reputation.
           </p>
         </div>
-        <a
-          href={`/users/${profile?.id || 'user-001'}`}
-          target="_blank"
-          rel="noreferrer"
-          className="px-3.5 py-1.5 rounded-xl border border-[#282836] hover:border-[#93B2F8] text-xs font-semibold text-zinc-300 hover:text-white transition-colors flex items-center gap-1.5"
-        >
-          <span>Preview Public View</span>
-          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M6 3h7v7M13 3 8 8" />
-          </svg>
-        </a>
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={handlePrefillDemo}
+            disabled={saving}
+            type="button"
+            className="px-3.5 py-1.5 rounded-xl border border-[#93B2F8]/40 bg-[#0A1680]/30 hover:bg-[#0A1680]/60 text-xs font-bold text-[#93B2F8] transition-all flex items-center gap-1.5 shadow-sm shadow-[#0A1680]/30"
+          >
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M8 1v14M1 8h14" />
+            </svg>
+            <span>Pre-fill Demo Profile (100%)</span>
+          </button>
+          <a
+            href={`/users/${profile?.id || 'user-001'}`}
+            target="_blank"
+            rel="noreferrer"
+            className="px-3.5 py-1.5 rounded-xl border border-[#282836] hover:border-[#93B2F8] text-xs font-semibold text-zinc-300 hover:text-white transition-colors flex items-center gap-1.5"
+          >
+            <span>Preview Public View</span>
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 3h7v7M13 3 8 8" />
+            </svg>
+          </a>
+        </div>
       </div>
 
       {status?.error && (

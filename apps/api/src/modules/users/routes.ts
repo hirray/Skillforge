@@ -53,6 +53,17 @@ router.patch('/me', requireAuth, async (req: Request, res: Response, next: NextF
   }
 });
 
+// POST /users/me/prefill-demo - 1-Click prefill of full profile data for testing & demo
+router.post('/me/prefill-demo', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = getAuthUser(req);
+    const result = await getService().prefillDemoProfile(userId);
+    res.json(result);
+  } catch (e) {
+    next(e);
+  }
+});
+
 // PUT /users/me/availability
 router.put('/me/availability', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
   try {

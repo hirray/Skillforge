@@ -198,15 +198,268 @@ export class RealUserService {
    * PATCH /users/me
    */
   async updateMe(userId: string, data: any) {
+    let existing = await prisma.user.findUnique({ where: { id: userId } });
+    if (!existing) {
+      await this.getMe(userId);
+      existing = await prisma.user.findUnique({ where: { id: userId } });
+    }
+
+    const cleanData: Record<string, any> = {};
+    const allowedFields = [
+      'name',
+      'displayName',
+      'username',
+      'avatarUrl',
+      'headline',
+      'bio',
+      'pronouns',
+      'city',
+      'region',
+      'country',
+      'workMode',
+      'intendedUse',
+      'companyName',
+      'workEmailDomain',
+      'jobTitle',
+      'githubUsername',
+      'linkedinUrl',
+      'portfolioUrl',
+    ];
+
+    for (const key of allowedFields) {
+      if (data[key] !== undefined) {
+        cleanData[key] = data[key];
+      }
+    }
+
     await prisma.user.update({
       where: { id: userId },
       data: {
-        ...data,
+        ...cleanData,
         updatedAt: new Date(),
       },
     });
 
-    await writeAudit(userId, 'UPDATE_PROFILE', 'User', userId, undefined, { fields: Object.keys(data) });
+    await writeAudit(userId, 'UPDATE_PROFILE', 'User', userId, undefined, { fields: Object.keys(cleanData) });
+
+    try {
+      await prisma.aiCandidateProfile.upsert({
+        where: { userId },
+        create: {
+          userId,
+          name: cleanData.name || existing?.name || 'Engineer',
+          headline: cleanData.headline || existing?.headline || 'Software Engineer',
+        },
+        update: {
+          ...(cleanData.name ? { name: cleanData.name } : {}),
+          ...(cleanData.headline ? { headline: cleanData.headline } : {}),
+        },
+      });
+    } catch {}
+
+    return this.getMe(userId);
+  }
+
+  /**
+   * POST /users/me/prefill-demo
+   * Prefills complete, impressive profile data for demo & testing (100% readiness score)
+   */
+  async prefillDemoProfile(userId: string) {
+    let existing = await prisma.user.findUnique({ where: { id: userId } });
+    if (!existing) {
+      await this.getMe(userId);
+      existing = await prisma.user.findUnique({ where: { id: userId } });
+    }
+
+    const userName = existing?.name && existing.name !== 'User' && existing.name !== 'Candidate Engineer'
+      ? existing.name
+      : 'Maya Chen';
+    const displayName = existing?.displayName || userName.split(' ')[0] || 'Maya';
+
+    // 1. Update User basic info
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        name: userName,
+        displayName,
+        headline: 'Staff Distributed Systems Architect & High-Throughput Infrastructure Lead',
+        bio: 'Specializing in event-driven microservices, real-time streaming architectures, fault-tolerant consensus systems, and high-performance database indexing. 6+ years building cloud-native infrastructure powering millions of events per second with 99.99% uptime.',
+        pronouns: 'she/her',
+        city: 'San Francisco',
+        region: 'CA',
+        country: 'United States',
+        workMode: 'remote',
+        companyName: 'Northstar Labs',
+        jobTitle: 'Staff Distributed Systems Architect',
+        githubUsername: 'mayachen-systems',
+        linkedinUrl: 'https://linkedin.com/in/maya-chen-engineer',
+        portfolioUrl: 'https://mayachen.engineering',
+        intendedUse: 'seeking_work',
+        matchingOptIn: true,
+        updatedAt: new Date(),
+      },
+    });
+
+    // 2. Clear existing entries to avoid duplicates
+    await prisma.userSkill.deleteMany({ where: { userId } });
+    await prisma.workExperience.deleteMany({ where: { userId } });
+    await prisma.education.deleteMany({ where: { userId } });
+    await prisma.certification.deleteMany({ where: { userId } });
+    await prisma.availability.deleteMany({ where: { userId } });
+
+    // 3. Ensure canonical skills exist and add UserSkills
+    const demoSkills = [
+      { name: 'React', category: 'Frontend', level: '4' },
+      { name: 'TypeScript', category: 'Language', level: '4' },
+      { name: 'Node.js', category: 'Backend', level: '4' },
+      { name: 'Distributed Systems', category: 'Architecture', level: '4' },
+      { name: 'PostgreSQL', category: 'Database', level: '4' },
+      { name: 'Kubernetes', category: 'DevOps', level: '3' },
+      { name: 'GraphQL', category: 'API', level: '3' },
+      { name: 'Prisma', category: 'Database', level: '4' },
+    ];
+
+    for (const sk of demoSkills) {
+      let canonical = await prisma.skill.findFirst({
+        where: { name: { equals: sk.name } },
+      });
+      if (!canonical) {
+        canonical = await prisma.skill.create({
+          data: {
+            name: sk.name,
+            category: sk.category,
+            status: 'approved',
+          },
+        });
+      }
+      await prisma.userSkill.create({
+        data: {
+          userId,
+          skillId: canonical.id,
+          level: sk.level,
+          origin: 'manual',
+        },
+      });
+    }
+
+    // 4. Work Experience
+    await prisma.workExperience.createMany({
+      data: [
+        {
+          userId,
+          company: 'Northstar Distributed Labs',
+          role: 'Staff Infrastructure Architect',
+          origin: 'manual',
+          detailsJson: JSON.stringify({
+            location: 'San Francisco, CA (Remote)',
+            startDate: '2023-01',
+            endDate: null,
+            current: true,
+            description: 'Architected sub-50ms event-driven pipelines processing 12M+ records daily. Spearheaded zero-downtime database schema migration pipelines with automated shadow traffic evaluation.',
+          }),
+        },
+        {
+          userId,
+          company: 'Vercel & Next.js Ecosystem',
+          role: 'Senior Backend Engineer',
+          origin: 'manual',
+          detailsJson: JSON.stringify({
+            location: 'Remote',
+            startDate: '2021-03',
+            endDate: '2022-12',
+            current: false,
+            description: 'Built edge runtime caching, global KV stores, and multi-region deployment automation. Optimized API latency by 42% across serverless container clusters.',
+          }),
+        },
+        {
+          userId,
+          company: 'Stripe Core Infrastructure',
+          role: 'Systems Engineer',
+          origin: 'manual',
+          detailsJson: JSON.stringify({
+            location: 'Seattle, WA',
+            startDate: '2019-06',
+            endDate: '2021-02',
+            current: false,
+            description: 'Maintained high-throughput ledger transactions with strict idempotency and cryptographic audit trails.',
+          }),
+        },
+      ],
+    });
+
+    // 5. Education
+    await prisma.education.create({
+      data: {
+        userId,
+        institution: 'Stanford University',
+        degree: 'Bachelor of Science (B.S.) in Computer Science',
+        origin: 'manual',
+        detailsJson: JSON.stringify({
+          fieldOfStudy: 'Distributed Systems & Cloud Architecture',
+          startDate: '2015-09',
+          endDate: '2019-06',
+          grade: '3.9 GPA',
+        }),
+      },
+    });
+
+    // 6. Certifications
+    await prisma.certification.createMany({
+      data: [
+        {
+          userId,
+          name: 'AWS Certified Solutions Architect - Professional',
+          origin: 'manual',
+          detailsJson: JSON.stringify({
+            issuer: 'Amazon Web Services',
+            issueDate: '2023-04',
+            credentialId: 'AWS-PSA-994821',
+            credentialUrl: 'https://aws.amazon.com/verification',
+          }),
+        },
+        {
+          userId,
+          name: 'Certified Kubernetes Administrator (CKA)',
+          origin: 'manual',
+          detailsJson: JSON.stringify({
+            issuer: 'Linux Foundation / Cloud Native Computing Foundation',
+            issueDate: '2022-08',
+            credentialId: 'CKA-8839201',
+            credentialUrl: 'https://cncf.io/certification',
+          }),
+        },
+      ],
+    });
+
+    // 7. Availability
+    await prisma.availability.create({
+      data: {
+        userId,
+        status: 'immediate',
+      },
+    });
+
+    // 8. Update AI Candidate Profile for Member 2 matching
+    try {
+      await prisma.aiCandidateProfile.upsert({
+        where: { userId },
+        create: {
+          userId,
+          name: userName,
+          headline: 'Staff Distributed Systems Architect',
+          hoursPerWeek: 40,
+          recruiterVisible: true,
+          matchingOptIn: true,
+        },
+        update: {
+          name: userName,
+          headline: 'Staff Distributed Systems Architect',
+          hoursPerWeek: 40,
+          recruiterVisible: true,
+          matchingOptIn: true,
+        },
+      });
+    } catch {}
 
     return this.getMe(userId);
   }
