@@ -26,6 +26,7 @@ export const OpportunitiesInboxPage: React.FC = () => {
 
   // Responding to opportunity
   const [actioningId, setActioningId] = useState<string | null>(null);
+  const [responseNotice, setResponseNotice] = useState<string | null>(null);
 
   const fetchOpportunities = async () => {
     try {
@@ -104,6 +105,17 @@ export const OpportunitiesInboxPage: React.FC = () => {
   const handleRespond = async (messageId: string, status: 'accepted' | 'declined') => {
     try {
       setActioningId(messageId);
+      // Immediate optimistic update
+      setOpportunities((prev) =>
+        prev.map((o) => (o.id === messageId ? { ...o, status } : o))
+      );
+      setResponseNotice(
+        status === 'declined'
+          ? 'You politely declined this opportunity. The hiring team has been notified.'
+          : 'You accepted and expressed interest in this role! The hiring team has been notified to coordinate next steps.'
+      );
+      setTimeout(() => setResponseNotice(null), 5000);
+
       const res = await fetch(`/api/v1/pipeline/opportunities/${messageId}/respond`, {
         method: 'POST',
         headers: {
@@ -114,9 +126,12 @@ export const OpportunitiesInboxPage: React.FC = () => {
       });
 
       if (res.ok) {
-        setOpportunities((prev) =>
-          prev.map((o) => (o.id === messageId ? { ...o, status } : o))
-        );
+        const data = await res.json();
+        if (data && data.status) {
+          setOpportunities((prev) =>
+            prev.map((o) => (o.id === messageId ? { ...o, status: data.status } : o))
+          );
+        }
       }
     } catch (err) {
       console.error('Failed to respond to opportunity:', err);
@@ -238,6 +253,15 @@ export const OpportunitiesInboxPage: React.FC = () => {
       {/* Opportunities List */}
       <div className="space-y-4">
         <h2 className="text-sm font-bold text-white">Inbound Messages ({opportunities.length})</h2>
+
+        {responseNotice && (
+          <div className="p-3.5 rounded-xl bg-[#0A1680]/30 border border-[#93B2F8]/40 text-xs text-[#93B2F8] flex items-center gap-2 animate-fadeIn">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+            <span>{responseNotice}</span>
+          </div>
+        )}
 
         {loading ? (
           <div className="space-y-3 animate-pulse">

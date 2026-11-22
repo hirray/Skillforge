@@ -57,6 +57,25 @@ router.post('/read-all', requireAuth, async (req: Request, res: Response, next: 
   }
 });
 
+// POST /notifications/test - Trigger on-demand test notification for development
+router.post('/test', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = getAuthUser(req);
+    const { category = 'outreach', title = 'Direct Outreach Alert', message = 'A verified enterprise sent you an invitation for Senior Distributed Systems Lead.' } = req.body;
+    const notif = await getService().dispatchNotification({
+      userId,
+      category,
+      title,
+      message,
+      type: 'test_event',
+      link: '/opportunities',
+    });
+    res.json({ success: true, notification: notif });
+  } catch (e) {
+    next(e);
+  }
+});
+
 // GET /notifications/preferences - Get notification settings
 router.get('/preferences', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
   try {

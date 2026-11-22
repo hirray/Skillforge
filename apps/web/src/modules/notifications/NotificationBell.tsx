@@ -159,6 +159,24 @@ export const NotificationsInboxPage: React.FC = () => {
     fetchPreferences();
   }, [selectedCategory, unreadOnly]);
 
+  const handleSendTestNotif = async () => {
+    try {
+      await fetch('/api/v1/notifications/test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          category: selectedCategory === 'all' ? 'outreach' : selectedCategory,
+          title: 'Direct Recruiter Inquiry',
+          message: 'Northstar Labs sent you an interview invitation for Senior Systems Architect.',
+        }),
+      });
+      fetchNotifications();
+    } catch (e) {}
+  };
+
   const handleMarkAsRead = async (id: string) => {
     try {
       await fetch(`/api/v1/notifications/${id}/read`, {
@@ -214,6 +232,15 @@ export const NotificationsInboxPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={handleSendTestNotif}
+            className="px-3 py-1.5 rounded-xl border border-[#93B2F8]/30 hover:border-[#93B2F8] bg-[#0A1680]/20 text-xs font-semibold text-[#93B2F8] transition-colors flex items-center gap-1.5"
+          >
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M8 2v12M2 8h12" />
+            </svg>
+            <span>Send Test Alert</span>
+          </button>
           <button
             onClick={() => setShowPreferences(!showPreferences)}
             className="px-3.5 py-1.5 rounded-xl border border-[#282836] hover:border-[#93B2F8] text-xs font-semibold text-zinc-300 hover:text-white transition-colors"
@@ -361,8 +388,14 @@ export const NotificationsInboxPage: React.FC = () => {
         ))}
 
         {notifications.length === 0 && !loading && (
-          <div className="p-12 text-center text-zinc-500 text-xs bg-[#15151a] rounded-2xl border border-[#282836]">
-            No notifications found for this view.
+          <div className="p-12 text-center text-xs bg-[#15151a] rounded-2xl border border-[#282836] space-y-3">
+            <p className="text-zinc-400">No notifications found for this view.</p>
+            <button
+              onClick={handleSendTestNotif}
+              className="px-4 py-2 rounded-xl text-xs font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] transition-colors"
+            >
+              Generate Sample Notifications
+            </button>
           </div>
         )}
       </div>

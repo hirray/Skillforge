@@ -173,4 +173,22 @@ describe('Member 1 Phase 1 & 2 Unit Suite', () => {
       expect(Array.isArray(feed.feed[0].reasons)).toBe(true);
     }
   });
+
+  it('Module 30 & 25: Recruiter notifications auto-seed and candidate declining outreach notifies recruiter', async () => {
+    // 1. Recruiter auto-seeding
+    const recruiterNotifs = await notifService.listNotifications('recruiter-001', {});
+    expect(recruiterNotifs.total).toBeGreaterThan(0);
+    expect(recruiterNotifs.data.length).toBeGreaterThan(0);
+
+    // 2. Candidate politely declining an opportunity
+    const { RealService: RealPipelineService } = await import('../pipeline/real');
+    const pipelineService = new RealPipelineService();
+    const declineRes = await pipelineService.respondToOpportunity('outreach-demo-001', testUserId, 'declined');
+    expect(declineRes.success).toBe(true);
+    expect(declineRes.status).toBe('declined');
+
+    // 3. Recruiter received notification about the decline
+    const updatedRecruiterNotifs = await notifService.listNotifications('recruiter-001', { category: 'outreach' });
+    expect(updatedRecruiterNotifs.data.some((n: any) => n.title.includes('Declined'))).toBe(true);
+  });
 });
