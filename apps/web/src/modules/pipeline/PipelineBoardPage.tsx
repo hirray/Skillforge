@@ -214,7 +214,7 @@ export const PipelineBoardPage: React.FC = () => {
     try {
       setSendingOutreach(true);
       setOutreachStatus(null);
-      const res = await fetch(`/api/v1/pipeline/outreach`, {
+      const res = await fetch(`/api/v1/pipeline/${outreachEntry.id}/outreach`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -227,9 +227,9 @@ export const PipelineBoardPage: React.FC = () => {
         }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setOutreachStatus({ error: data.message || 'Outreach could not be delivered.' });
+        setOutreachStatus({ error: data.message || data.error || 'Outreach could not be delivered.' });
       } else {
         setOutreachStatus({ success: 'Outreach message successfully sent to candidate opportunities inbox!' });
         setOutreachText('');

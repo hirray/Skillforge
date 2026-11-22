@@ -124,12 +124,16 @@ router.post('/:id/notes', async (req: Request, res: Response, next: NextFunction
   }
 });
 
-// POST /pipeline/:id/outreach - Send message to candidate
-router.post('/:id/outreach', async (req: Request, res: Response, next: NextFunction) => {
+// POST /pipeline/:id/outreach or /pipeline/outreach - Send message to candidate
+router.post(['/:id/outreach', '/outreach'], async (req: Request, res: Response, next: NextFunction) => {
   try {
     const recruiterId = getAuthUser(req);
+    const entryId = req.params.id || req.body.entryId;
+    if (!entryId) {
+      return res.status(400).json({ code: 'VALIDATION_ERROR', message: 'Missing pipeline entry ID' });
+    }
     const data = outreachMessageSchema.parse(req.body);
-    const result = await getService().sendOutreach(req.params.id, data.text, recruiterId);
+    const result = await getService().sendOutreach(entryId, data.text, recruiterId);
     res.status(201).json(result);
   } catch (e) {
     next(e);
