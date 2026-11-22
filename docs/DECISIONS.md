@@ -149,3 +149,29 @@
 - Analytics excludes event payloads from automatic capture, aggregates in SQL, labels synthetic history, and suppresses small cohorts. Job-match run headers store only safe run/job metadata and empty-result summaries; candidate evidence stays in protected CandidateMatch rows.
 - ProjectDetail receives one URL-query initialization line so health actions open the existing Tasks or Milestones tab. Default navigation is unchanged; Member 3 should review this integration line.
 - PDF parser dependencies: pypdf, rapidfuzz and PyYAML. Optional hybrid: scikit-learn. Multer handles bounded multipart uploads. ESLint/parser and Prettier provide repository checks; no shared component was reformatted.
+
+## Phase 4: Candidate Comparison & Hiring Pipeline (PRD Area 25)
+- **Data Model & Scoping**:
+  - `Shortlist` entries are strictly scoped by `companyId` and `recruiterId`.
+  - Recruiter notes (`RecruiterNote`) are strictly confidential and private to company recruiters. They are never returned on candidate-facing endpoints or views.
+  - Stage transitions (`New`, `Reviewed`, `Shortlisted`, `Contacted`, `Interview`, `Selected`, `Rejected`, `Closed`) write immutable audit history records to `PipelineStageHistory`.
+- **Consent-Aware Outreach & Privacy Protection**:
+  - Candidates retain sovereign control over their visibility (`recruiterVisible`) and AI matching participation (`matchingOptIn`).
+  - Outreach messages are checked at time-of-sending against candidate consent. If a candidate has withdrawn recruiter visibility, sending messages is strictly blocked (`403 FORBIDDEN`).
+  - In the pipeline board, if a shortlisted candidate withdraws visibility, their card displays a `Profile no longer visible` badge, retaining historical notes while disabling new contact.
+  - Inbound recruiter messages are surfaced to the candidate in an "Opportunities Inbox" where candidates can accept or decline without exposing their private stage or recruiter notes.
+- **Side-by-Side Comparison Engine**:
+  - Compares 2 to 4 candidates simultaneously across documented experience, verified projects count, verified commits count, skill evidence levels (`verified` vs `unverified` vs `missing`), collaborative projects, and automated verification match rationale.
+  - Decision actions allow advancing candidate stages directly from the comparison matrix.
+
+## Phase 4: Company-Sponsored Real-World Projects (PRD Area 28)
+- **Data Model & Scoping**:
+  - `Challenge` entities represent enterprise-sponsored briefs linked to a verified `Company`.
+  - Team projects link to challenges via `challengeId` on `Project`.
+- **Submissions & Deadline Enforcement**:
+  - Challenge submissions (`ChallengeEntry`) enforce active status and deadline cutoff: submissions after `endsAt` or when status is `closed` are blocked (`400 VALIDATION_ERROR`).
+  - Submissions capture working demo URL, repository URL, and solution summary.
+- **Recruiter Evaluation Console**:
+  - Sponsoring enterprise recruiters can update entry review status (`submitted`, `under_review`, `shortlisted`, `declined`) and record private evaluation notes (`companyNote`).
+  - Private notes are stripped from public and participant entry queries, ensuring evaluation integrity.
+

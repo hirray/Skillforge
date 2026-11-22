@@ -32,6 +32,7 @@ import tasksRouter from './modules/tasks/routes';
 import teamRouter from './modules/team/routes';
 import usersRouter from './modules/users/routes';
 import verificationRouter from './modules/verification/routes';
+import challengesRouter, { challengeEntriesRouter } from './modules/challenges/routes';
 
 const app = express();
 
@@ -69,6 +70,11 @@ app.use('/api/v1/skills', skillsRouter);
 app.use('/api/v1/talent', talentRouter);
 app.use('/api/v1/tasks', tasksRouter);
 app.use('/api/v1/team', teamRouter);
+app.use('/api/v1/challenges', challengesRouter);
+app.use('/api/v1/challenge-entries', challengeEntriesRouter);
+app.use('/api/v1', pipelineRouter);
+app.use('/api/v1', challengesRouter);
+app.use('/api/v1', challengeEntriesRouter);
 app.use('/api/v1', teamRouter);
 app.use('/api/v1', tasksRouter);
 app.use('/api/v1', chatRouter);

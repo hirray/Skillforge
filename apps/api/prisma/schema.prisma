@@ -199,6 +199,7 @@ model Project {
   contributions      ContributionEvent[]
   eventId            String?
   event              HackathonEvent?     @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  challengeId        String?
 }
 
 model ProjectRequirement {
@@ -694,10 +695,72 @@ model CandidateMatch {
 }
 
 model Shortlist {
-  id        String @id @default(uuid())
-  jobId     String
-  userId    String
-  job       Job    @relation(fields: [jobId], references: [id])
+  id          String   @id @default(uuid())
+  companyId   String?
+  recruiterId String?
+  jobId       String?
+  userId      String
+  stage       String   @default("Shortlisted") // New, Reviewed, Shortlisted, Contacted, Interview, Selected, Rejected, Closed
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  job         Job?     @relation(fields: [jobId], references: [id])
+}
+
+model PipelineStageHistory {
+  id        String   @id @default(uuid())
+  entryId   String
+  fromStage String
+  toStage   String
+  changedBy String
+  createdAt DateTime @default(now())
+}
+
+model RecruiterNote {
+  id        String   @id @default(uuid())
+  entryId   String
+  authorId  String
+  text      String
+  createdAt DateTime @default(now())
+}
+
+model OutreachMessage {
+  id          String   @id @default(uuid())
+  entryId     String
+  recruiterId String
+  candidateId String
+  text        String
+  status      String   @default("sent") // sent | accepted | declined
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+}
+
+model Challenge {
+  id           String   @id @default(uuid())
+  companyId    String
+  title        String
+  problem      String
+  deliverables String   // JSON or text
+  skillIds     String   @default("[]") // JSON string array
+  startsAt     DateTime @default(now())
+  endsAt       DateTime
+  rules        String?
+  visibility   String   @default("public")
+  status       String   @default("open") // draft | open | closed | archived
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+}
+
+model ChallengeEntry {
+  id          String   @id @default(uuid())
+  challengeId String
+  projectId   String
+  summary     String
+  demoUrl     String?
+  repoUrl     String?
+  status      String   @default("submitted") // submitted | under_review | shortlisted | declined
+  companyNote String?
+  submittedAt DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
 }
 
 model Application {

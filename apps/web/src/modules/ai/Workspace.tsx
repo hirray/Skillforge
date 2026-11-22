@@ -28,6 +28,8 @@ import { ContributionsHubPage } from '../contribution';
 import { TalentSearchPage, CandidateProofView } from '../talent';
 import { MyCertificatesPage, PublicVerifyPage } from '../certificates';
 import { VerifiedExperiencePage, PortfolioEditorPage, PublicPortfolioPage } from '../portfolio';
+import { PipelineBoardPage, OpportunitiesInboxPage } from '../pipeline';
+import { ChallengeBoardPage, ChallengeDetailPage } from '../challenges';
 import './studio.css';
 
 const tools = [
@@ -315,6 +317,9 @@ export default function Member2Workspace() {
   }, []);
 
   const getPageTitle = (pathname: string) => {
+    if (pathname.startsWith('/pipeline')) return 'Hiring Pipeline';
+    if (pathname.startsWith('/opportunities')) return 'Opportunities Inbox';
+    if (pathname.startsWith('/challenges')) return 'Sponsored Challenges';
     if (pathname.startsWith('/certificates')) return 'Completion Certificates';
     if (pathname.startsWith('/verify')) return 'Credential Verification';
     if (pathname.startsWith('/me/verified-experience')) return 'Verified Experience';
@@ -416,6 +421,18 @@ export default function Member2Workspace() {
           <NavLink to="/talent" onClick={() => setMobileNav(false)}>
             <Icon name="team" />
             Recruiter Talent Search
+          </NavLink>
+          <NavLink to="/pipeline" onClick={() => setMobileNav(false)}>
+            <Icon name="folder" />
+            Hiring Pipeline
+          </NavLink>
+          <NavLink to="/opportunities" onClick={() => setMobileNav(false)}>
+            <Icon name="chat" />
+            Opportunities Inbox
+          </NavLink>
+          <NavLink to="/challenges" onClick={() => setMobileNav(false)}>
+            <Icon name="rocket" />
+            Sponsored Challenges
           </NavLink>
 
           <span className="st-nav-label">Intelligence</span>
@@ -530,6 +547,10 @@ export default function Member2Workspace() {
               <Route path="/talent/*" element={<TalentSearchPage />} />
               <Route path="/portfolio/candidate/*" element={<CandidateProofView />} />
               <Route path="/portfolio/*" element={<CandidateProofView />} />
+              <Route path="/pipeline/*" element={<PipelineBoardPage />} />
+              <Route path="/opportunities/*" element={<OpportunitiesInboxPage />} />
+              <Route path="/challenges/:id" element={<ChallengeDetailPage />} />
+              <Route path="/challenges/*" element={<ChallengeBoardPage />} />
               
               <Route path="/ai" element={<Overview context={activeContext} />} />
               <Route

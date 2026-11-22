@@ -646,6 +646,147 @@ export interface PublicPortfolioView {
   };
 }
 
+// Module 25: Candidate Comparison & Hiring Pipeline
+export type PipelineStage =
+  | 'New'
+  | 'Reviewed'
+  | 'Shortlisted'
+  | 'Contacted'
+  | 'Interview'
+  | 'Selected'
+  | 'Rejected'
+  | 'Closed';
+
+export interface PipelineStageHistory {
+  id: string;
+  entryId: string;
+  fromStage: string;
+  toStage: string;
+  changedBy: string;
+  createdAt: string;
+}
+
+export interface RecruiterNote {
+  id: string;
+  entryId: string;
+  authorId: string;
+  text: string;
+  createdAt: string;
+}
+
+export interface OutreachMessage {
+  id: string;
+  entryId: string;
+  recruiterId: string;
+  candidateId: string;
+  text: string;
+  status: 'sent' | 'accepted' | 'declined' | string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Shortlist {
+  id: string;
+  companyId?: string | null;
+  recruiterId?: string | null;
+  jobId?: string | null;
+  userId: string;
+  stage: PipelineStage | string;
+  createdAt: string;
+  updatedAt: string;
+  candidate?: {
+    id: string;
+    name: string;
+    email?: string;
+    avatar?: string | null;
+    headline?: string;
+    skills?: string[];
+    location?: string;
+    workMode?: string;
+    experienceYears?: number;
+    commitsCount?: number;
+    tasksCount?: number;
+    verifiedProjectsCount?: number;
+    recruiterVisible?: boolean;
+    contactPreference?: 'open' | 'applied_only' | 'closed' | string;
+  };
+  job?: {
+    id: string;
+    title: string;
+  } | null;
+  stageHistory?: PipelineStageHistory[];
+  notes?: RecruiterNote[];
+  outreach?: OutreachMessage[];
+}
+
+export interface CompareCandidateRow {
+  candidateId: string;
+  candidateName: string;
+  headline: string;
+  location: string;
+  workMode: string;
+  experienceYears: number;
+  recruiterVisible: boolean;
+  visible: boolean;
+  skills: Array<{ name: string; evidenceLevel: string; verified: boolean }>;
+  verifiedProjectsCount: number;
+  commitsCount: number;
+  tasksCount: number;
+  certificatesCount: number;
+  jobFitScore?: number;
+  matchReasons: string[];
+}
+
+export interface CompareResult {
+  jobId?: string | null;
+  jobTitle?: string | null;
+  candidates: CompareCandidateRow[];
+  comparedAt: string;
+}
+
+// Module 28: Company-Sponsored Real-World Projects
+export interface Challenge {
+  id: string;
+  companyId: string;
+  title: string;
+  problem: string;
+  deliverables: string;
+  skillIds: string[];
+  startsAt: string;
+  endsAt: string;
+  rules?: string | null;
+  visibility: 'public' | 'private' | string;
+  status: 'draft' | 'open' | 'closed' | 'archived' | string;
+  createdAt: string;
+  updatedAt: string;
+  company?: {
+    id: string;
+    name: string;
+    logo?: string | null;
+    verified?: boolean;
+  };
+  entriesCount?: number;
+}
+
+export interface ChallengeEntry {
+  id: string;
+  challengeId: string;
+  projectId: string;
+  summary: string;
+  demoUrl?: string | null;
+  repoUrl?: string | null;
+  status: 'submitted' | 'under_review' | 'shortlisted' | 'declined' | string;
+  companyNote?: string | null;
+  submittedAt: string;
+  updatedAt: string;
+  project?: {
+    id: string;
+    title: string;
+    category?: string;
+    membersCount?: number;
+  };
+}
+
 
 
 

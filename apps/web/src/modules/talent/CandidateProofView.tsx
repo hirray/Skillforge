@@ -47,6 +47,96 @@ export const CandidateProofView: React.FC = () => {
   const [shortlisted, setShortlisted] = useState(false);
   const [activeTab, setActiveTab] = useState<'all' | 'github' | 'tasks' | 'projects' | 'manual'>('all');
   const [copiedLink, setCopiedLink] = useState(false);
+  const [showOutreachModal, setShowOutreachModal] = useState(false);
+  const [outreachText, setOutreachText] = useState('');
+  const [sendingOutreach, setSendingOutreach] = useState(false);
+  const [outreachStatus, setOutreachStatus] = useState<{ success?: string; error?: string } | null>(null);
+  const [pipelineEntryId, setPipelineEntryId] = useState<string | null>(null);
+
+  const handleShortlistCandidate = async () => {
+    if (!candidate) return;
+    try {
+      const candidateKey = candidate.id || candidate.userId || userId;
+      const res = await fetch('/api/v1/pipeline', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token') || 'recruiter-001'}`,
+        },
+        body: JSON.stringify({
+          candidateId: candidateKey,
+          companyId: 'm2-demo-company',
+          stage: 'Shortlisted',
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPipelineEntryId(data.id);
+        setShortlisted(true);
+      }
+    } catch (e) {
+      console.error('Error shortlisting candidate:', e);
+      setShortlisted(true);
+    }
+  };
+
+  const handleSendOutreach = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!candidate || !outreachText.trim()) return;
+    try {
+      setSendingOutreach(true);
+      setOutreachStatus(null);
+      let entryId = pipelineEntryId;
+      if (!entryId) {
+        const pRes = await fetch('/api/v1/pipeline', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token') || 'recruiter-001'}`,
+          },
+          body: JSON.stringify({
+            candidateId: candidate.id || candidate.userId || userId,
+            companyId: 'm2-demo-company',
+            stage: 'Contacted',
+          }),
+        });
+        if (pRes.ok) {
+          const pData = await pRes.json();
+          entryId = pData.id;
+          setPipelineEntryId(entryId);
+        }
+      }
+
+      const res = await fetch('/api/v1/pipeline/outreach', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token') || 'recruiter-001'}`,
+        },
+        body: JSON.stringify({
+          entryId: entryId || 'pipeline-entry-default',
+          companyId: 'm2-demo-company',
+          text: outreachText.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setOutreachStatus({ error: data.message || 'Outreach could not be delivered.' });
+      } else {
+        setOutreachStatus({ success: 'Outreach message successfully sent to candidate opportunities inbox!' });
+        setOutreachText('');
+        setTimeout(() => {
+          setShowOutreachModal(false);
+          setOutreachStatus(null);
+        }, 1800);
+      }
+    } catch (err: any) {
+      setOutreachStatus({ error: err.message || 'Error sending message.' });
+    } finally {
+      setSendingOutreach(false);
+    }
+  };
 
   useEffect(() => {
     const fetchCandidateAndEvidence = async () => {
@@ -286,7 +376,7 @@ export const CandidateProofView: React.FC = () => {
           <div className="flex items-center gap-2.5 shrink-0 pt-2 md:pt-0">
             <button
               type="button"
-              onClick={() => setShortlisted(!shortlisted)}
+              onClick={handleShortlistCandidate}
               className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
                 shortlisted
                   ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/25'
@@ -296,18 +386,17 @@ export const CandidateProofView: React.FC = () => {
               <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor">
                 <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
               </svg>
-              <span>{shortlisted ? 'Shortlisted' : 'Shortlist Candidate'}</span>
+              <span>{shortlisted ? '★ In Hiring Pipeline' : 'Shortlist Candidate'}</span>
             </button>
 
-            <a
-              href={`mailto:recruiter-team@skillforge.internal?subject=Opportunity%20Discussion%20for%20${encodeURIComponent(
-                candidate.name
-              )}`}
+            <button
+              type="button"
+              onClick={() => setShowOutreachModal(true)}
               className="px-5 py-2.5 rounded-xl text-xs font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] transition-all shadow-lg shadow-[#93B2F8]/20 flex items-center gap-2"
             >
               <span>Contact Candidate</span>
               <span>→</span>
-            </a>
+            </button>
           </div>
         </div>
       </div>
@@ -631,7 +720,7 @@ export const CandidateProofView: React.FC = () => {
               Shortlist them to your company pipeline or send a direct technical interview invite.
             </p>
             <button
-              onClick={() => setShortlisted(!shortlisted)}
+              onClick={handleShortlistCandidate}
               className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all shadow-md ${
                 shortlisted
                   ? 'bg-emerald-500 text-black shadow-emerald-500/20'
@@ -640,9 +729,104 @@ export const CandidateProofView: React.FC = () => {
             >
               {shortlisted ? '★ Shortlisted in Pipeline' : 'Shortlist Candidate Now'}
             </button>
+            {shortlisted && (
+              <button
+                onClick={() => navigate('/pipeline')}
+                className="w-full text-xs text-[#93B2F8] hover:underline block pt-1 font-semibold"
+              >
+                Open Hiring Pipeline Board →
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Direct Outreach Modal */}
+      {showOutreachModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="w-full max-w-lg bg-[#15151a] border border-[#282836] rounded-2xl p-6 space-y-4 shadow-2xl">
+            <div className="flex items-start justify-between pb-3 border-b border-[#282836]">
+              <div>
+                <h2 className="text-base font-bold text-white">Send Direct Outreach Message</h2>
+                <p className="text-xs text-zinc-400">
+                  To: <strong className="text-white">{candidate.name}</strong>
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowOutreachModal(false);
+                  setOutreachStatus(null);
+                }}
+                className="text-zinc-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Consent Notice */}
+            {!candidate.recruiterVisible ? (
+              <div className="p-3 bg-rose-950/60 border border-rose-500/40 rounded-xl text-xs text-rose-300 space-y-1">
+                <p className="font-bold">⚠️ Recruiter Contact Consent Withdrawn</p>
+                <p className="text-[11px] text-rose-400">
+                  This candidate has toggled off recruiter contact consent in their discovery settings. Sending messages to this candidate is blocked.
+                </p>
+              </div>
+            ) : (
+              <div className="p-3 bg-blue-950/40 border border-blue-500/30 rounded-xl text-xs text-blue-300 flex items-center gap-2">
+                <span>✓ Candidate has active discovery consent enabled for verified recruiters.</span>
+              </div>
+            )}
+
+            {outreachStatus?.error && (
+              <div className="p-3 bg-rose-950/60 border border-rose-500/40 rounded-xl text-xs text-rose-300">
+                {outreachStatus.error}
+              </div>
+            )}
+            {outreachStatus?.success && (
+              <div className="p-3 bg-emerald-950/60 border border-emerald-500/40 rounded-xl text-xs text-emerald-300">
+                {outreachStatus.success}
+              </div>
+            )}
+
+            <form onSubmit={handleSendOutreach} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
+                  Message Content (Delivered to candidate's Opportunities Inbox)
+                </label>
+                <textarea
+                  rows={4}
+                  disabled={!candidate.recruiterVisible}
+                  value={outreachText}
+                  onChange={(e) => setOutreachText(e.target.value)}
+                  placeholder={`Hi ${candidate.name}, we were impressed by your verified contributions on SkillForge and would love to discuss an engineering role with our team...`}
+                  className="w-full bg-[#1b1b22] text-xs text-white p-3 rounded-xl border border-[#282836] focus:border-[#93B2F8] focus:outline-none transition-colors disabled:opacity-50"
+                  required
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowOutreachModal(false);
+                    setOutreachStatus(null);
+                  }}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={sendingOutreach || !outreachText.trim() || !candidate.recruiterVisible}
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] disabled:opacity-50 transition-all shadow-md shadow-[#93B2F8]/20"
+                >
+                  {sendingOutreach ? 'Sending...' : 'Send Message →'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
