@@ -76,14 +76,31 @@ export const ChallengeDetailPage: React.FC = () => {
         const projRes = await fetch('/api/v1/projects');
         if (projRes.ok) {
           const projs = await projRes.json();
-          const list = Array.isArray(projs) ? projs : projs.projects || [];
-          setMyProjects(list);
-          if (list.length > 0) setSelectedProjectId(list[0].id);
+          const list: any[] = Array.isArray(projs)
+            ? projs
+            : Array.isArray(projs?.data)
+            ? projs.data
+            : Array.isArray(projs?.projects)
+            ? projs.projects
+            : [];
+          if (list.length > 0) {
+            setMyProjects(list);
+            setSelectedProjectId(list[0].id);
+          } else {
+            const fallback = [{ id: 'm2-demo-project', title: 'Vision attendance platform' }];
+            setMyProjects(fallback);
+            setSelectedProjectId(fallback[0].id);
+          }
+        } else {
+          const fallback = [{ id: 'm2-demo-project', title: 'Vision attendance platform' }];
+          setMyProjects(fallback);
+          setSelectedProjectId(fallback[0].id);
         }
       } catch (e) {
         // Fallback demo project
-        setMyProjects([{ id: 'm2-demo-project', title: 'Pilot Project (Updated)' }]);
-        setSelectedProjectId('m2-demo-project');
+        const fallback = [{ id: 'm2-demo-project', title: 'Vision attendance platform' }];
+        setMyProjects(fallback);
+        setSelectedProjectId(fallback[0].id);
       }
     } catch (err: any) {
       setError(err.message || 'Error loading challenge');
@@ -488,8 +505,13 @@ export const ChallengeDetailPage: React.FC = () => {
                 <h2 className="text-base font-bold text-white">Submit Team Solution</h2>
                 <p className="text-xs text-zinc-400">Challenge: {challenge.title}</p>
               </div>
-              <button onClick={() => setShowSubmitModal(false)} className="text-zinc-400 hover:text-white">
-                ✕
+              <button
+                onClick={() => setShowSubmitModal(false)}
+                className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-[#1b1b22] transition-colors"
+              >
+                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+                  <path d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z" />
+                </svg>
               </button>
             </div>
 
@@ -506,15 +528,24 @@ export const ChallengeDetailPage: React.FC = () => {
 
             <form onSubmit={handleSubmitEntry} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-zinc-300 mb-1">Select Active Team Project</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="font-semibold text-zinc-300">Select Active Team Project</label>
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/projects/create?challengeId=${challenge.id}`)}
+                    className="text-[11px] text-[#93B2F8] hover:underline"
+                  >
+                    + Create New Project
+                  </button>
+                </div>
                 <select
                   required
                   value={selectedProjectId}
                   onChange={(e) => setSelectedProjectId(e.target.value)}
-                  className="w-full bg-[#1b1b22] text-white p-3 rounded-xl border border-[#282836] focus:border-[#93B2F8] focus:outline-none"
+                  className="w-full bg-[#1b1b22] text-white p-3 rounded-xl border border-[#282836] focus:border-[#93B2F8] focus:outline-none cursor-pointer"
                 >
                   {myProjects.map((p) => (
-                    <option key={p.id} value={p.id}>
+                    <option key={p.id} value={p.id} className="bg-[#1b1b22] text-white py-1">
                       {p.title} ({p.id})
                     </option>
                   ))}
