@@ -17,6 +17,7 @@
     "dev:fake-contributions": "tsx scripts/fake-contributions.ts",
     "dev:emit-event": "tsx scripts/emit-event.ts",
     "test:member2": "vitest run src/modules/ai/member2/integration.test.ts --test-timeout=20000 --threads=false",
+    "seed:phase4": "tsx scripts/seed-phase4.ts",
     "check:member2-contract": "tsx scripts/check-member2-contract.ts"
   },
   "dependencies": {

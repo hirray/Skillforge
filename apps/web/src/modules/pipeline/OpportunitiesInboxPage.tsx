@@ -131,7 +131,10 @@ export const OpportunitiesInboxPage: React.FC = () => {
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
             <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              <span>🛡️ Recruiter Contact Consent & Visibility Control</span>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#93B2F8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+              <span>Recruiter Contact Consent & Visibility Control</span>
               {consentSavedNotice && (
                 <span className="text-[10px] text-emerald-400 font-semibold bg-emerald-950/70 px-2 py-0.5 rounded-full">
                   Saved successfully
@@ -202,7 +205,10 @@ export const OpportunitiesInboxPage: React.FC = () => {
         ) : opportunities.length === 0 ? (
           <div className="p-12 text-center rounded-2xl bg-[#15151a] border border-[#282836] space-y-3">
             <div className="w-12 h-12 rounded-2xl bg-[#1b1b22] border border-[#282836] mx-auto flex items-center justify-center text-[#93B2F8]">
-              ✉
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect width="20" height="16" x="2" y="4" rx="2" />
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+              </svg>
             </div>
             <h3 className="text-sm font-bold text-white">No outreach messages yet</h3>
             <p className="text-xs text-zinc-400 max-w-md mx-auto">
@@ -238,12 +244,18 @@ export const OpportunitiesInboxPage: React.FC = () => {
                 {/* Status Badge */}
                 <div>
                   {opp.status === 'accepted' ? (
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-950/70 text-emerald-400 border border-emerald-500/30">
-                      ✓ Accepted / Interested
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-950/70 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
+                      <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor">
+                        <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" />
+                      </svg>
+                      <span>Accepted / Interested</span>
                     </span>
                   ) : opp.status === 'declined' ? (
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-zinc-800 text-zinc-400 border border-zinc-700">
-                      ✕ Declined Politely
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-zinc-800 text-zinc-400 border border-zinc-700 flex items-center gap-1.5">
+                      <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor">
+                        <path d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z" />
+                      </svg>
+                      <span>Declined Politely</span>
                     </span>
                   ) : (
                     <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-950/60 text-blue-300 border border-blue-500/30">

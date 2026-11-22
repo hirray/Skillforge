@@ -294,7 +294,17 @@ export const ChallengeDetailPage: React.FC = () => {
             </div>
 
             <div className="p-4 rounded-xl bg-[#0A1680]/20 border border-[#93B2F8]/30 text-xs text-[#93B2F8] space-y-1">
-              <strong className="block text-white">🏆 Direct Recruiter Review</strong>
+              <strong className="text-white flex items-center gap-1.5">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#F1B94C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                  <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                  <path d="M4 22h16" />
+                  <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                  <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                  <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+                </svg>
+                <span>Direct Recruiter Review</span>
+              </strong>
               <p className="text-[11px] text-zinc-300">
                 Shortlisted team entries are fast-tracked into the company's hiring pipeline with verified proof attestation.
               </p>
@@ -392,7 +402,11 @@ export const ChallengeDetailPage: React.FC = () => {
                   <div className="pt-3 border-t border-[#282836] space-y-3 bg-[#171720] p-4 rounded-xl border border-[#282836]">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
-                        <span>🔒 Enterprise Evaluation Console</span>
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                        <span>Enterprise Evaluation Console</span>
                         <span className="text-[10px] text-zinc-400 font-normal">(Private to company recruiters)</span>
                       </span>
 

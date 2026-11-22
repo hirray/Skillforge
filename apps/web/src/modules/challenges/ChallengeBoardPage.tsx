@@ -196,7 +196,13 @@ export const ChallengeBoardPage: React.FC = () => {
       ) : filtered.length === 0 ? (
         <div className="p-12 text-center rounded-2xl bg-[#15151a] border border-[#282836] space-y-3">
           <div className="w-12 h-12 rounded-2xl bg-[#1b1b22] border border-[#282836] mx-auto flex items-center justify-center text-amber-400">
-            🎯
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="22" y1="12" x2="18" y2="12" />
+              <line x1="6" y1="12" x2="2" y2="12" />
+              <line x1="12" y1="6" x2="12" y2="2" />
+              <line x1="12" y1="22" x2="12" y2="18" />
+            </svg>
           </div>
           <h3 className="text-sm font-bold text-white">No challenges matching filters</h3>
           <p className="text-xs text-zinc-400">Check back soon or post a new sponsored enterprise challenge.</p>

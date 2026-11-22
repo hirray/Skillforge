@@ -169,6 +169,10 @@ async function main() {
     },
   });
   
+  // Seed Phase 4 Demo Data (Modules 25 & 28)
+  const { seedPhase4Data } = await import('./seed-phase4');
+  await seedPhase4Data();
+
   console.log('Database seeded.');
 }
 

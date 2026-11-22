@@ -386,7 +386,7 @@ export const CandidateProofView: React.FC = () => {
               <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor">
                 <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
               </svg>
-              <span>{shortlisted ? '★ In Hiring Pipeline' : 'Shortlist Candidate'}</span>
+              <span>{shortlisted ? 'In Hiring Pipeline' : 'Shortlist Candidate'}</span>
             </button>
 
             <button
@@ -727,7 +727,7 @@ export const CandidateProofView: React.FC = () => {
                   : 'bg-[#93B2F8] text-[#0A1680] hover:bg-[#b0c7fa] shadow-[#93B2F8]/20'
               }`}
             >
-              {shortlisted ? '★ Shortlisted in Pipeline' : 'Shortlist Candidate Now'}
+              {shortlisted ? 'Shortlisted in Pipeline' : 'Shortlist Candidate Now'}
             </button>
             {shortlisted && (
               <button
@@ -766,14 +766,24 @@ export const CandidateProofView: React.FC = () => {
             {/* Consent Notice */}
             {!candidate.recruiterVisible ? (
               <div className="p-3 bg-rose-950/60 border border-rose-500/40 rounded-xl text-xs text-rose-300 space-y-1">
-                <p className="font-bold">⚠️ Recruiter Contact Consent Withdrawn</p>
+                <p className="font-bold flex items-center gap-1.5">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                  <span>Recruiter Contact Consent Withdrawn</span>
+                </p>
                 <p className="text-[11px] text-rose-400">
                   This candidate has toggled off recruiter contact consent in their discovery settings. Sending messages to this candidate is blocked.
                 </p>
               </div>
             ) : (
               <div className="p-3 bg-blue-950/40 border border-blue-500/30 rounded-xl text-xs text-blue-300 flex items-center gap-2">
-                <span>✓ Candidate has active discovery consent enabled for verified recruiters.</span>
+                <svg viewBox="0 0 16 16" width="13" height="13" fill="#93B2F8">
+                  <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" />
+                </svg>
+                <span>Candidate has active discovery consent enabled for verified recruiters.</span>
               </div>
             )}
 
