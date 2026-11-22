@@ -13,9 +13,17 @@ import {
 const router = Router();
 
 const getAuthUser = (req: Request) => {
+  if ((req as any).user?.id) return (req as any).user.id;
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
-    return authHeader.substring(7);
+    const raw = authHeader.substring(7);
+    if (raw.includes('.')) {
+      try {
+        const payload = JSON.parse(Buffer.from(raw.split('.')[1], 'base64').toString());
+        if (payload?.id) return payload.id;
+      } catch {}
+    }
+    return raw;
   }
   return (req.query.userId as string) || 'recruiter-001';
 };

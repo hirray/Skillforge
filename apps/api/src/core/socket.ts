@@ -211,6 +211,10 @@ export function removeUserFromProjectRoom(projectId: string, userId: string) {
   }
 }
 
+export function getSocketServer(): SocketIOServer | null {
+  return io;
+}
+
 export function isUserOnline(userId: string): boolean {
   return onlineUsers.has(userId);
 }

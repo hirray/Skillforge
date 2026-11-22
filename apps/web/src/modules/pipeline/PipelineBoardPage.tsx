@@ -229,7 +229,8 @@ export const PipelineBoardPage: React.FC = () => {
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setOutreachStatus({ error: data.message || data.error || 'Outreach could not be delivered.' });
+        const errMsg = data.error?.message || data.message || (typeof data.error === 'string' ? data.error : null) || 'Outreach could not be delivered.';
+        setOutreachStatus({ error: errMsg });
       } else {
         setOutreachStatus({ success: 'Outreach message successfully sent to candidate opportunities inbox!' });
         setOutreachText('');

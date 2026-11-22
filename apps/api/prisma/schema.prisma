@@ -14,6 +14,38 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
+  // Member 1 Auth & Profile fields
+  passwordHash       String?
+  name               String?           @default("User")
+  displayName        String?
+  username           String?           @unique
+  avatarUrl          String?
+  headline           String?
+  bio                String?
+  pronouns           String?
+  city               String?
+  region             String?
+  country            String?
+  workMode           String?           @default("flexible")
+  emailVerified      Boolean           @default(false)
+  intendedUse        String?           @default("individual")
+  companyName        String?
+  workEmailDomain    String?
+  jobTitle           String?
+  visibilitySettings String?           @default("{\"bio\":\"public\",\"skills\":\"public\",\"experience\":\"platform\",\"education\":\"platform\",\"certifications\":\"public\",\"links\":\"public\",\"availability\":\"recruiters\"}")
+  matchingOptIn      Boolean           @default(true)
+  deactivated        Boolean           @default(false)
+
+  // Member 1 Auth & Session relations
+  refreshTokens           RefreshToken[]
+  emailVerificationTokens EmailVerificationToken[]
+  passwordResetTokens     PasswordResetToken[]
+  consentRecords          ConsentRecord[]
+  deletionRequests        DeletionRequest[]
+  userSessions            UserSession[]
+  bookmarks               Bookmark[]
+  notificationPreferences NotificationPreference[]
+
   skills         UserSkill[]
   learningGoals  LearningGoal[]
   availabilities Availability[]
@@ -40,11 +72,14 @@ model User {
 }
 
 model Skill {
-  id         String       @id @default(uuid())
-  name       String       @unique
-  category   String
-  aliases    SkillAlias[]
-  userSkills UserSkill[]
+  id           String       @id @default(uuid())
+  name         String       @unique
+  category     String
+  status       String       @default("active") // active | deprecated | pending
+  mergedIntoId String?
+  description  String?
+  aliases      SkillAlias[]
+  userSkills   UserSkill[]
 }
 
 model SkillAlias {
@@ -442,13 +477,17 @@ model ActivityFeedEntry {
 }
 
 model Notification {
-  id        String   @id @default(uuid())
-  userId    String
-  message   String
-  type      String   @default("info")
-  link      String?
-  read      Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id          String   @id @default(uuid())
+  userId      String
+  title       String?  @default("Notification")
+  message     String
+  type        String   @default("info")
+  category    String?  @default("general")
+  link        String?
+  payloadJson String?  @default("{}")
+  dedupeKey   String?  @unique
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
 }
 
 model GitHubIntegration {
@@ -786,9 +825,14 @@ model Report {
 }
 
 model AuditLog {
-  id        String   @id @default(uuid())
-  action    String
-  createdAt DateTime @default(now())
+  id         String   @id @default(uuid())
+  actorId    String?
+  action     String
+  targetType String?
+  targetId   String?
+  reason     String?
+  metadata   String   @default("{}")
+  createdAt  DateTime @default(now())
 }
 
 
@@ -993,4 +1037,143 @@ model SavedSearch {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
 }
+
+// ---------------------------------------------------------
+// Member 1 Phase 1 & 2 Models: Auth, Skills, Notifications, Search
+// ---------------------------------------------------------
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  familyId  String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, familyId])
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ConsentRecord {
+  id         String   @id @default(uuid())
+  userId     String
+  type       String
+  version    String
+  acceptedAt DateTime @default(now())
+  ip         String?
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model LoginAttempt {
+  id          String   @id @default(uuid())
+  email       String
+  ip          String
+  success     Boolean
+  attemptedAt DateTime @default(now())
+
+  @@index([email, ip, attemptedAt])
+}
+
+model DeletionRequest {
+  id           String    @id @default(uuid())
+  userId       String
+  requestedAt  DateTime  @default(now())
+  scheduledFor DateTime
+  status       String    @default("pending") // pending | executed | cancelled
+  reason       String?
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserSession {
+  id           String    @id @default(uuid())
+  userId       String
+  deviceLabel  String
+  ip           String?
+  lastActiveAt DateTime  @default(now())
+  createdAt    DateTime  @default(now())
+  revokedAt    DateTime?
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model SkillProposal {
+  id            String   @id @default(uuid())
+  canonicalName String
+  category      String   @default("Other")
+  proposedBy    String
+  requestCount  Int      @default(1)
+  status        String   @default("pending") // pending | approved | rejected | merged
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model SkillMergeRecord {
+  id              String    @id @default(uuid())
+  sourceSkillId   String
+  targetSkillId   String
+  mergedBy        String
+  reason          String
+  movedRowIdsJson String    @default("{}")
+  createdAt       DateTime  @default(now())
+  undoneAt        DateTime?
+}
+
+model NotificationPreference {
+  id       String  @id @default(uuid())
+  userId   String
+  category String
+  inApp    Boolean @default(true)
+  email    Boolean @default(true)
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category])
+}
+
+model SearchDocument {
+  id         String   @id @default(uuid())
+  type       String // project | person | job | company
+  refId      String   @unique
+  ownerId    String?
+  visibility String   @default("public") // public | platform | private
+  title      String
+  body       String
+  tags       String   @default("[]") // JSON string of tags
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  @@index([type, visibility])
+}
+
+model Bookmark {
+  id         String   @id @default(uuid())
+  userId     String
+  targetType String // project | job | person
+  targetId   String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, targetType, targetId])
+}
+
 

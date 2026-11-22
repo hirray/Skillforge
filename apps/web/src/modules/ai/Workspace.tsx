@@ -30,6 +30,12 @@ import { MyCertificatesPage, PublicVerifyPage } from '../certificates';
 import { VerifiedExperiencePage, PortfolioEditorPage, PublicPortfolioPage } from '../portfolio';
 import { PipelineBoardPage, OpportunitiesInboxPage } from '../pipeline';
 import { ChallengeBoardPage, ChallengeDetailPage } from '../challenges';
+import { SignInPage, RegisterPage, AccountSettingsPage } from '../auth/AuthPages';
+import { ProfileEditorPage } from '../users/ProfileEditorPage';
+import { PublicProfilePage } from '../users/PublicProfilePage';
+import { AdminSkillsPage } from '../skills/AdminSkillsPage';
+import { NotificationBell, NotificationsInboxPage } from '../notifications/NotificationBell';
+import { GlobalSearchPage, OpportunityFeedPage } from '../search/GlobalSearchPage';
 import './studio.css';
 
 const tools = [
@@ -435,6 +441,32 @@ export default function Member2Workspace() {
             Sponsored Challenges
           </NavLink>
 
+          <span className="st-nav-label">Identity & Discovery</span>
+          <NavLink to="/search" onClick={() => setMobileNav(false)}>
+            <Icon name="overview" />
+            Search & Discovery
+          </NavLink>
+          <NavLink to="/feed" onClick={() => setMobileNav(false)}>
+            <Icon name="spark" />
+            Opportunity Feed
+          </NavLink>
+          <NavLink to="/me/profile" onClick={() => setMobileNav(false)}>
+            <Icon name="people" />
+            Profile & Skills
+          </NavLink>
+          <NavLink to="/admin/skills" onClick={() => setMobileNav(false)}>
+            <Icon name="shield" />
+            Taxonomy Governance
+          </NavLink>
+          <NavLink to="/notifications" onClick={() => setMobileNav(false)}>
+            <Icon name="chat" />
+            Notification Inbox
+          </NavLink>
+          <NavLink to="/auth/settings" onClick={() => setMobileNav(false)}>
+            <Icon name="document" />
+            Account Settings
+          </NavLink>
+
           <span className="st-nav-label">Intelligence</span>
           <NavLink end to="/ai" onClick={() => setMobileNav(false)}>
             <Icon name="overview" />
@@ -494,6 +526,7 @@ export default function Member2Workspace() {
             <strong>{getPageTitle(location.pathname)}</strong>
           </div>
           <div className="st-topbar-right">
+            <NotificationBell />
             <span className="st-preview-tag">Local preview</span>
             <label className="st-account">
               <span className="st-user-avatar">
@@ -551,6 +584,16 @@ export default function Member2Workspace() {
               <Route path="/opportunities/*" element={<OpportunitiesInboxPage />} />
               <Route path="/challenges/:id" element={<ChallengeDetailPage />} />
               <Route path="/challenges/*" element={<ChallengeBoardPage />} />
+
+              <Route path="/auth/login" element={<SignInPage />} />
+              <Route path="/auth/register" element={<RegisterPage />} />
+              <Route path="/auth/settings" element={<AccountSettingsPage />} />
+              <Route path="/me/profile/*" element={<ProfileEditorPage />} />
+              <Route path="/users/:id" element={<PublicProfilePage />} />
+              <Route path="/admin/skills/*" element={<AdminSkillsPage />} />
+              <Route path="/notifications/*" element={<NotificationsInboxPage />} />
+              <Route path="/search/*" element={<GlobalSearchPage />} />
+              <Route path="/feed/*" element={<OpportunityFeedPage />} />
               
               <Route path="/ai" element={<Overview context={activeContext} />} />
               <Route

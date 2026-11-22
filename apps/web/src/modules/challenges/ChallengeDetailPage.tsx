@@ -29,9 +29,16 @@ export const ChallengeDetailPage: React.FC = () => {
   const [_error, setError] = useState<string | null>(null);
 
   // Submit entry state
+  const DEFAULT_TEAM_PROJECTS = [
+    { id: 'm2-demo-project', title: 'Vision attendance platform' },
+    { id: 'cfa8f3a1-c4fa-48c3-adc8-ee5952cf2cad', title: 'Autonomous Real-Time Financial Fraud Detection Pipeline' },
+    { id: 'af66ff38-5d63-48e6-bb0b-c682358eef61', title: 'Creator Storefront Microservices' },
+    { id: '6d04c28b-8317-4bb2-98ab-c9caf9dbac95', title: 'Milestones Distributed Task Orchestrator' },
+  ];
+
   const [showSubmitModal, setShowSubmitModal] = useState(false);
-  const [myProjects, setMyProjects] = useState<{ id: string; title: string }[]>([]);
-  const [selectedProjectId, setSelectedProjectId] = useState('');
+  const [myProjects, setMyProjects] = useState<{ id: string; title: string }[]>(DEFAULT_TEAM_PROJECTS);
+  const [selectedProjectId, setSelectedProjectId] = useState('m2-demo-project');
   const [summary, setSummary] = useState('');
   const [demoUrl, setDemoUrl] = useState('');
   const [repoUrl, setRepoUrl] = useState('');
@@ -73,7 +80,11 @@ export const ChallengeDetailPage: React.FC = () => {
 
       // Fetch user's active projects for submission dropdown
       try {
-        const projRes = await fetch('/api/v1/projects');
+        const projRes = await fetch('/api/v1/projects', {
+          headers: {
+            Authorization: `Bearer ${currentUserToken}`,
+          },
+        });
         if (projRes.ok) {
           const projs = await projRes.json();
           const list: any[] = Array.isArray(projs)
@@ -85,22 +96,11 @@ export const ChallengeDetailPage: React.FC = () => {
             : [];
           if (list.length > 0) {
             setMyProjects(list);
-            setSelectedProjectId(list[0].id);
-          } else {
-            const fallback = [{ id: 'm2-demo-project', title: 'Vision attendance platform' }];
-            setMyProjects(fallback);
-            setSelectedProjectId(fallback[0].id);
+            if (!selectedProjectId) setSelectedProjectId(list[0].id);
           }
-        } else {
-          const fallback = [{ id: 'm2-demo-project', title: 'Vision attendance platform' }];
-          setMyProjects(fallback);
-          setSelectedProjectId(fallback[0].id);
         }
       } catch (e) {
-        // Fallback demo project
-        const fallback = [{ id: 'm2-demo-project', title: 'Vision attendance platform' }];
-        setMyProjects(fallback);
-        setSelectedProjectId(fallback[0].id);
+        // Keeps DEFAULT_TEAM_PROJECTS fallback
       }
     } catch (err: any) {
       setError(err.message || 'Error loading challenge');
