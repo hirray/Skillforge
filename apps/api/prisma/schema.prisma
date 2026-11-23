@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -993,8 +993,8 @@ model MentorshipRequest {
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
   project     Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  mentor      User           @relation("MentorUserRequests", fields: [mentorId], references: [id], onDelete: Cascade)
-  profile     MentorProfile? @relation(fields: [mentorId], references: [userId])
+  mentor      User           @relation("MentorUserRequests", fields: [mentorId], references: [id], onDelete: Cascade, map: "MentorshipRequest_mentor_user_fkey")
+  profile     MentorProfile? @relation(fields: [mentorId], references: [userId], map: "MentorshipRequest_mentor_profile_fkey")
 
   @@index([projectId, mentorId])
   @@index([mentorId, status])
@@ -1010,8 +1010,8 @@ model MentorFeedback {
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
   project     Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  mentor      User           @relation("MentorUserFeedback", fields: [mentorId], references: [id], onDelete: Cascade)
-  profile     MentorProfile? @relation(fields: [mentorId], references: [userId])
+  mentor      User           @relation("MentorUserFeedback", fields: [mentorId], references: [id], onDelete: Cascade, map: "MentorFeedback_mentor_user_fkey")
+  profile     MentorProfile? @relation(fields: [mentorId], references: [userId], map: "MentorFeedback_mentor_profile_fkey")
 
   @@index([projectId, mentorId])
 }

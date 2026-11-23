@@ -92,7 +92,7 @@ describe('Member 1 Phase 1 & 2 Unit Suite', () => {
 
     // Also prefill user-001 so it is ready for the browser session
     await userService.prefillDemoProfile('user-001');
-  });
+  }, 30000);
 
   it('Module 2: Updates availability status', async () => {
     const avail = await userService.updateAvailability(testUserId, {

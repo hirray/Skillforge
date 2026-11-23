@@ -72,6 +72,26 @@ export async function seedPhase4Data() {
     },
   });
 
+  // Ensure Demo Job exists for Shortlists and Pipelines
+  await prisma.job.upsert({
+    where: { id: 'm2-demo-job' },
+    update: {
+      companyId: 'm2-demo-company',
+      title: 'Senior Distributed Systems & AI Systems Lead',
+      status: 'Open',
+    },
+    create: {
+      id: 'm2-demo-job',
+      companyId: 'm2-demo-company',
+      title: 'Senior Distributed Systems & AI Systems Lead',
+      department: 'Engineering',
+      description: 'Lead engineering for scalable neural search, streaming data pipelines, and distributed event architectures.',
+      location: 'San Francisco, CA • Remote',
+      workMode: 'remote',
+      status: 'Open',
+    },
+  });
+
   // 2. Ensure Candidates Have User Profiles & UserPreferences
   const candidatesData = [
     {
