@@ -11,6 +11,7 @@
     "lint": "eslint \"src/**/*.ts\"",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --test-timeout=20000",
+    "test:authz": "vitest run src/modules/admin/admin.authz.test.ts",
     "check:contract": "tsx scripts/check-contract.ts",
     "seed:member2": "tsx scripts/seed-member2.ts",
     "dev:fake-activity": "tsx scripts/fake-activity.ts",

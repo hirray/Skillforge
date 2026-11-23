@@ -23,6 +23,7 @@ export class LocalStorageProvider implements StorageProvider {
   async upload(fileKey: string, data: Buffer | string, mimeType: string): Promise<string> {
     await this.ensureDir();
     const filePath = path.join(this.baseDir, fileKey);
+    await fs.mkdir(path.dirname(filePath), { recursive: true });
     const buffer = typeof data === 'string' ? Buffer.from(data, 'base64') : data;
     await fs.writeFile(filePath, buffer);
     return fileKey;

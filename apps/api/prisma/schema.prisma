@@ -38,6 +38,8 @@ model User {
   visibilitySettings String?           @default("{\"bio\":\"public\",\"skills\":\"public\",\"experience\":\"platform\",\"education\":\"platform\",\"certifications\":\"public\",\"links\":\"public\",\"availability\":\"recruiters\"}")
   matchingOptIn      Boolean           @default(true)
   deactivated        Boolean           @default(false)
+  status             String?           @default("active") // active | suspended | pending_deletion | deactivated
+  suspensionReason   String?
 
   // Member 1 Auth & Session relations
   refreshTokens           RefreshToken[]
@@ -45,6 +47,7 @@ model User {
   passwordResetTokens     PasswordResetToken[]
   consentRecords          ConsentRecord[]
   deletionRequests        DeletionRequest[]
+  dataExportJobs          DataExportJob[]
   userSessions            UserSession[]
   bookmarks               Bookmark[]
   notificationPreferences NotificationPreference[]
@@ -549,11 +552,18 @@ model ProjectCompletion {
 }
 
 model ProjectVerification {
-  id        String   @id @default(uuid())
-  projectId String
-  status    String
-  createdAt DateTime @default(now())
-  project   Project  @relation(fields: [projectId], references: [id])
+  id              String    @id @default(uuid())
+  projectId       String
+  status          String    @default("pending") // pending | verified | rejected | under_review
+  confidenceScore Float?    @default(85.0)
+  discrepancies   String?   // JSON string array of flagged issues
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  rejectionReason String?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now()) @updatedAt
+  project         Project   @relation(fields: [projectId], references: [id])
 }
 
 model Certificate {
@@ -821,10 +831,40 @@ model Application {
 }
 
 model Report {
-  id        String   @id @default(uuid())
-  type      String
-  status    String
-  createdAt DateTime @default(now())
+  id          String    @id @default(uuid())
+  type        String    @default("content")
+  targetType  String?   // project | user | message | challenge | contribution_dispute
+  targetId    String?
+  reason      String?
+  reporterId  String?
+  status      String    @default("pending") // pending | open | resolved | dismissed | escalated
+  actionTaken String?
+  notes       String?
+  resolvedBy  String?
+  resolvedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+}
+
+model ProjectModerationHold {
+  id         String    @id @default(uuid())
+  projectId  String    @unique
+  reason     String
+  createdBy  String
+  createdAt  DateTime  @default(now())
+  releasedAt DateTime?
+  releasedBy String?
+}
+
+model DataExportJob {
+  id          String    @id @default(uuid())
+  userId      String
+  status      String    @default("pending") // pending | completed | failed
+  fileKey     String?
+  downloadUrl String?
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime?
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model AuditLog {

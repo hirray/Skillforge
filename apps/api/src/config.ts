@@ -6,6 +6,7 @@ dotenv.config({ path: '../../.env' });
 const envSchema = z.object({
   PORT: z.string().default('4000'),
   AUTH_SOURCE: z.enum(['mock', 'real']).default('mock'),
+  ADMIN_SOURCE: z.enum(['mock', 'real']).default('real'),
   PROJECTS_SOURCE: z.enum(['mock', 'real']).default('real'),
   TEAM_SOURCE: z.enum(['mock', 'real']).default('real'),
   TASKS_SOURCE: z.enum(['mock', 'real']).default('real'),

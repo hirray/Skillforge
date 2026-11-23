@@ -36,6 +36,8 @@ import { PublicProfilePage } from '../users/PublicProfilePage';
 import { AdminSkillsPage } from '../skills/AdminSkillsPage';
 import { NotificationBell, NotificationsInboxPage } from '../notifications/NotificationBell';
 import { GlobalSearchPage, OpportunityFeedPage } from '../search/GlobalSearchPage';
+import { AdminConsolePage } from '../admin/AdminConsolePage';
+import { PrivacyCentrePage } from '../settings/PrivacyCentrePage';
 import './studio.css';
 
 const tools = [
@@ -454,9 +456,17 @@ export default function Member2Workspace() {
             <Icon name="people" />
             Profile & Skills
           </NavLink>
-          <NavLink to="/admin/skills" onClick={() => setMobileNav(false)}>
+          <NavLink to="/admin" onClick={() => setMobileNav(false)}>
             <Icon name="shield" />
+            Admin &amp; Moderation
+          </NavLink>
+          <NavLink to="/admin/skills" onClick={() => setMobileNav(false)}>
+            <Icon name="spark" />
             Taxonomy Governance
+          </NavLink>
+          <NavLink to="/settings/privacy" onClick={() => setMobileNav(false)}>
+            <Icon name="shield" />
+            Privacy &amp; Data Rights
           </NavLink>
           <NavLink to="/notifications" onClick={() => setMobileNav(false)}>
             <Icon name="chat" />
@@ -590,6 +600,9 @@ export default function Member2Workspace() {
               <Route path="/auth/settings" element={<AccountSettingsPage />} />
               <Route path="/me/profile/*" element={<ProfileEditorPage />} />
               <Route path="/users/:id" element={<PublicProfilePage />} />
+              <Route path="/admin" element={<AdminConsolePage />} />
+              <Route path="/admin/*" element={<AdminConsolePage />} />
+              <Route path="/settings/privacy/*" element={<PrivacyCentrePage />} />
               <Route path="/admin/skills/*" element={<AdminSkillsPage />} />
               <Route path="/notifications/*" element={<NotificationsInboxPage />} />
               <Route path="/search/*" element={<GlobalSearchPage />} />

@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { projectForViewer, canView } from '../../core/visibility';
 import { writeAudit } from '../../core/audit';
+import { storageProvider } from '../../core/storage';
 
 const prisma = new PrismaClient();
 
@@ -743,5 +744,242 @@ export class RealUserService {
       },
     });
     return { success: true, goals };
+  }
+
+  /**
+   * GET /users/me/export - GDPR Data Takeout
+   */
+  async exportUserData(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        skills: { include: { skill: true } },
+        education: true,
+        experience: true,
+        certifications: true,
+        resumes: true,
+        projectsOwned: true,
+        memberships: { include: { project: true } },
+        contributions: true,
+        consentRecords: true,
+        deletionRequests: true,
+      },
+    });
+
+    if (!user) {
+      throw { status: 404, message: 'User not found' };
+    }
+
+    const exportPayload = {
+      version: '1.0',
+      system: 'SkillForge Platform',
+      exportedAt: new Date().toISOString(),
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        displayName: user.displayName,
+        username: user.username,
+        headline: user.headline,
+        bio: user.bio,
+        workMode: user.workMode,
+        visibilitySettings: user.visibilitySettings,
+        matchingOptIn: user.matchingOptIn,
+        createdAt: user.createdAt,
+      },
+      skills: user.skills.map((s) => ({
+        name: s.skill.name,
+        category: s.skill.category,
+        level: s.level,
+        origin: s.origin,
+      })),
+      education: user.education.map((e) => this.formatEducation(e)),
+      experience: user.experience.map((e) => this.formatExperience(e)),
+      certifications: user.certifications.map((c) => this.formatCertification(c)),
+      resumes: user.resumes.map((r) => ({ id: r.id, fileName: r.fileName, status: r.status, createdAt: r.createdAt })),
+      projects: {
+        owned: user.projectsOwned.map((p) => ({ id: p.id, title: p.title, status: p.status, createdAt: p.createdAt })),
+        memberships: user.memberships.map((m) => ({
+          projectId: m.projectId,
+          projectTitle: m.project?.title,
+          role: m.role,
+          status: m.status,
+          joinedAt: m.joinedAt,
+        })),
+      },
+      contributionsCount: user.contributions.length,
+      consents: user.consentRecords.map((c) => ({ type: c.type, version: c.version, acceptedAt: c.acceptedAt })),
+    };
+
+    const fileKey = `exports/data-export-${userId}-${Date.now()}.json`;
+    await storageProvider.upload(fileKey, Buffer.from(JSON.stringify(exportPayload, null, 2)), 'application/json');
+    const downloadUrl = await storageProvider.getSignedUrl(fileKey, 1440); // 24 hours
+
+    await prisma.dataExportJob.create({
+      data: {
+        userId,
+        status: 'completed',
+        fileKey,
+        downloadUrl,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      },
+    });
+
+    await writeAudit(userId, 'USER_DATA_EXPORTED', 'user', userId, 'GDPR Data Takeout Request', {
+      fileKey,
+    });
+
+    return {
+      success: true,
+      downloadUrl,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      data: exportPayload,
+    };
+  }
+
+  /**
+   * POST /users/me/deletion - 14-Day Grace Period Account Deletion Request
+   */
+  async requestAccountDeletion(userId: string, reason?: string) {
+    const scheduledFor = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+
+    const deletion = await prisma.deletionRequest.create({
+      data: {
+        userId,
+        scheduledFor,
+        reason: reason || 'User requested account closure',
+        status: 'pending',
+      },
+    });
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        status: 'pending_deletion',
+      },
+    });
+
+    await writeAudit(userId, 'ACCOUNT_DELETION_REQUESTED', 'user', userId, reason || 'User initiated account deletion', {
+      scheduledFor: scheduledFor.toISOString(),
+      gracePeriodDays: 14,
+    });
+
+    return {
+      success: true,
+      message: 'Account deletion scheduled. You have a 14-day grace period to cancel.',
+      scheduledFor: scheduledFor.toISOString(),
+      gracePeriodDays: 14,
+      deletionId: deletion.id,
+    };
+  }
+
+  /**
+   * DELETE /users/me/deletion - Cancel Scheduled Account Deletion
+   */
+  async cancelAccountDeletion(userId: string) {
+    const active = await prisma.deletionRequest.findFirst({
+      where: { userId, status: 'pending' },
+      orderBy: { requestedAt: 'desc' },
+    });
+
+    if (active) {
+      await prisma.deletionRequest.update({
+        where: { id: active.id },
+        data: { status: 'cancelled' },
+      });
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        status: 'active',
+      },
+    });
+
+    await writeAudit(userId, 'ACCOUNT_DELETION_CANCELLED', 'user', userId, 'User restored account during grace period');
+
+    return {
+      success: true,
+      message: 'Account deletion cancelled. Your profile and access remain fully active.',
+    };
+  }
+
+  /**
+   * GET /users/me/consents - Retrieve Consent History
+   */
+  async getConsents(userId: string) {
+    let consents = await prisma.consentRecord.findMany({
+      where: { userId },
+      orderBy: { acceptedAt: 'desc' },
+    });
+
+    if (consents.length === 0) {
+      await prisma.consentRecord.createMany({
+        data: [
+          { userId, type: 'terms_of_service', version: '2026.1', ip: '127.0.0.1' },
+          { userId, type: 'privacy_policy', version: '2026.1', ip: '127.0.0.1' },
+          { userId, type: 'recruiter_discovery', version: '2026.1', ip: '127.0.0.1' },
+          { userId, type: 'ai_job_matching', version: '2026.1', ip: '127.0.0.1' },
+        ],
+      });
+      consents = await prisma.consentRecord.findMany({
+        where: { userId },
+        orderBy: { acceptedAt: 'desc' },
+      });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { matchingOptIn: true, visibilitySettings: true, status: true },
+    });
+
+    const activeDeletion = await prisma.deletionRequest.findFirst({
+      where: { userId, status: 'pending' },
+      orderBy: { requestedAt: 'desc' },
+    });
+
+    return {
+      consents,
+      matchingOptIn: user?.matchingOptIn ?? true,
+      visibilitySettings: user?.visibilitySettings ? JSON.parse(user.visibilitySettings) : {},
+      accountStatus: user?.status || 'active',
+      pendingDeletion: activeDeletion
+        ? {
+            scheduledFor: activeDeletion.scheduledFor,
+            requestedAt: activeDeletion.requestedAt,
+          }
+        : null,
+    };
+  }
+
+  /**
+   * POST /users/me/consents - Record New Consent Decision
+   */
+  async recordConsent(userId: string, data: { type: string; version?: string; accepted: boolean }) {
+    await prisma.consentRecord.create({
+      data: {
+        userId,
+        type: data.type,
+        version: data.version || '2026.1',
+        ip: '127.0.0.1',
+      },
+    });
+
+    if (data.type === 'ai_job_matching') {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { matchingOptIn: data.accepted },
+      });
+    }
+
+    await writeAudit(
+      userId,
+      'CONSENT_UPDATED',
+      'user',
+      userId,
+      `Consent ${data.type} set to ${data.accepted ? 'accepted' : 'revoked'}`
+    );
+
+    return { success: true };
   }
 }

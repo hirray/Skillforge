@@ -192,6 +192,62 @@ router.put('/me/learning-goals', requireAuth, async (req: Request, res: Response
   }
 });
 
+// GET /users/me/export - GDPR Data Takeout
+router.get('/me/export', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = getAuthUser(req);
+    const result = await getService().exportUserData(userId);
+    res.json(result);
+  } catch (e) {
+    next(e);
+  }
+});
+
+// POST /users/me/deletion - 14-Day Grace Period Account Deletion Request
+router.post('/me/deletion', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = getAuthUser(req);
+    const reason = req.body?.reason;
+    const result = await getService().requestAccountDeletion(userId, reason);
+    res.json(result);
+  } catch (e) {
+    next(e);
+  }
+});
+
+// DELETE /users/me/deletion - Cancel Scheduled Account Deletion
+router.delete('/me/deletion', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = getAuthUser(req);
+    const result = await getService().cancelAccountDeletion(userId);
+    res.json(result);
+  } catch (e) {
+    next(e);
+  }
+});
+
+// GET /users/me/consents - Retrieve Consent History & Privacy Status
+router.get('/me/consents', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = getAuthUser(req);
+    const result = await getService().getConsents(userId);
+    res.json(result);
+  } catch (e) {
+    next(e);
+  }
+});
+
+// POST /users/me/consents - Record New Consent
+router.post('/me/consents', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = getAuthUser(req);
+    const result = await getService().recordConsent(userId, req.body);
+    res.json(result);
+  } catch (e) {
+    next(e);
+  }
+});
+
 // GET /users/:id - Public profile view with visibility projection
 router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
