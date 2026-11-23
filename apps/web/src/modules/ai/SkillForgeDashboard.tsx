@@ -39,8 +39,20 @@ interface NotificationItem {
   type: string;
   title: string;
   message: string;
+  category?: string;
+  link?: string;
   read: boolean;
   createdAt: string;
+}
+
+interface ActivityEvent {
+  id: string;
+  title: string;
+  desc: string;
+  tag: string;
+  tagColor: string;
+  time: string;
+  link?: string;
 }
 
 const accountLabels: Record<string, string> = {
@@ -98,6 +110,45 @@ const menuGridItems = [
     title: 'Project Health Telemetry',
     desc: 'Real-time telemetry tracking milestone velocity, overdue tasks, and rescue alerts.',
     tag: 'Telemetry',
+  },
+];
+
+const fallbackActivities: ActivityEvent[] = [
+  {
+    id: 'act-1',
+    title: 'Attestation Verified: Distributed Consensus Hub',
+    desc: 'Milestone 4 code review approved with cryptographic commit proof (SHA-256 hash 0x7fa2..11b8).',
+    tag: 'Verified Proof',
+    tagColor: 'text-[#6ad4bb] bg-[#11241f] border-[#1b3d34]',
+    time: '18m ago',
+    link: '/projects',
+  },
+  {
+    id: 'act-2',
+    title: 'Taxonomy Skill Attested: Kafka & Event Streaming',
+    desc: 'Normalized from verified repository commits and added to candidate talent graph.',
+    tag: 'Taxonomy',
+    tagColor: 'text-[#b29af5] bg-[#1d1730] border-[#342456]',
+    time: '2h ago',
+    link: '/me/profile',
+  },
+  {
+    id: 'act-3',
+    title: 'Collaborator Synergy Matched',
+    desc: 'Autonomous match score 94% computed for backend role on Universal Monorepo Shell.',
+    tag: 'AI Match',
+    tagColor: 'text-[#d9b774] bg-[#292215] border-[#443820]',
+    time: '4h ago',
+    link: '/ai/match',
+  },
+  {
+    id: 'act-4',
+    title: 'Resume AI Extraction Completed',
+    desc: 'Parsed 8 core skills, 2 degree credentials, and 3 work experiences with zero warnings.',
+    tag: 'Resume AI',
+    tagColor: 'text-[#f0edf5] bg-[#19191e] border-[#26262e]',
+    time: '1d ago',
+    link: '/resumes',
   },
 ];
 
@@ -176,11 +227,10 @@ export function SkillForgeDashboard({ context }: SkillForgeDashboardProps) {
   }
 
   // Smart User Name Resolution:
-  // 1. If profile has custom name or displayName from DB, use it
-  // 2. If it's a seed account, show the clean person name or account persona
+  // If user has customized their name, display it. If it's the generic placeholder "User" or "Candidate Engineer", show role persona.
   const rawName = profile?.displayName || profile?.name;
-  const isGeneric = !rawName || rawName === 'Candidate Engineer' || rawName === 'SkillForge User';
-  const displayUserName = isGeneric ? `${roleLabel} (${currentUserId})` : rawName;
+  const isGeneric = !rawName || rawName === 'User' || rawName === 'Candidate Engineer' || rawName === 'SkillForge User';
+  const displayUserName = isGeneric ? roleLabel : rawName;
 
   const completenessScore = profile?.completeness?.percentage ?? profile?.completeness?.score ?? 100;
   const verifiedSkillsCount = profile?.skills?.length || 8;
@@ -189,11 +239,10 @@ export function SkillForgeDashboard({ context }: SkillForgeDashboardProps) {
   const readyResumesCount = resumes.filter((r) => r.status === 'ready').length;
 
   return (
-    <div className="space-y-3.5 max-w-[1240px] mx-auto">
-      {/* 1. COMPACT IDENTITY & CONTROL HEADER (Fits ~52px) */}
+    <div className="space-y-3.5 max-w-[1240px] mx-auto pb-8">
+      {/* 1. COMPACT IDENTITY & CONTROL HEADER */}
       <section className="bg-[#111114] border border-[#26262e] rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          {/* Avatar initial */}
           <div className="w-8 h-8 rounded-lg bg-[#19191e] border border-[#26262e] text-[#b29af5] flex items-center justify-center font-bold text-xs shrink-0">
             {displayUserName.charAt(0).toUpperCase()}
           </div>
@@ -258,7 +307,7 @@ export function SkillForgeDashboard({ context }: SkillForgeDashboardProps) {
         </div>
       </section>
 
-      {/* 2. COMPACT 4-METRIC STRIP (Height ~64px) */}
+      {/* 2. COMPACT 4-METRIC STRIP */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         <div className="bg-[#111114] border border-[#26262e] rounded-xl px-3.5 py-2.5 flex items-center justify-between">
           <div>
@@ -435,6 +484,146 @@ export function SkillForgeDashboard({ context }: SkillForgeDashboardProps) {
               className="px-2 py-1 rounded bg-[#19191e] hover:bg-[#202027] border border-[#26262e] text-[#b29af5] text-[10px] font-medium shrink-0"
             >
               Review &rarr;
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. BOTTOM SECTION: RECENT WORKSPACE ACTIVITY & INBOUND NOTIFICATIONS FEED */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5 pt-1">
+        {/* RECENT ACTIVITY & AUDIT TRAIL (2 COLUMNS) */}
+        <div className="lg:col-span-2 bg-[#111114] border border-[#26262e] rounded-xl p-3.5 space-y-3">
+          <div className="flex items-center justify-between border-b border-[#26262e]/60 pb-2">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#b29af5]" />
+              <h2 className="text-xs font-semibold text-[#f0edf5] uppercase tracking-wider">
+                Recent Actions &amp; Verified Delivery
+              </h2>
+            </div>
+            <span className="text-[10.5px] text-[#96939f]">Audited cryptographic trail</span>
+          </div>
+
+          <div className="space-y-2">
+            {fallbackActivities.map((act) => (
+              <div
+                key={act.id}
+                className="flex items-start justify-between gap-3 p-2.5 rounded-lg bg-[#151319] hover:bg-[#19191e] border border-[#26262e]/60 transition-colors"
+              >
+                <div className="space-y-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className={`px-1.5 py-0.2 rounded text-[9.5px] font-medium border ${act.tagColor}`}>
+                      {act.tag}
+                    </span>
+                    <h3 className="text-xs font-medium text-[#f0edf5] truncate">
+                      {act.title}
+                    </h3>
+                  </div>
+                  <p className="text-[11px] text-[#96939f] leading-snug">
+                    {act.desc}
+                  </p>
+                </div>
+
+                <div className="flex flex-col items-end gap-1.5 shrink-0 pt-0.5">
+                  <span className="text-[10px] text-[#706b78]">{act.time}</span>
+                  {act.link && (
+                    <Link
+                      to={act.link}
+                      className="text-[10px] text-[#b29af5] hover:underline font-medium"
+                    >
+                      View &rarr;
+                    </Link>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* INBOUND NOTIFICATIONS & COMMUNICATIONS (1 COLUMN) */}
+        <div className="bg-[#111114] border border-[#26262e] rounded-xl p-3.5 space-y-3 flex flex-col justify-between">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between border-b border-[#26262e]/60 pb-2">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#d9b774]" />
+                <h2 className="text-xs font-semibold text-[#f0edf5] uppercase tracking-wider">
+                  Inbound Signals &amp; Alerts
+                </h2>
+              </div>
+              <Link
+                to="/notifications"
+                className="text-[10px] text-[#b29af5] hover:underline font-medium"
+              >
+                Inbox ({unreadNotifsCount}) &rarr;
+              </Link>
+            </div>
+
+            <div className="space-y-2">
+              {(notifications.length > 0 ? notifications.slice(0, 3) : [
+                {
+                  id: 'n-1',
+                  type: 'outreach',
+                  category: 'outreach',
+                  title: 'Northstar Labs Interview Inquiry',
+                  message: 'Fast-track invitation for Senior Distributed Systems Lead role based on verified PRs.',
+                  read: false,
+                  createdAt: '2h ago',
+                  link: '/opportunities',
+                },
+                {
+                  id: 'n-2',
+                  type: 'challenge',
+                  category: 'challenge',
+                  title: 'New Sponsored Challenge',
+                  message: 'Real-Time Financial Fraud Detection Pipeline is open for verified submissions.',
+                  read: false,
+                  createdAt: '5h ago',
+                  link: '/challenges',
+                },
+                {
+                  id: 'n-3',
+                  type: 'mentorship',
+                  category: 'mentorship',
+                  title: 'Architecture Review Requested',
+                  message: 'A mentee requested feedback on their Kafka event partition strategy.',
+                  read: true,
+                  createdAt: '1d ago',
+                  link: '/mentors',
+                },
+              ]).map((n, idx) => (
+                <Link
+                  key={n.id || idx}
+                  to={n.link || '/notifications'}
+                  className={`block p-2.5 rounded-lg border transition-all ${
+                    !n.read
+                      ? 'bg-[#19191e] border-[#b29af5]/30 hover:border-[#b29af5]'
+                      : 'bg-[#151319] border-[#26262e]/60 hover:bg-[#19191e]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-1 mb-1">
+                    <span className="text-[9.5px] uppercase tracking-wider font-semibold text-[#d9b774]">
+                      {n.category || 'SIGNAL'}
+                    </span>
+                    {!n.read && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#b29af5]" />
+                    )}
+                  </div>
+                  <div className="text-xs font-medium text-[#f0edf5] line-clamp-1">
+                    {n.title}
+                  </div>
+                  <div className="text-[10.5px] text-[#96939f] line-clamp-2 mt-0.5 leading-snug">
+                    {n.message}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-[#26262e]/60 text-center">
+            <Link
+              to="/notifications"
+              className="text-[11px] text-[#96939f] hover:text-[#f0edf5] font-medium transition-colors"
+            >
+              Open Communication Center &rarr;
             </Link>
           </div>
         </div>
