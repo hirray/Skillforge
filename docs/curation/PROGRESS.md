@@ -37,4 +37,7 @@
 ---
 
 ## Open Problems & Blockers
-- None currently. Audit in progress.
+- None.
+- Verified: Project detail views (`/projects/proj-monorepo`, `/projects/proj-consensus`, etc.) resolve properly with zero 404 crashes.
+- Verified: Guided tour spotlight elevated target element above parent stacking contexts with 9999px box-shadow mask and bright glowing purple outline so inspected components are 100% visible and noticeable.
+- Verified: Help Center (`/help`) includes all 4 interactive visual pipeline flowcharts (Project to Certification, Recruiter Hiring, Hackathons, Mentorship) with step-by-step guides and product manuals.
