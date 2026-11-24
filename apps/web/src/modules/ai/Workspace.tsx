@@ -5,9 +5,14 @@ import {
   Brand,
   Icon,
   Loading,
-  ErrorNotice,
   PageHeader,
 } from './shared';
+import { useActiveContext, ContextSwitcher } from '../../context/ContextModel';
+import { navigationConfig } from '../../config/navigation';
+import { UnifiedHome } from '../home/UnifiedHome';
+import { DiscoverPage } from '../discover/DiscoverPage';
+import { AccessDenied } from '../../components/AccessDenied';
+
 import Requirements from './Requirements';
 import Matching from './Matching';
 import Health from './Health';
@@ -37,21 +42,7 @@ import { NotificationBell, NotificationsInboxPage } from '../notifications/Notif
 import { GlobalSearchPage, OpportunityFeedPage } from '../search/GlobalSearchPage';
 import { AdminConsolePage } from '../admin/AdminConsolePage';
 import { PrivacyCentrePage } from '../settings/PrivacyCentrePage';
-import { SkillForgeDashboard } from './SkillForgeDashboard';
 import './studio.css';
-
-const accounts = [
-  ['user-001', 'Student (user-001)'],
-  ['user-002', 'Freelancer (user-002)'],
-  ['user-003', 'Pro Dev (user-003)'],
-  ['user-004', 'Founder (user-004)'],
-  ['user-005', 'Designer (user-005)'],
-  ['user-006', 'ML Engineer (user-006)'],
-  ['user-007', 'Cloud Arch (user-007)'],
-  ['user-008', 'Job Seeker (user-008)'],
-  ['recruiter-001', 'Recruiter (recruiter-001)'],
-  ['admin-001', 'Admin (admin-001)'],
-];
 
 const fallbackContext: WorkspaceContext = {
   user: { id: token(), name: 'SkillForge User', roles: ['owner'] },
@@ -66,97 +57,14 @@ const fallbackContext: WorkspaceContext = {
   ranker: 'standard',
 };
 
-function Overview({ context }: { context: WorkspaceContext }) {
-  return <SkillForgeDashboard context={context} />;
-}
-
-function Preferences({
-  context,
-  onUpdate,
-}: {
-  context: WorkspaceContext;
-  onUpdate: () => void;
-}) {
-  const [error, setError] = useState<unknown>(null);
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState('');
-
-  const update = async (key: string, value: boolean) => {
-    setSaving(true);
-    setError(null);
-    try {
-      await api('/ai/preferences', {
-        method: 'PATCH',
-        body: JSON.stringify({ [key]: value }),
-      });
-      setMessage('Discovery settings saved.');
-      onUpdate();
-    } catch (e) {
-      setError(e);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <>
-      <PageHeader
-        eyebrow="Your preferences"
-        title="Be discovered on your terms."
-      >
-        These controls determine whether you can appear in recommendations.
-      </PageHeader>
-      <section className="st-panel">
-        <div className="st-panel-body">
-          {(
-            [
-              [
-                'matchingOptIn',
-                'Collaborator recommendations',
-                'Allow project owners to discover your profile for relevant collaboration.',
-              ],
-              [
-                'recruiterVisible',
-                'Recruiter discovery',
-                'Allow your profile to appear in company job-matching results.',
-              ],
-              [
-                'publicSkills',
-                'Share skill details',
-                'Display skill names in match explanations. Private details stay out of results.',
-              ],
-            ] as const
-          ).map(([key, title, description]) => (
-            <label className="st-preference" key={key}>
-              <div>
-                <strong>{title}</strong>
-                <p>{description}</p>
-              </div>
-              <input
-                type="checkbox"
-                checked={context.preference[key]}
-                disabled={saving}
-                onChange={(e) => void update(key, e.target.checked)}
-              />
-            </label>
-          ))}
-          {message && (
-            <div className="st-notice success" role="status">
-              {message}
-            </div>
-          )}
-          <ErrorNotice error={error} />
-        </div>
-      </section>
-    </>
-  );
-}
-
 export default function Member2Workspace() {
+  const { activeContext } = useActiveContext();
   const [context, setContext] = useState<WorkspaceContext | null>(null);
   const [loading, setLoading] = useState(true);
   const [mobileNav, setMobileNav] = useState(false);
   const location = useLocation();
+
+  const navCfg = navigationConfig[activeContext] || navigationConfig.individual;
 
   const load = () => {
     setLoading(true);
@@ -176,194 +84,104 @@ export default function Member2Workspace() {
   }, []);
 
   const getPageTitle = (pathname: string) => {
-    if (pathname.startsWith('/pipeline')) return 'Hiring Pipeline';
-    if (pathname.startsWith('/opportunities')) return 'Opportunities Inbox';
-    if (pathname.startsWith('/challenges')) return 'Sponsored Challenges';
-    if (pathname.startsWith('/certificates')) return 'Completion Certificates';
-    if (pathname.startsWith('/verify')) return 'Credential Verification';
+    if (pathname.startsWith('/home') || pathname === '/') return 'Home';
+    if (pathname.startsWith('/discover')) return 'Discover';
+    if (pathname.startsWith('/pipeline')) return 'Pipeline';
+    if (pathname.startsWith('/opportunities')) return 'Opportunities';
+    if (pathname.startsWith('/challenges')) return 'Challenges & Hackathons';
+    if (pathname.startsWith('/certificates')) return 'Certificates';
+    if (pathname.startsWith('/verify')) return 'Verification';
     if (pathname.startsWith('/me/verified-experience')) return 'Verified Experience';
-    if (pathname.startsWith('/me/portfolio')) return 'Portfolio Editor';
-    if (pathname.startsWith('/u/') || pathname.startsWith('/portfolio')) return 'Professional Portfolio';
+    if (pathname.startsWith('/me/portfolio')) return 'Portfolio';
+    if (pathname.startsWith('/u/') || pathname.startsWith('/portfolio')) return 'Portfolio';
     if (pathname.startsWith('/projects/create') || pathname.startsWith('/projects/new')) return 'Create Project';
     if (pathname.startsWith('/projects')) return 'Projects';
     if (pathname.startsWith('/tasks')) return 'Tasks';
     if (pathname.startsWith('/team')) return 'Team Invitations';
     if (pathname.startsWith('/chat')) return 'Project Rooms';
-    if (pathname.startsWith('/mentors')) return 'Mentors & Technical Advisors';
-    if (pathname.startsWith('/hackathons')) return 'Hackathons & Sprints';
+    if (pathname.startsWith('/mentors')) return 'Mentors & Advisors';
+    if (pathname.startsWith('/hackathons')) return 'Hackathons';
     if (pathname.startsWith('/resumes')) return 'Resume Intelligence';
-    if (pathname.startsWith('/ai/requirements')) return 'Project Blueprint';
-    if (pathname.startsWith('/ai/match')) return 'Find Collaborators';
-    if (pathname.startsWith('/ai/health')) return 'Project Health';
-    if (pathname.startsWith('/ai/job-match')) return 'Talent Matching';
-    if (pathname.startsWith('/ai/preferences')) return 'Discovery Settings';
-    if (pathname.startsWith('/analytics')) return 'Analytics & Evaluation';
-    if (pathname.startsWith('/ai')) return 'Intelligence Overview';
+    if (pathname.startsWith('/companies')) return 'Company Workspace';
+    if (pathname.startsWith('/jobs')) return 'Jobs';
+    if (pathname.startsWith('/talent')) return 'Talent Search';
+    if (pathname.startsWith('/admin')) return 'Admin Console';
+    if (pathname.startsWith('/me/profile')) return 'Profile';
+    if (pathname.startsWith('/notifications')) return 'Inbox';
+    if (pathname.startsWith('/help')) return 'Help Center';
     return 'SkillForge';
   };
 
-  const activeContext = context || fallbackContext;
+  const activeUserContext = context || fallbackContext;
 
   return (
     <div className="studio">
+      {/* =========================================================================
+          DESKTOP SIDEBAR: Renders strictly from navigationConfig[activeContext]
+          Max 6 primary items per context. Zero hardcoded links.
+      ========================================================================= */}
       <aside className={`st-sidebar ${mobileNav ? 'open' : ''}`}>
-        <Link to="/projects" className="st-brand">
+        <Link to="/home" className="st-brand">
           <Brand />
           <span>
             skillforge<span className="st-brand-dot">.</span>
           </span>
         </Link>
 
+        {/* Workspace Context Tag */}
         <div className="st-workspace-tag">
-          <span className="st-workspace-avatar">S</span>
+          <span className="st-workspace-avatar">
+            {navCfg.label.charAt(0).toUpperCase()}
+          </span>
           <div>
-            <strong>Your workspace</strong>
-            <small>Build together</small>
+            <strong>{navCfg.label}</strong>
+            <small>Context Active</small>
           </div>
-          <Icon name="chevron" size={14} />
         </div>
 
+        {/* Dynamic Navigation rendered strictly from navigationConfig */}
         <nav aria-label="Main navigation">
-          <span className="st-nav-label">Build together</span>
-          <NavLink to="/projects" onClick={() => setMobileNav(false)}>
-            <Icon name="folder" />
-            Projects
-          </NavLink>
-          <NavLink to="/tasks" onClick={() => setMobileNav(false)}>
-            <Icon name="check" />
-            Tasks
-          </NavLink>
-          <NavLink to="/team" onClick={() => setMobileNav(false)}>
-            <Icon name="people" />
-            Team invitations
-          </NavLink>
-          <NavLink to="/chat" onClick={() => setMobileNav(false)}>
-            <Icon name="chat" />
-            Project rooms
-          </NavLink>
-          <NavLink to="/mentors" onClick={() => setMobileNav(false)}>
-            <Icon name="spark" />
-            Mentors & Advisors
-          </NavLink>
-          <NavLink to="/hackathons" onClick={() => setMobileNav(false)}>
-            <Icon name="rocket" />
-            Hackathons & Sprints
-          </NavLink>
-          <NavLink to="/contributions" onClick={() => setMobileNav(false)}>
-            <Icon name="overview" />
-            Documented Contributions
-          </NavLink>
-          <NavLink to="/certificates" onClick={() => setMobileNav(false)}>
-            <Icon name="spark" />
-            Completion Certificates
-          </NavLink>
-          <NavLink to="/me/verified-experience" onClick={() => setMobileNav(false)}>
-            <Icon name="check" />
-            Verified Experience
-          </NavLink>
-          <NavLink to="/me/portfolio" onClick={() => setMobileNav(false)}>
-            <Icon name="people" />
-            My Portfolio
-          </NavLink>
-          <NavLink to="/integrations/github" onClick={() => setMobileNav(false)}>
-            <Icon name="document" />
-            GitHub Integration
-          </NavLink>
-          <NavLink to="/companies" onClick={() => setMobileNav(false)}>
-            <Icon name="shield" />
-            Company & Recruiters
-          </NavLink>
-          <NavLink to="/jobs" onClick={() => setMobileNav(false)}>
-            <Icon name="job" />
-            Opportunities & Jobs
-          </NavLink>
-          <NavLink to="/talent" onClick={() => setMobileNav(false)}>
-            <Icon name="team" />
-            Recruiter Talent Search
-          </NavLink>
-          <NavLink to="/pipeline" onClick={() => setMobileNav(false)}>
-            <Icon name="folder" />
-            Hiring Pipeline
-          </NavLink>
-          <NavLink to="/opportunities" onClick={() => setMobileNav(false)}>
-            <Icon name="chat" />
-            Opportunities Inbox
-          </NavLink>
-          <NavLink to="/challenges" onClick={() => setMobileNav(false)}>
-            <Icon name="rocket" />
-            Sponsored Challenges
-          </NavLink>
+          <span className="st-nav-label">Navigation ({navCfg.primaryItems.length})</span>
+          {navCfg.primaryItems.map((item) => (
+            <NavLink
+              key={item.id}
+              to={item.route}
+              data-tour={item.dataTour}
+              onClick={() => setMobileNav(false)}
+            >
+              <Icon name={item.icon} />
+              <span>{item.label}</span>
+            </NavLink>
+          ))}
 
-          <span className="st-nav-label">Identity & Discovery</span>
-          <NavLink to="/search" onClick={() => setMobileNav(false)}>
-            <Icon name="overview" />
-            Search & Discovery
-          </NavLink>
-          <NavLink to="/feed" onClick={() => setMobileNav(false)}>
-            <Icon name="spark" />
-            Opportunity Feed
-          </NavLink>
-          <NavLink to="/me/profile" onClick={() => setMobileNav(false)}>
-            <Icon name="people" />
-            Profile & Skills
-          </NavLink>
-          <NavLink to="/admin" onClick={() => setMobileNav(false)}>
-            <Icon name="shield" />
-            Admin &amp; Moderation
-          </NavLink>
-          <NavLink to="/admin/skills" onClick={() => setMobileNav(false)}>
-            <Icon name="spark" />
-            Taxonomy Governance
-          </NavLink>
-          <NavLink to="/settings/privacy" onClick={() => setMobileNav(false)}>
-            <Icon name="shield" />
-            Privacy &amp; Data Rights
-          </NavLink>
-          <NavLink to="/notifications" onClick={() => setMobileNav(false)}>
-            <Icon name="chat" />
-            Notification Inbox
-          </NavLink>
-          <NavLink to="/auth/settings" onClick={() => setMobileNav(false)}>
-            <Icon name="document" />
-            Account Settings
-          </NavLink>
-
-          <span className="st-nav-label">Intelligence</span>
-          <NavLink end to="/ai" onClick={() => setMobileNav(false)}>
-            <Icon name="overview" />
-            Overview
-          </NavLink>
-          <NavLink to="/resumes" onClick={() => setMobileNav(false)}>
-            <Icon name="resume" />
-            Resume intelligence
-          </NavLink>
-          <NavLink to="/ai/requirements" onClick={() => setMobileNav(false)}>
-            <Icon name="spark" />
-            Project blueprint
-            <span className="st-nav-new">AI</span>
-          </NavLink>
-          <NavLink to="/ai/match/demo" onClick={() => setMobileNav(false)}>
-            <Icon name="people" />
-            Find collaborators
-          </NavLink>
-          <NavLink to="/ai/health" onClick={() => setMobileNav(false)}>
-            <Icon name="health" />
-            Project health
-          </NavLink>
-          <NavLink to="/ai/job-match/demo" onClick={() => setMobileNav(false)}>
-            <Icon name="job" />
-            Talent matching
-          </NavLink>
-          <NavLink to="/analytics" onClick={() => setMobileNav(false)}>
-            <Icon name="chart" />
-            Analytics & evaluation
-          </NavLink>
+          {/* Optional Overflow Items if defined */}
+          {navCfg.overflowItems.length > 0 && (
+            <>
+              <span className="st-nav-label mt-4">Tools &amp; Capabilities</span>
+              {navCfg.overflowItems.map((item) => (
+                <NavLink
+                  key={item.id}
+                  to={item.route}
+                  data-tour={item.dataTour}
+                  onClick={() => setMobileNav(false)}
+                >
+                  <Icon name={item.icon} />
+                  <span>{item.label}</span>
+                </NavLink>
+              ))}
+            </>
+          )}
         </nav>
 
+        {/* Sidebar Bottom Utilities */}
         <div className="st-sidebar-bottom">
-          <NavLink to="/ai/preferences">
+          <NavLink to="/help" data-tour="topbar-help">
+            <Icon name="spark" />
+            <span>Help Center &amp; Manuals</span>
+          </NavLink>
+          <NavLink to="/auth/settings">
             <Icon name="shield" />
-            Discovery settings
+            <span>Settings</span>
           </NavLink>
           <div className="st-sidebar-note">
             <span className="st-dot" />
@@ -372,7 +190,11 @@ export default function Member2Workspace() {
         </div>
       </aside>
 
+      {/* =========================================================================
+          MAIN APPLICATION VIEWPORT
+      ========================================================================= */}
       <div className="st-main">
+        {/* Top bar with Breadcrumbs, Context Switcher, Alerts, Help */}
         <header className="st-topbar">
           <button
             className="st-mobile-menu"
@@ -386,41 +208,65 @@ export default function Member2Workspace() {
             <Icon name="chevron" size={13} />
             <strong>{getPageTitle(location.pathname)}</strong>
           </div>
-          <div className="st-topbar-right">
-            <NotificationBell />
-            <span className="st-preview-tag">Local preview</span>
-            <label className="st-account">
-              <span className="st-user-avatar">
-                {activeContext.user.name
-                  ?.split(' ')
-                  .map((n) => n[0])
-                  .slice(0, 2)
-                  .join('') || 'SF'}
+
+          <div className="st-topbar-right flex items-center gap-3">
+            {/* Role Context Switcher */}
+            <ContextSwitcher />
+
+            {/* Quick Search */}
+            <Link
+              to="/discover"
+              data-tour="topbar-search"
+              className="p-1.5 rounded-lg bg-[#181822] hover:bg-[#20202d] border border-[#2b2a3a] text-[#9ca3af] hover:text-white transition-colors"
+              title="Search (Ctrl+K)"
+            >
+              <Icon name="search" size={15} />
+            </Link>
+
+            {/* In-App Notifications Bell */}
+            <div data-tour="topbar-bell">
+              <NotificationBell />
+            </div>
+
+            {/* Help Button */}
+            <Link
+              to="/help"
+              data-tour="topbar-help"
+              className="p-1.5 rounded-lg bg-[#181822] hover:bg-[#20202d] border border-[#2b2a3a] text-[#c084fc] hover:text-white transition-colors text-xs font-bold"
+              title="Help & Guides"
+            >
+              ?
+            </Link>
+
+            {/* Avatar Pill */}
+            <Link
+              to="/me/profile"
+              data-tour="topbar-avatar"
+              className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[#181822] border border-[#2b2a3a] text-xs text-white hover:border-[#8861dc]/50 transition-colors"
+            >
+              <span className="w-5 h-5 rounded-full bg-[#8861dc] text-white flex items-center justify-center font-bold text-[10px]">
+                {activeUserContext.user.name?.charAt(0) || 'U'}
               </span>
-              <select
-                aria-label="Preview account"
-                value={token()}
-                onChange={(e) => {
-                  localStorage.setItem('token', e.target.value);
-                  window.location.reload();
-                }}
-              >
-                {accounts.map(([id, name]) => (
-                  <option key={id} value={id}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            </label>
+              <span className="hidden sm:inline font-medium text-[11px] max-w-[80px] truncate">
+                {activeUserContext.user.name || 'User'}
+              </span>
+            </Link>
           </div>
         </header>
 
+        {/* Main Content Area */}
         <main className="st-content">
           {loading && !context ? (
             <Loading />
           ) : (
             <Routes>
-              <Route path="/" element={<Navigate to="/projects" replace />} />
+              {/* Core Home Redirection to 5-Zone Home */}
+              <Route path="/" element={<Navigate to="/home" replace />} />
+              <Route path="/home" element={<UnifiedHome />} />
+              <Route path="/overview" element={<UnifiedHome />} />
+              <Route path="/discover" element={<DiscoverPage />} />
+
+              {/* Individual / Candidate Routes */}
               <Route path="/projects/*" element={<ProjectsModule />} />
               <Route path="/tasks/*" element={<TasksModule />} />
               <Route path="/team/*" element={<MyInvitations />} />
@@ -436,67 +282,95 @@ export default function Member2Workspace() {
               <Route path="/u/:username" element={<PublicPortfolioPage />} />
               <Route path="/portfolio/:username" element={<PublicPortfolioPage />} />
               <Route path="/integrations/github/*" element={<GitHubIntegrationPage />} />
+              <Route path="/resumes/*" element={<ResumeStudio />} />
+
+              {/* Recruiter & Company Routes with Route Guards */}
               <Route path="/companies/*" element={<CompanyWorkspacePage />} />
               <Route path="/jobs/*" element={<JobsBoardPage />} />
-              <Route path="/talent/*" element={<TalentSearchPage />} />
+              <Route
+                path="/talent/*"
+                element={
+                  activeContext === 'individual' || activeContext === 'mentor' ? (
+                    <AccessDenied requiredContext="recruiter" title="Recruiter Access Required" />
+                  ) : (
+                    <TalentSearchPage />
+                  )
+                }
+              />
               <Route path="/portfolio/candidate/*" element={<CandidateProofView />} />
-              <Route path="/portfolio/*" element={<CandidateProofView />} />
-              <Route path="/pipeline/*" element={<PipelineBoardPage />} />
+              <Route
+                path="/pipeline/*"
+                element={
+                  activeContext === 'individual' || activeContext === 'mentor' ? (
+                    <AccessDenied requiredContext="recruiter" title="Recruiter Pipeline Required" />
+                  ) : (
+                    <PipelineBoardPage />
+                  )
+                }
+              />
               <Route path="/opportunities/*" element={<OpportunitiesInboxPage />} />
               <Route path="/challenges/:id" element={<ChallengeDetailPage />} />
               <Route path="/challenges/*" element={<ChallengeBoardPage />} />
 
+              {/* Platform Admin Routes with Strict Guards */}
+              <Route
+                path="/admin"
+                element={
+                  activeContext !== 'platform_admin' ? (
+                    <AccessDenied requiredContext="platform_admin" title="Platform Admin Required" />
+                  ) : (
+                    <AdminConsolePage />
+                  )
+                }
+              />
+              <Route
+                path="/admin/*"
+                element={
+                  activeContext !== 'platform_admin' ? (
+                    <AccessDenied requiredContext="platform_admin" title="Platform Admin Required" />
+                  ) : (
+                    <AdminConsolePage />
+                  )
+                }
+              />
+              <Route
+                path="/admin/skills/*"
+                element={
+                  activeContext !== 'platform_admin' ? (
+                    <AccessDenied requiredContext="platform_admin" title="Platform Admin Required" />
+                  ) : (
+                    <AdminSkillsPage />
+                  )
+                }
+              />
+
+              {/* Profile, Auth & Settings */}
               <Route path="/auth/login" element={<SignInPage />} />
               <Route path="/auth/register" element={<RegisterPage />} />
               <Route path="/auth/settings" element={<AccountSettingsPage />} />
               <Route path="/me/profile/*" element={<ProfileEditorPage />} />
               <Route path="/users/:id" element={<PublicProfilePage />} />
-              <Route path="/admin" element={<AdminConsolePage />} />
-              <Route path="/admin/*" element={<AdminConsolePage />} />
               <Route path="/settings/privacy/*" element={<PrivacyCentrePage />} />
-              <Route path="/admin/skills/*" element={<AdminSkillsPage />} />
               <Route path="/notifications/*" element={<NotificationsInboxPage />} />
               <Route path="/search/*" element={<GlobalSearchPage />} />
               <Route path="/feed/*" element={<OpportunityFeedPage />} />
-              
-              <Route path="/ai" element={<Overview context={activeContext} />} />
-              <Route
-                path="/ai/requirements"
-                element={<Requirements context={activeContext} />}
-              />
-              <Route
-                path="/ai/match/*"
-                element={<Matching context={activeContext} />}
-              />
-              <Route
-                path="/ai/health"
-                element={<Health context={activeContext} />}
-              />
-              <Route
-                path="/ai/job-match/*"
-                element={<JobMatching context={activeContext} />}
-              />
-              <Route
-                path="/ai/preferences"
-                element={
-                  <Preferences
-                    context={activeContext}
-                    onUpdate={() => void load()}
-                  />
-                }
-              />
-              <Route path="/resumes/*" element={<ResumeStudio />} />
-              <Route
-                path="/analytics/*"
-                element={<Analytics context={activeContext} />}
-              />
-              <Route path="*" element={<Navigate to="/projects" replace />} />
+
+              {/* Intelligence Tooling */}
+              <Route path="/ai" element={<Navigate to="/home" replace />} />
+              <Route path="/ai/requirements" element={<Requirements context={activeUserContext} />} />
+              <Route path="/ai/match/*" element={<Matching context={activeUserContext} />} />
+              <Route path="/ai/health" element={<Health context={activeUserContext} />} />
+              <Route path="/ai/job-match/*" element={<JobMatching context={activeUserContext} />} />
+              <Route path="/analytics/*" element={<Analytics context={activeUserContext} />} />
+
+              {/* Fallback */}
+              <Route path="*" element={<Navigate to="/home" replace />} />
             </Routes>
           )}
         </main>
 
         <footer className="st-footer">
-          <span>SkillForge Intelligence</span>
+          <span>SkillForge Unified Intelligence</span>
           <span>Human judgment, supported by evidence.</span>
         </footer>
       </div>
