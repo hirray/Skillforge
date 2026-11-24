@@ -72,6 +72,7 @@ export const JobsBoardPage: React.FC = () => {
 
         {companies.length > 0 && (
           <button
+            data-tour="jobs-create-btn"
             onClick={() => setShowPostModal(true)}
             className="px-4 py-2 rounded-xl text-xs font-bold text-[#0A1680] bg-[#93B2F8] hover:bg-[#b0c7fa] transition-all flex items-center gap-1.5 shadow-md shadow-[#93B2F8]/10 shrink-0"
           >
@@ -81,6 +82,36 @@ export const JobsBoardPage: React.FC = () => {
             <span>Post Opportunity</span>
           </button>
         )}
+      </div>
+
+      {/* Mini Job & Hiring Pipeline Progress Bar (Requirement A2.6) */}
+      <div className="p-3 bg-[#161522] rounded-xl border border-[#2b2a3c] flex items-center justify-between flex-wrap gap-2 text-xs">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-zinc-400 font-bold uppercase tracking-wider text-[11px]">
+            Hiring Pipeline:
+          </span>
+          {['Draft', 'Active', 'Interview', 'Selected', 'Closed'].map((stage, idx) => (
+            <React.Fragment key={stage}>
+              {idx > 0 && <span className="text-zinc-600 font-bold">&rarr;</span>}
+              <span className={`px-2 py-0.5 rounded-md font-semibold text-[11px] ${
+                stage === 'Active'
+                  ? 'bg-[#8861dc] text-white border border-[#a855f7]'
+                  : stage === 'Draft'
+                  ? 'bg-[#8861dc]/20 text-[#c4b5fd]'
+                  : 'bg-[#1e1d2b] text-zinc-400'
+              }`}>
+                {stage}
+              </span>
+            </React.Fragment>
+          ))}
+        </div>
+        <a
+          href="/help#FC-11"
+          className="text-[#93b2f8] hover:text-white font-semibold text-[11px] flex items-center gap-1"
+        >
+          <span>See hiring pipeline (FC-11)</span>
+          <span>&rarr;</span>
+        </a>
       </div>
 
       {error && (

@@ -1,0 +1,56 @@
+%% Source files: apps/web/src/modules/tasks/, apps/web/src/modules/milestones/, apps/web/src/modules/chat/, apps/api/src/modules/health/
+%% Enums & models: Task, TaskHistory, Milestone, ChatRoom, HealthStatus
+%% Title: FC-05 Project Room Execution & Contribution Loop
+%% Purpose: Tracks day-to-day agile collaboration, delivery states, and real-time health telemetry.
+%% Audience: Team Leads, Engineers, Project Contributors
+
+flowchart TD
+  classDef startEnd fill:#0A1680,stroke:#93B2F8,stroke-width:2px,color:#FCFDFF,rx:20,ry:20;
+  classDef userAction fill:#FFFFFF,stroke:#0A1680,stroke-width:2px,color:#16213A;
+  classDef decision fill:#FBEDB0,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+  classDef aiSystem fill:#FCFDFF,stroke:#93B2F8,stroke-width:3px,stroke-dasharray: 4 2,color:#0A1680;
+  classDef notification fill:#FFFFFF,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+
+  subgraph S_TASK_CYCLE ["Lane: Task & Milestone Execution"]
+    A1(["Start: Sprint Work Cycle"]):::startEnd
+    A2["Create Task & Assign Collaborator (To Do)"]:::userAction
+    A3["Member Moves Task to 'In Progress'"]:::userAction
+    A4["Member Attaches Commit SHA or PR URL (Review)"]:::userAction
+    A5{"Peer Review Approved?"}:::decision
+    A6["Task Marked 'Done' & Evidence Appended to Audit Log"]:::aiSystem
+  end
+
+  subgraph S_COLLAB ["Lane: Team Communication & Assets"]
+    B1["Group & Direct Chat Messages with Code Snippets"]:::userAction
+    B2["Store Meeting Action Items & Architectural Links"]:::userAction
+    B3["Sync Real-Time GitHub Commits to Milestone Progress"]:::aiSystem
+  end
+
+  subgraph S_HEALTH ["Lane: Project Health & Telemetry Engine"]
+    C1["Telemetry Monitors Milestone Velocity & Task Age"]:::aiSystem
+    C2{"Are Any Tasks Overdue by >7 Days?"}:::decision
+    C3["Health Status Set to 'Healthy' (Normal Velocity)"]:::aiSystem
+    C4["Health Status Set to 'At Risk' or 'Needs Attention'"]:::notification
+    C5{"Team Resolves Delay or Triggers Project Rescue?"}:::decision
+    C6["Trigger Emergency Handover & Replacement (FC-06)"]:::userAction
+    C7(["End: Milestone Completed Successfully"]):::startEnd
+  end
+
+  A1 --> A2 --> A3 --> A4 --> A5
+  A5 -- "No (Changes Requested)" --> A3
+  A5 -- "Yes" --> A6
+  A6 --> B3
+  B1 --> B2 --> B3
+  B3 --> C1 --> C2
+  C2 -- "No" --> C3 --> C7
+  C2 -- "Yes" --> C4 --> C5
+  C5 -- "Delay Resolved by Team" --> C3
+  C5 -- "Unresolvable Blocker" --> C6
+
+%% --- SAME STEPS IN WORDS (Accessibility Alternative) ---
+%% 1. Task Definition: Tasks are created with title, priority, milestone linkage, and assignee.
+%% 2. Execution & Proof: Assignee works on task and moves card to 'Review', linking GitHub commit hashes.
+%% 3. Peer Approval: Another team member reviews the code deliverable. If accepted, task moves to 'Done'.
+%% 4. Evidence Accumulation: Every completed task contributes cryptographic proof toward the member's final certificate.
+%% 5. Automated Health Signals: System calculates delivery velocity. If milestones lag, health drops to 'At Risk'.
+%% 6. Corrective Interventions: Team can either reallocate tasks internally or initiate a Project Rescue (FC-06).

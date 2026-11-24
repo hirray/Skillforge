@@ -1,0 +1,61 @@
+%% Source files: apps/web/src/modules/certificates/, apps/api/src/modules/certificates/, apps/web/src/modules/portfolio/
+%% Enums & models: ProjectCompletion, ProjectVerification, Certificate, PortfolioProject
+%% Title: FC-07 Project Completion, Cryptographic Verification & Public Credentials
+%% Purpose: Deep-dive into the formal sign-off, anti-fraud audit, and verifiable credential minting workflow.
+%% Audience: Graduating Project Teams, Recruiters, Verifiers
+
+flowchart TD
+  classDef startEnd fill:#0A1680,stroke:#93B2F8,stroke-width:2px,color:#FCFDFF,rx:20,ry:20;
+  classDef userAction fill:#FFFFFF,stroke:#0A1680,stroke-width:2px,color:#16213A;
+  classDef decision fill:#FBEDB0,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+  classDef aiSystem fill:#FCFDFF,stroke:#93B2F8,stroke-width:3px,stroke-dasharray: 4 2,color:#0A1680;
+  classDef notification fill:#FFFFFF,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+
+  subgraph S_SUBMISSION ["Lane: Completion Request & Checklist"]
+    A1(["Start: All Milestones Marked Done"]):::startEnd
+    A2["Owner Initiates Project Completion Checklist"]:::userAction
+    A3["Provide Live Demo URL, GitHub Final Commit & Documentation"]:::userAction
+    A4["Lock Project Room to Prevent Further Code Modifications"]:::aiSystem
+  end
+
+  subgraph S_PEER_REVIEW ["Lane: Contributor Peer Confirmation"]
+    B1["All Active Members Receive Attestation Notification"]:::notification
+    B2["Each Member Confirms Their Own Role & Deliverables"]:::userAction
+    B3{"Do All Members Agree on Attributions?"}:::decision
+    B4["Disputed: Escalate to Admin Mediation Queue (FC-14)"]:::userAction
+    B5["Unanimous Consensus Reached"]:::aiSystem
+  end
+
+  subgraph S_AUDIT ["Lane: Verification Engine & Admin Audit"]
+    C1{"Automated Rules Pass? (Commits >10, Tasks Done >80%)"}:::decision
+    C2["Fast-Track Automated Verification Approved"]:::aiSystem
+    C3["Route to Platform Admin Verification Queue for Manual Review"]:::userAction
+    C4{"Admin Approves Deliverable Integrity?"}:::decision
+    C5["Verification Rejected with Remediation Action Notes"]:::notification
+  end
+
+  subgraph S_MINTING ["Lane: Verifiable Credential Generation"]
+    D1["Generate Immutable SHA-256 Proof Snapshot of Repo & Tasks"]:::aiSystem
+    D2["Mint Unique Certificate with UUID & Verification QR Code"]:::aiSystem
+    D3["Auto-Publish Verified Experience to User Portfolio"]:::aiSystem
+    D4["Public Verification Page Live at /verify/:certId"]:::userAction
+    D5(["End: Publicly Verifiable Credential Live"]):::startEnd
+  end
+
+  A1 --> A2 --> A3 --> A4
+  A4 --> B1 --> B2 --> B3
+  B3 -- "No (Dispute Logged)" --> B4 --> C3
+  B3 -- "Yes (Consensus)" --> B5 --> C1
+  C1 -- "Yes" --> C2 --> D1
+  C1 -- "Flagged / Edge Case" --> C3 --> C4
+  C4 -- "No" --> C5
+  C4 -- "Yes" --> D1
+  D1 --> D2 --> D3 --> D4 --> D5
+
+%% --- SAME STEPS IN WORDS (Accessibility Alternative) ---
+%% 1. Completion Checklist: Owner verifies all deliverables, supplies demo URL, and locks project repo.
+%% 2. Peer Attestation: Every member votes on role contributions. 100% consensus is required for fast-track.
+%% 3. Dispute Resolution: If any member contests contributions, it routes to Platform Admin review.
+%% 4. Automated Verification: Clean projects with proven git commit logs and completed milestones auto-verify.
+%% 5. Credential Issuance: Unique digital certificate issued with cryptographic hash and scannable QR code.
+%% 6. Public Validation: Third parties and recruiters can verify authenticity at `/verify/:certId` without an account.

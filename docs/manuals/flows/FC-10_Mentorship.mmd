@@ -1,0 +1,52 @@
+%% Source files: apps/web/src/modules/mentors/, apps/api/src/modules/mentors/, apps/web/src/modules/projects/
+%% Enums & models: MentorProfile, MentorshipRequest, MentorFeedback
+%% Title: FC-10 Mentor Layer & Milestone Advisory Flow
+%% Purpose: Shows how industry experts connect with project teams to deliver structured, high-leverage architectural advice.
+%% Audience: Mentors, Project Owners, Advisors
+
+flowchart TD
+  classDef startEnd fill:#0A1680,stroke:#93B2F8,stroke-width:2px,color:#FCFDFF,rx:20,ry:20;
+  classDef userAction fill:#FFFFFF,stroke:#0A1680,stroke-width:2px,color:#16213A;
+  classDef decision fill:#FBEDB0,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+  classDef aiSystem fill:#FCFDFF,stroke:#93B2F8,stroke-width:3px,stroke-dasharray: 4 2,color:#0A1680;
+  classDef notification fill:#FFFFFF,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+
+  subgraph S_MENTOR_ONBOARD ["Lane: Mentor Setup"]
+    A1(["Start: Industry Expert Onboarding"]):::startEnd
+    A2["Expert Creates Mentor Profile & Selects Specialties (e.g. Systems, ML)"]:::userAction
+    A3["Set Weekly Availability & Maximum Mentored Project Slots"]:::userAction
+    A4["Mentor Appears on Public Advisor Directory (/mentors)"]:::aiSystem
+  end
+
+  subgraph S_REQUEST ["Lane: Project Inquiries & Scoping"]
+    B1["Project Owner Browses Mentors Filtered by Required Skills"]:::userAction
+    B2["Owner Submits Mentorship Request with Milestone Context"]:::userAction
+    B3["Mentor Receives Inquiry in Requests Dashboard"]:::notification
+    B4{"Mentor Accepts Mentorship Request?"}:::decision
+    B5["Decline Request with Helpful Guidance or Referral"]:::userAction
+  end
+
+  subgraph S_ENGAGEMENT ["Lane: Milestone Review & Feedback"]
+    C1["Mentor Granted Scoped Read-Only Access to Project Milestones & Chat"]:::aiSystem
+    C2["Team Submits Milestone Architecture for Expert Critique"]:::userAction
+    C3["Mentor Posts Structured Feedback: Strengths, Blindspots & Next Steps"]:::userAction
+    C4["Feedback Appears in Team Activity Feed & Milestone Dossier"]:::notification
+    C5{"Milestone Target Reached?"}:::decision
+    C6["Mentor Submits Final Project Endorsement & Concludes Engagement"]:::userAction
+    C7(["End: Mentorship Completed & Verified Proof Recorded"]):::startEnd
+  end
+
+  A1 --> A2 --> A3 --> A4
+  A4 --> B1 --> B2 --> B3 --> B4
+  B4 -- "No" --> B5
+  B4 -- "Yes" --> C1 --> C2 --> C3 --> C4 --> C5
+  C5 -- "No (Needs Revision)" --> C2
+  C5 -- "Yes" --> C6 --> C7
+
+%% --- SAME STEPS IN WORDS (Accessibility Alternative) ---
+%% 1. Mentor Profile: Senior engineers and architects set up advisory profiles with specific domain expertise.
+%% 2. Advisory Request: Project owners browse vetted mentors and submit requests tied to key project goals.
+%% 3. Scoped Engagement: When accepted, mentors receive restricted, privacy-safe read access to project milestones.
+%% 4. Actionable Feedback: Mentors review pull requests and design documents, leaving structured critique.
+%% 5. Activity Integration: Feedback posts to the team's Project Room, guiding next milestone sprints.
+%% 6. Endorsement: Mentor provides final sign-off, adding external credibility to the team's verified experience.

@@ -1,0 +1,56 @@
+%% Source files: apps/web/src/modules/admin/, apps/api/src/modules/admin/, apps/web/src/modules/skills/AdminSkillsPage.tsx
+%% Enums & models: Report, ProjectModerationHold, Certificate, AuditLog, SkillMergeRecord
+%% Title: FC-14 Platform Governance, Moderation & Audit Architecture
+%% Purpose: Platform administrative controls, dispute mediation, certificate revocation, and taxonomy curation.
+%% Audience: Platform Administrators, Security Officers, Compliance Auditors
+
+flowchart TD
+  classDef startEnd fill:#0A1680,stroke:#93B2F8,stroke-width:2px,color:#FCFDFF,rx:20,ry:20;
+  classDef userAction fill:#FFFFFF,stroke:#0A1680,stroke-width:2px,color:#16213A;
+  classDef decision fill:#FBEDB0,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+  classDef aiSystem fill:#FCFDFF,stroke:#93B2F8,stroke-width:3px,stroke-dasharray: 4 2,color:#0A1680;
+  classDef notification fill:#FFFFFF,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+
+  subgraph S_INTAKE ["Lane: Issue Reporting & Queue Intake"]
+    A1(["Start: Incident or Audit Request Triggered"]):::startEnd
+    A2{"Trigger Source?"}:::decision
+    A3["User Submits Abuse / Plagiarism Report"]:::userAction
+    A4["Project Completion Disputed by Team Member (FC-07)"]:::notification
+    A5["Community Proposes Skill Taxonomy Merges / Aliases"]:::userAction
+  end
+
+  subgraph S_ADMIN_QUEUE ["Lane: Admin Console Processing (/admin)"]
+    B1["Item Placed in Designated Admin Queue with Priority Score"]:::aiSystem
+    B2["Administrator Inspects Repository Commits, Chat Logs & Evidence"]:::userAction
+    B3{"Admin Decision on Moderation / Dispute?"}:::decision
+  end
+
+  subgraph S_ENFORCEMENT ["Lane: Resolution & Immutable Audit Log"]
+    C1["Dismiss False Alarm: Report Cleared with Reason"]:::userAction
+    C2["Take Moderation Action: Suspend User, Issue Warning, or Remove Content"]:::userAction
+    C3["Resolve Project Dispute: Adjust Member Roles & Attributions"]:::userAction
+    C4["Revoke Compromised Certificate: Status Set to 'revoked' on Public Ledger"]:::aiSystem
+    C5["Approve Taxonomy Proposal: Merge Skill Aliases into Canonical Node"]:::aiSystem
+    C6["Immutable Audit Log Entry Appended (Actor, Timestamp, Action, Justification)"]:::aiSystem
+    C7(["End: Incident Resolved & Logged in System Ledger"]):::startEnd
+  end
+
+  A1 --> A2
+  A2 -- "Content/Abuse Report" --> A3 --> B1
+  A2 -- "Project Dispute" --> A4 --> B1
+  A2 -- "Taxonomy Proposal" --> A5 --> B1
+  B1 --> B2 --> B3
+  B3 -- "Dismiss" --> C1 --> C6
+  B3 -- "Violation Proven" --> C2 --> C6
+  B3 -- "Attribution Adjusted" --> C3 --> C6
+  B3 -- "Fraudulent Cert" --> C4 --> C6
+  B3 -- "Taxonomy Merge" --> C5 --> C6
+  C6 --> C7
+
+%% --- SAME STEPS IN WORDS (Accessibility Alternative) ---
+%% 1. Intake: Moderation issues arrive via user abuse reports, peer attribution disputes, or taxonomy proposals.
+%% 2. Queue Assignment: Items route to the Platform Admin console with priority scores and evidence packages.
+%% 3. Investigation: Administrator inspects commit logs, chat records, and deliverable demo links.
+%% 4. Enforcement: Administrator can warn, suspend, adjust member role attributions, or revoke fraudulent certificates.
+%% 5. Public Verification Invalidation: Revoked certificates immediately display as 'Revoked' at their public verification URL.
+%% 6. Immutable Audit Trail: Every administrative intervention is permanently recorded in the system audit log.

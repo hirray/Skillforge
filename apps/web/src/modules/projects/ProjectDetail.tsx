@@ -749,6 +749,56 @@ export const ProjectDetail = () => {
                   </span>
                 )}
               </div>
+
+              {/* Mini Pipeline Progress Bar (Requirement A2.6) */}
+              <div style={{ margin: '10px 0 2px', padding: '6px 12px', background: '#161522', borderRadius: 8, border: '1px solid #2b2a3c', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <span style={{ color: '#9ca3af', fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Pipeline:
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }}>
+                  {['Draft', 'Recruiting', 'Active', 'Completed', 'Verified'].map((stageName, idx) => {
+                    const currentStatus = (project.status || 'Active').toLowerCase();
+                    const isCurrent =
+                      currentStatus === stageName.toLowerCase() ||
+                      (stageName === 'Active' && (currentStatus === 'in progress' || currentStatus === 'active')) ||
+                      (stageName === 'Recruiting' && currentStatus === 'recruiting') ||
+                      (stageName === 'Completed' && currentStatus === 'completed') ||
+                      (stageName === 'Verified' && currentStatus === 'verified');
+                    const isPast =
+                      stageName === 'Draft' ||
+                      (stageName === 'Recruiting' && ['active', 'in progress', 'completed', 'verified'].includes(currentStatus)) ||
+                      (stageName === 'Active' && ['completed', 'verified'].includes(currentStatus)) ||
+                      (stageName === 'Completed' && currentStatus === 'verified');
+
+                    return (
+                      <React.Fragment key={stageName}>
+                        {idx > 0 && <span style={{ color: isPast ? '#a855f7' : '#3c3a4e', fontWeight: 700 }}>&rarr;</span>}
+                        <span
+                          style={{
+                            padding: '1.5px 7px',
+                            borderRadius: 5,
+                            fontSize: 10.5,
+                            fontWeight: isCurrent ? 700 : 500,
+                            background: isCurrent ? '#8861dc' : isPast ? '#8861dc20' : '#1e1d2b',
+                            color: isCurrent ? '#ffffff' : isPast ? '#c4b5fd' : '#6b7280',
+                            border: isCurrent ? '1px solid #a855f7' : '1px solid transparent',
+                          }}
+                        >
+                          {stageName}
+                        </span>
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('/help#FC-02')}
+                  style={{ marginLeft: 'auto', background: 'transparent', border: 'none', padding: 0, fontSize: 10.5, color: '#93b2f8', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 3 }}
+                >
+                  <span>See full pipeline (FC-02)</span>
+                  <span>&rarr;</span>
+                </button>
+              </div>
             </div>
           </div>
 

@@ -26,7 +26,11 @@
     "eval:matching": "node scripts/eval-matching.js",
     "test:member2": "npm run test:member2 -w apps/api && node scripts/test-ai.js",
     "check:member2-contract": "npm run check:member2-contract -w apps/api",
-    "check:member2-migrations": "node scripts/check-migrations.js"
+    "check:member2-migrations": "node scripts/check-migrations.js",
+    "check:flows": "node scripts/check-flows.js",
+    "check:manuals": "node scripts/check-manuals.js",
+    "docs:manual-pdf": "node scripts/docs-manual-pdf.js",
+    "docs:screenshots": "node scripts/docs-screenshots.js"
   },
   "devDependencies": {
     "@typescript-eslint/parser": "^8.72.2",

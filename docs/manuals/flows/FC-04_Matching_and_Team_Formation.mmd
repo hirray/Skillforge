@@ -1,0 +1,56 @@
+%% Source files: apps/web/src/modules/ai/Matching.tsx, apps/api/src/modules/matching/, apps/web/src/modules/team/
+%% Enums & models: ProjectInvitation, JoinRequest, ProjectRole, ProjectMember, CandidateMatch
+%% Title: FC-04 AI Collaborator Matching & Team Assembly Flow
+%% Purpose: Illustrates the two-way consent architecture for building complementary engineering teams.
+%% Audience: Project Owners, Prospective Teammates, System Architects
+
+flowchart TD
+  classDef startEnd fill:#0A1680,stroke:#93B2F8,stroke-width:2px,color:#FCFDFF,rx:20,ry:20;
+  classDef userAction fill:#FFFFFF,stroke:#0A1680,stroke-width:2px,color:#16213A;
+  classDef decision fill:#FBEDB0,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+  classDef aiSystem fill:#FCFDFF,stroke:#93B2F8,stroke-width:3px,stroke-dasharray: 4 2,color:#0A1680;
+  classDef notification fill:#FFFFFF,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+
+  subgraph S_OWNER ["Lane: Project Creator (Owner)"]
+    A1(["Start: Project Needs Collaborators"]):::startEnd
+    A2["Owner Inspects Open Role Gaps in Team Tab"]:::userAction
+    A3{"Discovery Path: Outreach vs Inbound?"}:::decision
+    A4["AI Matches Candidates Based on Complementarity & Availability"]:::aiSystem
+    A5["Owner Reviews Explainable Synergy Reasons & Past Proof"]:::userAction
+    A6["Owner Sends Role-Specific Project Invitation"]:::userAction
+  end
+
+  subgraph S_CANDIDATE ["Lane: Prospective Collaborator"]
+    B1["Candidate Browses Projects on Discover Feed"]:::userAction
+    B2["Candidate Submits Join Request with Role Note"]:::userAction
+    B3["Candidate Receives Invitation in Notifications & Inbox"]:::notification
+    B4["Candidate Inspects Project Goals, Timeline & Tech Stack"]:::userAction
+    B5{"Candidate Accepts Invitation?"}:::decision
+    B6["Decline or Allow Invitation to Expire (7 days)"]:::userAction
+  end
+
+  subgraph S_APPROVAL ["Lane: Mutual Consent & Onboarding"]
+    C1{"Owner Approves Inbound Join Request?"}:::decision
+    C2["Owner Declines Join Request with Optional Feedback"]:::userAction
+    C3["Collaborator Added to ProjectMember Directory"]:::aiSystem
+    C4["Role Assigned & Access Granted to Project Room (FC-05)"]:::userAction
+    C5(["End: Active Team Member Onboarded"]):::startEnd
+  end
+
+  A1 --> A2 --> A3
+  A3 -- "Owner Direct Outreach" --> A4 --> A5 --> A6 --> B3
+  A3 -- "Public Inbound Request" --> B1 --> B2 --> C1
+  B3 --> B4 --> B5
+  B5 -- "No" --> B6
+  B5 -- "Yes" --> C3
+  C1 -- "No" --> C2
+  C1 -- "Yes" --> C3
+  C3 --> C4 --> C5
+
+%% --- SAME STEPS IN WORDS (Accessibility Alternative) ---
+%% 1. Team Gap Assessment: Owner defines open roles and required skills for the project.
+%% 2. Dual Discovery Paths: Collaborators join either through direct owner invitations or inbound join requests.
+%% 3. AI Complementarity Matching: System calculates candidate scores based on skill gaps, timezone, and availability.
+%% 4. Explainable Matches: Owner sees exactly why a candidate is suggested (e.g. 'Covers missing Kafka & Go skills').
+%% 5. Mutual Consent Gate: No user is forced onto a team. Candidates must accept invites, and owners must approve join requests.
+%% 6. Workspace Access: Once accepted, collaborator receives immediate member privileges in the Project Room.

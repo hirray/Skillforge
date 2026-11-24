@@ -1,0 +1,59 @@
+%% Source files: apps/web/src/modules/projects/rescue/, apps/api/src/modules/projects/rescue/
+%% Enums & models: ProjectGap, HandoverNote, InactiveMemberItem
+%% Title: FC-06 Project Rescue & Skill-Gap Replacement Architecture
+%% Purpose: Emergency failover workflow when a collaborator departs or milestone deadlines are severely threatened.
+%% Audience: Project Owners, Incoming Replacement Engineers
+
+flowchart TD
+  classDef startEnd fill:#0A1680,stroke:#93B2F8,stroke-width:2px,color:#FCFDFF,rx:20,ry:20;
+  classDef userAction fill:#FFFFFF,stroke:#0A1680,stroke-width:2px,color:#16213A;
+  classDef decision fill:#FBEDB0,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+  classDef aiSystem fill:#FCFDFF,stroke:#93B2F8,stroke-width:3px,stroke-dasharray: 4 2,color:#0A1680;
+  classDef notification fill:#FFFFFF,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+
+  subgraph S_TRIGGER ["Lane: Incident Trigger & Inactivity Detection"]
+    A1(["Start: Delivery Stalled"]):::startEnd
+    A2{"Trigger Condition?"}:::decision
+    A3["Inactivity Telemetry Alert (>10 Days No Commits)"]:::notification
+    A4["Collaborator Leaves or Is Removed"]:::userAction
+    A5["New Unforeseen Technical Requirement Emerges"]:::userAction
+    A6["Owner Declares Emergency Project Gap"]:::userAction
+  end
+
+  subgraph S_HANDOVER ["Lane: Context-First Handover Preparation"]
+    B1["Owner Fills Gap Profile: Title, Priority & Urgency"]:::userAction
+    B2["Owner Documents State of Repository, Blockers & Tasks"]:::userAction
+    B3["Structured Handover Document Created in Project Archive"]:::aiSystem
+  end
+
+  subgraph S_SOURCING ["Lane: Urgent Replacement Discovery"]
+    C1["AI Scans Available Engineers Seeking Immediate Rescue Work"]:::aiSystem
+    C2["Owner Reviews Filtered Candidates Ranked by Direct Gap Fit"]:::userAction
+    C3["Context-First Invitation Dispatched with Handover Brief"]:::notification
+    C4{"Replacement Accepts Rescue Invitation?"}:::decision
+    C5["Replacement Reviews Brief & Signs Acceptance"]:::userAction
+  end
+
+  subgraph S_RESTORATION ["Lane: Project Rehabilitation"]
+    D1["New Member Assigned to Orphaned Tasks & Repositories"]:::userAction
+    D2["Departed Member's Prior Commits Safely Preserved in Audit"]:::aiSystem
+    D3["Project Health Telemetry Restores to 'Healthy'"]:::aiSystem
+    D4(["End: Project Resumes Normal Execution (FC-05)"]):::startEnd
+  end
+
+  A1 --> A2
+  A2 -- "Inactivity" --> A3 --> A6
+  A2 -- "Departure" --> A4 --> A6
+  A2 -- "Skill Void" --> A5 --> A6
+  A6 --> B1 --> B2 --> B3
+  B3 --> C1 --> C2 --> C3 --> C4
+  C4 -- "No (Declined)" --> C1
+  C4 -- "Yes" --> C5 --> D1 --> D2 --> D3 --> D4
+
+%% --- SAME STEPS IN WORDS (Accessibility Alternative) ---
+%% 1. Stalled Project Trigger: Occurs due to inactivity, member departure, or discovery of an unfillable technical requirement.
+%% 2. Handover Brief: Owner creates a handover note detailing current blockers, codebase progress, and required tasks.
+%% 3. Rapid Sourcing: SkillForge AI searches for available candidates with verified skills matching the exact gap.
+%% 4. Context-First Invite: Candidate receives a specialized rescue invitation including the handover brief upfront.
+%% 5. Handover Acceptance: Candidate accepts, immediately receiving ownership of the relevant tasks.
+%% 6. Audit Integrity: Departed member's prior work remains cryptographically attributed; project returns to Healthy status.

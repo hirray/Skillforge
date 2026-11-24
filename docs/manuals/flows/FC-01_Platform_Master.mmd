@@ -1,0 +1,72 @@
+%% Source files: apps/web/src/modules/ai/Workspace.tsx, apps/web/src/config/navigation.ts
+%% Enums & models: User, Project, Job, Challenge, HackathonEvent, Certificate
+%% Title: FC-01 Platform Master Architecture & Holistic User Journey
+%% Purpose: High-level overview of the complete SkillForge collaboration and talent lifecycle, linking to each specialized flow.
+%% Audience: All Users, Evaluators, Engineering Teams
+
+graph TD
+  classDef startEnd fill:#0A1680,stroke:#93B2F8,stroke-width:2px,color:#FCFDFF,rx:20,ry:20;
+  classDef userAction fill:#FFFFFF,stroke:#0A1680,stroke-width:2px,color:#16213A;
+  classDef decision fill:#FBEDB0,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+  classDef aiSystem fill:#FCFDFF,stroke:#93B2F8,stroke-width:3px,stroke-dasharray: 4 2,color:#0A1680;
+  classDef notification fill:#FFFFFF,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+
+  subgraph S_ONBOARDING ["Actor: New User"]
+    A1(["Start: Land on SkillForge"]):::startEnd
+    A2["Create Account & Select Role Context"]:::userAction
+    A3{"Upload Resume / CV?"}:::decision
+    A4["AI Parses Resume & Suggests Skills (FC-03)"]:::aiSystem
+    A5["Complete Profile & Set Availability"]:::userAction
+  end
+
+  subgraph S_TEAM ["Actor: Project Owner & Collaborators"]
+    B1{"Create Project or Find Work?"}:::decision
+    B2["Define Project Idea in Plain Words (FC-02)"]:::userAction
+    B3["AI Extracts Capabilities & Analyzes Gaps (FC-02)"]:::aiSystem
+    B4["Collaborator Matching & Consent Invites (FC-04)"]:::aiSystem
+    B5["Assemble Verified Team (FC-04)"]:::userAction
+  end
+
+  subgraph S_PROJECT_ROOM ["Actor: Team Workspace"]
+    C1["Execute Milestones & Kanban Tasks (FC-05)"]:::userAction
+    C2["Connect GitHub Repo & Log Cryptographic Proofs (FC-05)"]:::userAction
+    C3{"Project Stalled or Member Inactive?"}:::decision
+    C4["Execute Emergency Project Rescue (FC-06)"]:::userAction
+    C5["Formal Completion Checklist & Peer Sign-Off (FC-07)"]:::userAction
+  end
+
+  subgraph S_CREDENTIALS ["Actor: Verification & Portfolio"]
+    D1["System Audits Evidence & Issues Certificate (FC-07)"]:::aiSystem
+    D2["Auto-Generate Verified Experience Dossier (FC-07)"]:::userAction
+    D3["Publish Verified Professional Portfolio (FC-16)"]:::userAction
+  end
+
+  subgraph S_OPPORTUNITIES ["Actor: Recruiters & Companies"]
+    E1["Post Jobs & Define Hiring Radar (FC-11)"]:::userAction
+    E2["AI Job-to-Talent Match & Radar Ranking (FC-11)"]:::aiSystem
+    E3["Consent-Gated Inbound Outreach (FC-11, FC-12)"]:::notification
+    E4(["End: High-Trust Verified Hire"]):::startEnd
+  end
+
+  A1 --> A2 --> A3
+  A3 -- "Yes" --> A4 --> A5
+  A3 -- "No (Manual Entry)" --> A5
+  A5 --> B1
+  B1 -- "Create Project" --> B2 --> B3 --> B4 --> B5
+  B1 -- "Find Work / Join" --> B4
+  B5 --> C1 --> C2 --> C3
+  C3 -- "Yes" --> C4 --> C1
+  C3 -- "No" --> C5
+  C5 --> D1 --> D2 --> D3
+  D3 --> E2
+  E1 --> E2 --> E3 --> E4
+
+%% --- SAME STEPS IN WORDS (Accessibility Alternative) ---
+%% 1. Start: The user visits SkillForge, signs up, and selects their role context (Individual, Recruiter, Mentor, Company Admin).
+%% 2. Profile Setup: User optionally uploads a resume for AI extraction (FC-03) or fills in their skills manually.
+%% 3. Project Initiation: User either starts a new project by typing a concept in plain English (FC-02) or discovers existing teams seeking collaborators.
+%% 4. AI Team Assembly: The system evaluates required skills, identifies missing capabilities, and matches complementary builders with mutual consent (FC-04).
+%% 5. Project Execution: Team enters the Project Room to track tasks, chat, link GitHub commits, and monitor real-time health telemetry (FC-05).
+%% 6. Rescue Mechanism: If a member leaves or falls inactive, the owner triggers an emergency project rescue handover (FC-06).
+%% 7. Verification: Upon milestone completion, the team confirms attributions, and SkillForge issues a cryptographic certificate and verified dossier (FC-07).
+%% 8. Career Opportunities: The verified dossier powers the candidate's portfolio, matching them with verified recruiter job pipelines (FC-11, FC-12).

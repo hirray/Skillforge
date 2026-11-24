@@ -1,0 +1,53 @@
+%% Source files: apps/web/src/modules/jobs/, apps/web/src/modules/talent/, apps/web/src/modules/pipeline/, apps/api/src/modules/pipeline/
+%% Enums & models: Job, CandidateMatch, Shortlist, PipelineStageHistory, OutreachMessage
+%% Title: FC-11 Recruiter Talent Radar, AI Matching & Hiring Pipeline
+%% Purpose: Evidence-first recruiter talent acquisition, candidate comparison, and consent-gated outreach pipeline.
+%% Audience: Recruiters, Hiring Managers, Company Admins
+
+flowchart TD
+  classDef startEnd fill:#0A1680,stroke:#93B2F8,stroke-width:2px,color:#FCFDFF,rx:20,ry:20;
+  classDef userAction fill:#FFFFFF,stroke:#0A1680,stroke-width:2px,color:#16213A;
+  classDef decision fill:#FBEDB0,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+  classDef aiSystem fill:#FCFDFF,stroke:#93B2F8,stroke-width:3px,stroke-dasharray: 4 2,color:#0A1680;
+  classDef notification fill:#FFFFFF,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+
+  subgraph S_JOB_LIFECYCLE ["Lane: Job Creation & Status Lifecycle"]
+    A1(["Start: Hiring Need Identified"]):::startEnd
+    A2["Recruiter Posts Job with Required & Preferred Skills (/jobs/create)"]:::userAction
+    A3["Set Job Lifecycle State: Draft -> Active (or Paused/Closed)"]:::userAction
+  end
+
+  subgraph S_DISCOVERY ["Lane: Talent Radar & AI Candidate Matching"]
+    B1["Recruiter Applies Manual Filters (Skills, Commits, Location, Availability)"]:::userAction
+    B2["AI Job-to-Talent Matcher Evaluates Proven Codebase Commits & Projects"]:::aiSystem
+    B3["Candidates Ranked into Match Tiers (Strong, Good, Adjacent) with Explainable Reasons"]:::aiSystem
+    B4["Recruiter Compares Up to 3 Candidates Side-by-Side"]:::userAction
+  end
+
+  subgraph S_PIPELINE ["Lane: Hiring Pipeline Stages (New -> Closed)"]
+    C1["Candidate Added to Job Shortlist with Private Team Notes"]:::userAction
+    C2["Pipeline Stage Transitions: 'New' -> 'Reviewed' -> 'Shortlisted'"]:::userAction
+    C3{"Does Candidate Consent to Recruiter Outreach?"}:::decision
+    C4["Outreach Blocked by Candidate Privacy Settings (FC-16)"]:::notification
+    C5["Recruiter Sends Direct Inbound Message (State: 'Contacted')"]:::notification
+    C6{"Interview Outcome Positive?"}:::decision
+    C7["Advance to 'Interview' -> 'Selected'"]:::userAction
+    C8["Stage Set to 'Rejected' or 'Closed' with Respectful Notice"]:::userAction
+    C9(["End: High-Confidence Verified Hire Closed"]):::startEnd
+  end
+
+  A1 --> A2 --> A3
+  A3 --> B1 --> B2 --> B3 --> B4
+  B4 --> C1 --> C2 --> C3
+  C3 -- "No Consent" --> C4
+  C3 -- "Consented" --> C5 --> C6
+  C6 -- "No" --> C8
+  C6 -- "Yes" --> C7 --> C9
+
+%% --- SAME STEPS IN WORDS (Accessibility Alternative) ---
+%% 1. Job Posting: Recruiter defines role expectations, compensation, and required taxonomy skills.
+%% 2. Radar Filtering: Recruiter searches talent based on actual verified project commits, not self-reported text.
+%% 3. AI Evidence Matching: Candidates receive compatibility ratings with explicit explanations (e.g. 'Verified Kafka PRs on proj-consensus').
+%% 4. Shortlisting: Recruiter adds candidates to Kanban pipeline across 8 standardized stages.
+%% 5. Consent Enforcement: Inbound messages can only be sent if candidate has enabled recruiter outreach.
+%% 6. Pipeline Progression: Candidate moves through Interview to Selected or Closed with audit history.

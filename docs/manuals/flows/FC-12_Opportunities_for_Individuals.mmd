@@ -1,0 +1,54 @@
+%% Source files: apps/web/src/modules/discover/, apps/web/src/modules/pipeline/OpportunitiesInboxPage.tsx
+%% Enums & models: OpportunityFeedPage, Application, SavedSearch
+%% Title: FC-12 Individual Opportunity Discovery & Career Inbound
+%% Purpose: How developers discover high-relevance projects, jobs, challenges, and manage inbound inquiries.
+%% Audience: Individual Engineers, Freelancers, Students
+
+flowchart TD
+  classDef startEnd fill:#0A1680,stroke:#93B2F8,stroke-width:2px,color:#FCFDFF,rx:20,ry:20;
+  classDef userAction fill:#FFFFFF,stroke:#0A1680,stroke-width:2px,color:#16213A;
+  classDef decision fill:#FBEDB0,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+  classDef aiSystem fill:#FCFDFF,stroke:#93B2F8,stroke-width:3px,stroke-dasharray: 4 2,color:#0A1680;
+  classDef notification fill:#FFFFFF,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+
+  subgraph S_FEED ["Lane: Personalized Opportunity Surfaces"]
+    A1(["Start: Looking for New Opportunities"]):::startEnd
+    A2["Developer Browses Unified Discover Feed (/discover)"]:::userAction
+    A3["Toggle Tabs: Projects seeking skills vs Full-time Jobs vs Hackathons"]:::userAction
+    A4["AI Highlights Personalized Recommendations with Synergy Reasons"]:::aiSystem
+  end
+
+  subgraph S_ENGAGE ["Lane: Evaluation & Expression of Interest"]
+    B1{"Action Type?"}:::decision
+    B2["Save Opportunity to Private Bookmarks"]:::userAction
+    B3["Express Direct Interest with Proof Dossier Link"]:::userAction
+    B4["Submit Formal Application to Recruiter Opening"]:::userAction
+  end
+
+  subgraph S_TRACKING ["Lane: Inbound Status & Recruiter Contact"]
+    C1["Application Status Tracked in Opportunities Inbox (/opportunities)"]:::userAction
+    C2{"Recruiter Sends Inbound Interview Outreach?"}:::decision
+    C3["Candidate Receives Outreach Alert & Reviews Company Profile"]:::notification
+    C4{"Candidate Accepts Recruiter Discussion?"}:::decision
+    C5["Decline Message & Keep Profile Anonymously Discoverable"]:::userAction
+    C6["Direct Recruiter Chat Unlocked & Interview Scheduled"]:::userAction
+    C7(["End: Career Milestone Achieved"]):::startEnd
+  end
+
+  A1 --> A2 --> A3 --> A4 --> B1
+  B1 -- "Bookmark" --> B2
+  B1 -- "Collaborate" --> B3 --> C1
+  B1 -- "Apply" --> B4 --> C1
+  C1 --> C2
+  C2 -- "No (Under Review)" --> C1
+  C2 -- "Yes" --> C3 --> C4
+  C4 -- "No" --> C5
+  C4 -- "Yes" --> C6 --> C7
+
+%% --- SAME STEPS IN WORDS (Accessibility Alternative) ---
+%% 1. Feed Personalization: Discover feed highlights openings matching the candidate's exact verified skills.
+%% 2. Action Choices: Candidates can bookmark, apply to jobs, or request to join collaborative projects.
+%% 3. Status Tracking: The Opportunities Inbox tracks response status across all submitted expressions of interest.
+%% 4. Inbound Inquiries: If recruiters reach out, candidate receives an alert detailing the role and company.
+%% 5. Candidate Sovereignty: Candidate chooses whether to accept contact; contact details are never leaked.
+%% 6. Direct Interview: Accepted inquiries unlock direct messaging with hiring teams.

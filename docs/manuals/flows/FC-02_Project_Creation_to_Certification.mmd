@@ -1,0 +1,72 @@
+%% Source files: apps/web/src/modules/projects/, apps/api/src/modules/projects/, apps/web/src/modules/certificates/
+%% Enums & models: Project, ProjectRequirement, ProjectRole, ProjectMember, ProjectCompletion, Certificate
+%% Title: FC-02 Project Creation to Certification Full Pipeline
+%% Purpose: Complete end-to-end lifecycle of an engineering project from initial ideation to cryptographic certificate issuance.
+%% Audience: Project Creators, Team Collaborators, Mentors, Evaluators
+
+flowchart TD
+  classDef startEnd fill:#0A1680,stroke:#93B2F8,stroke-width:2px,color:#FCFDFF,rx:20,ry:20;
+  classDef userAction fill:#FFFFFF,stroke:#0A1680,stroke-width:2px,color:#16213A;
+  classDef decision fill:#FBEDB0,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+  classDef aiSystem fill:#FCFDFF,stroke:#93B2F8,stroke-width:3px,stroke-dasharray: 4 2,color:#0A1680;
+  classDef notification fill:#FFFFFF,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+
+  subgraph S_INITIATION ["Lane: Project Creator (Owner)"]
+    A1(["Start: New Project Idea"]):::startEnd
+    A2["Describe Problem Statement in Plain Text"]:::userAction
+    A3["AI Deconstructs Scope & Suggests Roles & Skills"]:::aiSystem
+    A4["Owner Modifies Requirements & Team Size Bounds"]:::userAction
+    A5["Skill-Gap Analysis: Covered vs Partial vs Missing"]:::aiSystem
+    A6["Publish Project: State Transitions to 'Recruiting'"]:::userAction
+  end
+
+  subgraph S_RECRUITMENT ["Lane: Collaborator Matching & Consent"]
+    B1["AI Recommends Complementary Talent with Match Score"]:::aiSystem
+    B2["Owner Issues Role-Specific Invitation"]:::userAction
+    B3["Candidate Reviews Scope & Handover Context"]:::userAction
+    B4{"Candidate Accepts Invitation?"}:::decision
+    B5["Team Capacity Reached: State Transitions to 'Active'"]:::userAction
+  end
+
+  subgraph S_EXECUTION ["Lane: Project Room Delivery Loop"]
+    C1["Team Breaks Work into Milestones & Kanban Tasks"]:::userAction
+    C2["Connect GitHub Repo & Stream Commits & PRs"]:::userAction
+    C3{"Member Inactive or Leaves Team?"}:::decision
+    C4["Trigger Project Rescue & Gap Replacement (FC-06)"]:::userAction
+    C5{"All Milestones Completed & Delivered?"}:::decision
+  end
+
+  subgraph S_VERIFICATION ["Lane: Attestation & Certification"]
+    D1["Owner Submits Formal Completion Checklist"]:::userAction
+    D2["Each Team Member Confirms Roles & Code Attributions"]:::userAction
+    D3{"Any Member Contests Contribution?"}:::decision
+    D4["Admin Mediation & Dispute Resolution Queue (FC-14)"]:::userAction
+    D5["System Generates Cryptographic Commit Snapshot"]:::aiSystem
+    D6["Unique Certificate & QR Code Generated for Each Member"]:::aiSystem
+    D7["Auto-Create Verified Experience Dossier in Portfolio"]:::userAction
+    D8(["End: Project Archived & Discoverable by Recruiters"]):::startEnd
+  end
+
+  A1 --> A2 --> A3 --> A4 --> A5 --> A6
+  A6 --> B1 --> B2 --> B3 --> B4
+  B4 -- "No (Declined/Expired)" --> B1
+  B4 -- "Yes" --> B5
+  B5 --> C1 --> C2 --> C3
+  C3 -- "Yes" --> C4 --> C1
+  C3 -- "No" --> C5
+  C5 -- "No (In Progress)" --> C1
+  C5 -- "Yes" --> D1 --> D2 --> D3
+  D3 -- "Yes (Disputed)" --> D4 --> D5
+  D3 -- "No (Consensus)" --> D5 --> D6 --> D7 --> D8
+
+%% --- SAME STEPS IN WORDS (Accessibility Alternative) ---
+%% 1. Ideation: Project owner defines project title and problem statement in natural language.
+%% 2. AI Scaffolding: AI evaluates the description and extracts required roles, technologies, and target dates.
+%% 3. Team-Gap Analysis: Owner reviews recommendations and marks skills as covered, partially covered, or missing.
+%% 4. Recruitment: Owner publishes project to 'Recruiting'. AI matches available talent with explainable synergy scores.
+%% 5. Mutual Consent: Candidate reviews project brief and accepts or declines role invitation.
+%% 6. Active Execution: Team enters Project Room, links GitHub repository, and moves tasks across Kanban board.
+%% 7. Telemetry & Rescue: If a member drops out, owner initiates emergency replacement handover via FC-06.
+%% 8. Completion Sign-Off: Once deliverables are met, owner initiates completion checklist.
+%% 9. Peer Review: Every collaborator independently signs off on their contributions and peer attributions.
+%% 10. Certification: Platform mints unique SHA-256 certificate for each confirmed contributor with QR code and adds verified experience to their portfolio.

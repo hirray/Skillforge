@@ -1,0 +1,52 @@
+%% Source files: apps/web/src/context/ContextModel.tsx, apps/web/src/config/navigation.ts
+%% Enums & models: ContextType, User, RecruiterMember, MentorProfile
+%% Title: FC-15 The Six Role Contexts & Dynamic Switching Architecture
+%% Purpose: Explains how a single user identity holds multiple role contexts without logging out or reloading.
+%% Audience: All Users, System Architects, Security Engineers
+
+flowchart TD
+  classDef startEnd fill:#0A1680,stroke:#93B2F8,stroke-width:2px,color:#FCFDFF,rx:20,ry:20;
+  classDef userAction fill:#FFFFFF,stroke:#0A1680,stroke-width:2px,color:#16213A;
+  classDef decision fill:#FBEDB0,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+  classDef aiSystem fill:#FCFDFF,stroke:#93B2F8,stroke-width:3px,stroke-dasharray: 4 2,color:#0A1680;
+  classDef notification fill:#FFFFFF,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+
+  subgraph S_PERSONA ["Lane: Single Human Identity (One Account)"]
+    A1(["User Authenticated via JWT Token"]):::startEnd
+    A2["System Reads User Memberships: Builder, Recruiter, Mentor, Admin"]:::aiSystem
+    A3["Top-Bar Context Switcher Displays Active Role Chip"]:::userAction
+  end
+
+  subgraph S_CONTEXTS ["Lane: The 6 North Star Contexts"]
+    B1["Guest: Public Project & Talent Exploration Only"]:::userAction
+    B2["Individual: Home, Discover, Projects, Challenges, Portfolio, Inbox"]:::userAction
+    B3["Recruiter: Home, Jobs, Talent Radar, Pipeline, Challenges, Messages"]:::userAction
+    B4["Company Admin: Recruiter Tools + Company Profile, Seats & Analytics"]:::userAction
+    B5["Mentor: Home, Requests, Mentored Projects, Feedback, Availability"]:::userAction
+    B6["Platform Admin: Overview, Moderation, Verification, Certs, Taxonomy, Audit"]:::userAction
+  end
+
+  subgraph S_SWITCHING ["Lane: Instant Dynamic Viewport Re-rendering"]
+    C1["User Clicks Context Switcher in Top Navigation Bar"]:::userAction
+    C2["Selects Alternative Available Role (e.g. Individual -> Recruiter)"]:::userAction
+    C3["Sidebar Nav, Cockpit HUD, and Allowed Routes Update Instantly"]:::aiSystem
+    C4["Strict Server-Side RBAC Enforces Access Permissions on Every Request"]:::aiSystem
+    C5(["End: Context Active without Page Reload"]):::startEnd
+  end
+
+  A1 --> A2 --> A3
+  A3 --> C1
+  A2 -.-> B1
+  A2 -.-> B2
+  A2 -.-> B3
+  A2 -.-> B4
+  A2 -.-> B5
+  A2 -.-> B6
+  C1 --> C2 --> C3 --> C4 --> C5
+
+%% --- SAME STEPS IN WORDS (Accessibility Alternative) ---
+%% 1. Single Identity: One user account can hold multiple roles simultaneously (e.g., an engineer who also recruits or mentors).
+%% 2. The 6 Contexts: Distinct, uncluttered experiences designed for Guest, Individual, Recruiter, Company Admin, Mentor, and Admin.
+%% 3. Dynamic Switcher: The top-bar Context Switcher allows instant switching between available contexts in one click.
+%% 4. Instant UI Refresh: Navigation bars, home widgets, and shortcuts adapt dynamically without reloading the browser.
+%% 5. Authorisation Enforcement: Server-side RBAC validates every API request to guarantee cross-role security boundaries.

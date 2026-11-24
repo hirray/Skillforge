@@ -1,0 +1,52 @@
+%% Source files: apps/web/src/modules/notifications/, apps/api/src/modules/notifications/
+%% Enums & models: Notification, NotificationPreference, ProjectInvitation
+%% Title: FC-13 Notifications, Invitations & Alert Dispatch Lifecycle
+%% Purpose: Event-driven notification engine delivering timely, actionable alerts across all platform events.
+%% Audience: All Platform Users, System Integrators
+
+flowchart TD
+  classDef startEnd fill:#0A1680,stroke:#93B2F8,stroke-width:2px,color:#FCFDFF,rx:20,ry:20;
+  classDef userAction fill:#FFFFFF,stroke:#0A1680,stroke-width:2px,color:#16213A;
+  classDef decision fill:#FBEDB0,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+  classDef aiSystem fill:#FCFDFF,stroke:#93B2F8,stroke-width:3px,stroke-dasharray: 4 2,color:#0A1680;
+  classDef notification fill:#FFFFFF,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+
+  subgraph S_EVENT ["Lane: Domain Event Trigger"]
+    A1(["Start: Event Occurs (Invite, Task Assigned, Health Alert)"]):::startEnd
+    A2["Event Bus Emits Domain Event with Payload"]:::aiSystem
+    A3{"User Notification Preferences Muted for Event Type?"}:::decision
+    A4["Notification Suppressed as per User Preference"]:::aiSystem
+  end
+
+  subgraph S_DISPATCH ["Lane: Real-Time UI Delivery"]
+    B1["Create Database Notification Record (Status: 'unread')"]:::aiSystem
+    B2["Increment Top-Bar Notification Bell Badge Count"]:::notification
+    B3["Render Notification Card in Home Zone E & Inbox (/notifications)"]:::notification
+  end
+
+  subgraph S_INTERACTION ["Lane: User Action & Lifecycle"]
+    C1{"Is Notification Actionable? (e.g. Project Invitation)"}:::decision
+    C2["User Clicks Inline 'Accept' or 'Decline' Directly in Notification"]:::userAction
+    C3["User Clicks Deep Link to Destination Screen (e.g. Task/Project)"]:::userAction
+    C4["Notification Automatically Marked as 'Read'"]:::aiSystem
+    C5{"Invitation Responded Within 7 Days?"}:::decision
+    C6["Invitation Automatically Expired by Platform Daemon"]:::aiSystem
+    C7(["End: Notification Action Closed"]):::startEnd
+  end
+
+  A1 --> A2 --> A3
+  A3 -- "Yes (Muted)" --> A4
+  A3 -- "No (Active)" --> B1 --> B2 --> B3 --> C1
+  C1 -- "Yes (Invitation/Review)" --> C2 --> C4 --> C7
+  C1 -- "Informational (Health/Task)" --> C3 --> C4 --> C7
+  C2 --> C5
+  C5 -- "No Action" --> C6
+  C5 -- "Responded" --> C7
+
+%% --- SAME STEPS IN WORDS (Accessibility Alternative) ---
+%% 1. Event Generation: System events (invitations, task assignments, health alerts) publish to event bus.
+%% 2. Preference Check: Notification rules verify user has not muted that alert category.
+%% 3. UI Display: Badges illuminate on the top-bar bell; alert cards render on Home dashboard.
+%% 4. Inline Actions: Invitations can be accepted or declined immediately from the notification banner.
+%% 5. Read Status: Interacting with an alert marks it read, clearing the notification badge.
+%% 6. Auto-Expiry: Invitations not responded to within 7 days automatically expire to avoid stalled teams.

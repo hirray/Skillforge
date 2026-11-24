@@ -1,0 +1,49 @@
+%% Source files: apps/web/src/modules/challenges/, apps/api/src/modules/challenges/, apps/web/src/modules/companies/
+%% Enums & models: Challenge, ChallengeEntry, Company, Application
+%% Title: FC-09 Company-Sponsored Real-World Challenge Architecture
+%% Purpose: Enterprise-sponsored real-world problem challenges connecting companies with top verified engineering talent.
+%% Audience: Company Admins, Technical Recruiters, Competitive Engineering Teams
+
+flowchart TD
+  classDef startEnd fill:#0A1680,stroke:#93B2F8,stroke-width:2px,color:#FCFDFF,rx:20,ry:20;
+  classDef userAction fill:#FFFFFF,stroke:#0A1680,stroke-width:2px,color:#16213A;
+  classDef decision fill:#FBEDB0,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+  classDef aiSystem fill:#FCFDFF,stroke:#93B2F8,stroke-width:3px,stroke-dasharray: 4 2,color:#0A1680;
+  classDef notification fill:#FFFFFF,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+
+  subgraph S_SPONSOR ["Lane: Enterprise Sponsor (Company)"]
+    A1(["Start: Company Needs Specialized Solutions"]):::startEnd
+    A2["Company Verifies Profile & Uploads Corporate Proof"]:::userAction
+    A3["Company Publishes Sponsored Challenge Brief & Reward"]:::userAction
+    A4["Challenge Appears on Global Discover Feed (/challenges)"]:::notification
+  end
+
+  subgraph S_PARTICIPANTS ["Lane: Student & Professional Teams"]
+    B1["Teams Discover Challenge & Review Technical Requirements"]:::userAction
+    B2["Team Launches Challenge Project Workspace (FC-02)"]:::userAction
+    B3["Team Delivers Production-Grade Implementation & Tests"]:::userAction
+    B4["Team Submits Project Deliverable to Company Portal"]:::userAction
+  end
+
+  subgraph S_EVALUATION ["Lane: Company Review & Hiring Fast-Track"]
+    C1["Company Engineering Lead Reviews Code, Tests & Architecture"]:::userAction
+    C2{"Does Submission Meet Enterprise Quality Standards?"}:::decision
+    C3["Provide Actionable Feedback & Attest Delivery Effort"]:::userAction
+    C4["Award Prize / Bounty & Endorse Team's Verified Experience"]:::aiSystem
+    C5["Company Directly Invites Top Contributors to Interview Pipeline (FC-11)"]:::notification
+    C6(["End: High-Value Talent Sourced & Experience Credentialed"]):::startEnd
+  end
+
+  A1 --> A2 --> A3 --> A4
+  A4 --> B1 --> B2 --> B3 --> B4
+  B4 --> C1 --> C2
+  C2 -- "Needs Polish" --> C3 --> C4
+  C2 -- "Exceeds Expectations" --> C4 --> C5 --> C6
+
+%% --- SAME STEPS IN WORDS (Accessibility Alternative) ---
+%% 1. Challenge Publication: Verified companies post real-world engineering challenges with cash bounties or interview fast-tracks.
+%% 2. Team Participation: Teams register, spin up collaborative project rooms, and build working software solving the brief.
+%% 3. Submission: Teams package live URLs, pull requests, and architecture documentation.
+%% 4. Enterprise Review: Company engineers review commits, security posture, and test coverage.
+%% 5. Experience Attestation: Submissions earn verified company-backed portfolio credentials.
+%% 6. Talent Fast-Track: Companies can directly transition high-performing contributors into candidate hiring pipelines.

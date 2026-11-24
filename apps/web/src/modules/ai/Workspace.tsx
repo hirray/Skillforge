@@ -60,11 +60,91 @@ const fallbackContext: WorkspaceContext = {
 
 export default function Member2Workspace() {
   const { activeContext } = useActiveContext();
-  const { startTour } = useTour();
+  const { startTour, allTours, isTourCompleted, resetAllTours } = useTour();
   const [context, setContext] = useState<WorkspaceContext | null>(null);
   const [loading, setLoading] = useState(true);
   const [mobileNav, setMobileNav] = useState(false);
+  const [showTourMenu, setShowTourMenu] = useState(false);
+  const [showHelpDrawer, setShowHelpDrawer] = useState(false);
   const location = useLocation();
+
+  const getContextualHelp = (pathname: string) => {
+    if (pathname.startsWith('/projects') || pathname.startsWith('/tasks')) {
+      return {
+        title: 'Project Delivery & Milestones',
+        chapter: '04_project_creation.md',
+        flowchart: 'FC-02_Project_Creation_to_Certification.mmd',
+        flowchartId: 'FC-02',
+        summary: 'Track engineering tasks on Kanban boards, stream GitHub commit hashes, and monitor project health telemetry.',
+        tourId: 't6-project-room',
+        tourTitle: 'Project Room Tour',
+      };
+    }
+    if (pathname.startsWith('/jobs') || pathname.startsWith('/talent') || pathname.startsWith('/pipeline')) {
+      return {
+        title: 'Recruiter Radar & Hiring Pipeline',
+        chapter: '12_recruiters_and_companies.md',
+        flowchart: 'FC-11_Hiring_Pipeline.mmd',
+        flowchartId: 'FC-11',
+        summary: 'Search verified engineers by commit evidence, evaluate explainable AI candidate matches, and manage shortlists.',
+        tourId: 't16-recruiter-hiring',
+        tourTitle: 'Recruiter Hiring Tour',
+      };
+    }
+    if (pathname.startsWith('/resumes') || pathname.startsWith('/me/profile')) {
+      return {
+        title: 'Profile & Resume Intelligence',
+        chapter: '03_profile_and_resume.md',
+        flowchart: 'FC-03_Resume_and_Profile.mmd',
+        flowchartId: 'FC-03',
+        summary: 'Parse PDF resumes with AI, review skills in quarantine, and configure granular recruiter visibility.',
+        tourId: 't2-resume-upload',
+        tourTitle: 'Resume AI Extraction Tour',
+      };
+    }
+    if (pathname.startsWith('/hackathons') || pathname.startsWith('/challenges')) {
+      return {
+        title: 'Hackathons & Company Challenges',
+        chapter: '11_hackathons_and_challenges.md',
+        flowchart: 'FC-08_Hackathon_or_Sprint.mmd',
+        flowchartId: 'FC-08',
+        summary: 'Participate in time-boxed 48-hour sprints with live clocks or solve enterprise challenges for bounties.',
+        tourId: 't12-hackathons',
+        tourTitle: 'Hackathons Tour',
+      };
+    }
+    if (pathname.startsWith('/mentors')) {
+      return {
+        title: 'Mentorship & Milestone Advisory',
+        chapter: '13_mentorship.md',
+        flowchart: 'FC-10_Mentorship.mmd',
+        flowchartId: 'FC-10',
+        summary: 'Review incoming project inquiries, review milestone deliverables, and provide structured critique.',
+        tourId: 't14-mentor',
+        tourTitle: 'Mentor Tour',
+      };
+    }
+    if (pathname.startsWith('/admin')) {
+      return {
+        title: 'Platform Governance & Audit',
+        chapter: '14_administrators.md',
+        flowchart: 'FC-14_Admin_and_Moderation.mmd',
+        flowchartId: 'FC-14',
+        summary: 'Process moderation queues, arbitrate project disputes, and curate the canonical skill taxonomy.',
+        tourId: 't19-admin',
+        tourTitle: 'Admin Tour',
+      };
+    }
+    return {
+      title: 'Workspace Navigation & Cockpit HUD',
+      chapter: '02_getting_started.md',
+      flowchart: 'FC-01_Platform_Master.mmd',
+      flowchartId: 'FC-01',
+      summary: 'Navigate your 5-zone cockpit HUD, switch between the 6 contexts, and trigger universal search.',
+      tourId: 'welcome-individual',
+      tourTitle: 'Welcome Tour',
+    };
+  };
 
   const navCfg = navigationConfig[activeContext] || navigationConfig.individual;
 
@@ -230,24 +310,102 @@ export default function Member2Workspace() {
               <NotificationBell />
             </div>
 
-            {/* Guided Feature Tour Button */}
-            <button
-              onClick={() => startTour()}
-              className="px-2.5 py-1 rounded-full bg-[#8861dc]/15 hover:bg-[#8861dc]/30 border border-[#8861dc]/35 text-[#c4b5fd] hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
-              title="Start feature tour"
-            >
-              <span>✨ Tour</span>
-            </button>
+            {/* Tour Dropdown Menu (Requirement B4.2) */}
+            <div className="relative inline-block text-left">
+              <button
+                onClick={() => setShowTourMenu(!showTourMenu)}
+                className="px-2.5 py-1 rounded-full bg-[#8861dc]/15 hover:bg-[#8861dc]/30 border border-[#8861dc]/35 text-[#c4b5fd] hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+                title="Guided tours menu"
+              >
+                <span>✨ Tour</span>
+                <span className="text-[10px] text-[#c4b5fd]">▾</span>
+              </button>
 
-            {/* Help Button */}
-            <Link
-              to="/help"
+              {showTourMenu && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowTourMenu(false)} />
+                  <div className="absolute right-0 mt-2 w-64 rounded-xl bg-[#14141c] border border-[#2c2b3e] shadow-[0_12px_32px_rgba(0,0,0,0.8)] py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                    <div className="px-3.5 py-1.5 text-[10px] font-bold text-zinc-400 uppercase tracking-wider border-b border-[#242332]">
+                      Guided Product Tours
+                    </div>
+                    <button
+                      onClick={() => {
+                        setShowTourMenu(false);
+                        startTour();
+                      }}
+                      className="w-full text-left px-3.5 py-2 text-xs text-white hover:bg-[#1f1e2c] flex items-center justify-between transition-colors"
+                    >
+                      <span>🔄 Replay Welcome Tour</span>
+                      <span className="text-[10px] text-zinc-400">~45s</span>
+                    </button>
+                    {(() => {
+                      const cHelp = getContextualHelp(location.pathname);
+                      return (
+                        <button
+                          onClick={() => {
+                            setShowTourMenu(false);
+                            startTour(cHelp.tourId);
+                          }}
+                          className="w-full text-left px-3.5 py-2 text-xs text-[#c4b5fd] hover:bg-[#1f1e2c] font-semibold flex items-center justify-between transition-colors"
+                        >
+                          <span>🎯 {cHelp.tourTitle}</span>
+                          <span className="text-[10px] text-[#a855f7]">Current</span>
+                        </button>
+                      );
+                    })()}
+                    <div className="px-3.5 pt-2 pb-1 text-[10px] font-bold text-zinc-500 uppercase tracking-wider border-t border-[#242332]">
+                      Feature Tours Catalog
+                    </div>
+                    <div className="max-h-48 overflow-y-auto">
+                      {allTours.map((t) => {
+                        const done = isTourCompleted(t.tourId);
+                        return (
+                          <button
+                            key={t.tourId}
+                            onClick={() => {
+                              setShowTourMenu(false);
+                              startTour(t.tourId);
+                            }}
+                            className="w-full text-left px-3.5 py-1.5 text-xs text-zinc-300 hover:text-white hover:bg-[#1f1e2c] flex items-center justify-between transition-colors"
+                          >
+                            <span className="truncate pr-2">{t.title}</span>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <span className="text-[10px] text-zinc-400">~{t.estimatedSeconds}s</span>
+                              {done ? (
+                                <span className="text-emerald-400 text-xs font-bold">✓</span>
+                              ) : (
+                                <span className="text-zinc-600 text-xs">•</span>
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="pt-1.5 border-t border-[#242332] px-2">
+                      <button
+                        onClick={() => {
+                          setShowTourMenu(false);
+                          resetAllTours();
+                        }}
+                        className="w-full py-1 text-center text-[11px] text-rose-400 hover:text-rose-300 transition-colors"
+                      >
+                        Reset All Tour Progress
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Contextual Help Button (Requirement A4.4) */}
+            <button
+              onClick={() => setShowHelpDrawer(true)}
               data-tour="topbar-help"
               className="p-1.5 rounded-lg bg-[#181822] hover:bg-[#20202d] border border-[#2b2a3a] text-[#c084fc] hover:text-white transition-colors text-xs font-bold"
-              title="Help & Guides"
+              title="Help & Guides (?)"
             >
               ?
-            </Link>
+            </button>
 
             {/* Avatar Pill */}
             <Link
@@ -388,6 +546,101 @@ export default function Member2Workspace() {
           <span>SkillForge Unified Intelligence</span>
           <span>Human judgment, supported by evidence.</span>
         </footer>
+
+        {/* Contextual Help Side Drawer (Requirement A4.4) */}
+        {showHelpDrawer && (
+          <div className="fixed inset-0 z-[99980] flex justify-end">
+            <div
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+              onClick={() => setShowHelpDrawer(false)}
+            />
+            <div className="relative w-full max-w-md h-full bg-[#12111c] border-l border-[#2e2d42] shadow-2xl p-6 overflow-y-auto flex flex-col justify-between z-10 animate-in slide-in-from-right duration-200">
+              <div>
+                <div className="flex items-center justify-between pb-4 border-b border-[#252436] mb-5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#c084fc] animate-pulse" />
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-white">
+                      Contextual Help & Guides
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setShowHelpDrawer(false)}
+                    className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-[#252436] transition-colors text-sm"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {(() => {
+                  const cHelp = getContextualHelp(location.pathname);
+                  return (
+                    <div className="space-y-5">
+                      <div className="p-4 rounded-xl bg-[#191826] border border-[#323048]">
+                        <span className="text-[10px] uppercase font-bold text-[#a855f7] tracking-wider">
+                          Active Screen Guide
+                        </span>
+                        <h4 className="text-base font-bold text-white mt-1 mb-2">
+                          {cHelp.title}
+                        </h4>
+                        <p className="text-xs text-zinc-300 leading-relaxed">
+                          {cHelp.summary}
+                        </p>
+                        <div className="mt-4 pt-3 border-t border-[#2a293d] flex gap-2">
+                          <button
+                            onClick={() => {
+                              setShowHelpDrawer(false);
+                              startTour(cHelp.tourId);
+                            }}
+                            className="px-3.5 py-1.5 rounded-lg bg-[#8861dc] hover:bg-[#784fce] text-xs font-bold text-white transition-all shadow-md flex items-center gap-1.5"
+                          >
+                            <span>✨ Start Tour</span>
+                          </button>
+                          <Link
+                            to={`/help#${cHelp.flowchartId}`}
+                            onClick={() => setShowHelpDrawer(false)}
+                            className="px-3 py-1.5 rounded-lg bg-[#252436] hover:bg-[#302f44] text-xs font-semibold text-zinc-300 hover:text-white transition-all"
+                          >
+                            <span>Flowchart ({cHelp.flowchartId})</span>
+                          </Link>
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-xl bg-[#151422] border border-[#262538] space-y-2">
+                        <span className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">
+                          Quick Actions
+                        </span>
+                        <div className="grid grid-cols-1 gap-2 pt-1">
+                          <Link
+                            to="/help"
+                            onClick={() => setShowHelpDrawer(false)}
+                            className="p-2.5 rounded-lg bg-[#1e1d2c] hover:bg-[#28273a] text-xs font-medium text-white flex items-center justify-between transition-colors"
+                          >
+                            <span>📖 Open Full User Manual (17 Chapters)</span>
+                            <span>&rarr;</span>
+                          </Link>
+                          <button
+                            onClick={() => {
+                              setShowHelpDrawer(false);
+                              startTour();
+                            }}
+                            className="p-2.5 rounded-lg bg-[#1e1d2c] hover:bg-[#28273a] text-xs font-medium text-white flex items-center justify-between text-left transition-colors"
+                          >
+                            <span>✨ Replay Role Welcome Tour</span>
+                            <span>&rarr;</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              <div className="pt-4 border-t border-[#252436] text-[11px] text-zinc-500 text-center">
+                Press <kbd className="px-1.5 py-0.5 rounded bg-[#201f2e] border border-[#323145] text-zinc-300">Esc</kbd> anytime to dismiss.
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

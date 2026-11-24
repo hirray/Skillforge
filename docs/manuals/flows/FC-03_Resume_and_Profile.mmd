@@ -1,0 +1,55 @@
+%% Source files: apps/web/src/modules/resumes/, apps/web/src/modules/users/, apps/api/src/modules/resumes/
+%% Enums & models: Resume, ResumeExtraction, UserSkill, Skill, Availability
+%% Title: FC-03 Resume Ingestion, AI Parsing & Profile Normalization
+%% Purpose: Shows how raw resumes are converted into verified taxonomy skills through mandatory human-in-the-loop review.
+%% Audience: Individual Builders, Candidates, Engineering Evaluators
+
+flowchart TD
+  classDef startEnd fill:#0A1680,stroke:#93B2F8,stroke-width:2px,color:#FCFDFF,rx:20,ry:20;
+  classDef userAction fill:#FFFFFF,stroke:#0A1680,stroke-width:2px,color:#16213A;
+  classDef decision fill:#FBEDB0,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+  classDef aiSystem fill:#FCFDFF,stroke:#93B2F8,stroke-width:3px,stroke-dasharray: 4 2,color:#0A1680;
+  classDef notification fill:#FFFFFF,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+
+  subgraph S_USER ["Lane: Individual User"]
+    A1(["Start: New User Registration"]):::startEnd
+    A2["Verify Email & Complete Authentication"]:::userAction
+    A3["Navigate to Resume Intelligence (/resumes)"]:::userAction
+    A4["Upload PDF or DOCX Resume File"]:::userAction
+  end
+
+  subgraph S_PARSER ["Lane: SkillForge AI Parsing Pipeline"]
+    B1["Document Ingestion & Text Extraction"]:::aiSystem
+    B2["Named Entity Recognition (NER) for Skills & History"]:::aiSystem
+    B3["Taxonomy Normalization against Canonical Skill Graph"]:::aiSystem
+    B4["Draft Extraction Record Generated in Quarantine"]:::aiSystem
+  end
+
+  subgraph S_REVIEW ["Lane: Human-in-the-Loop Review Screen"]
+    C1["User Inspects Side-by-Side Extracted Draft"]:::userAction
+    C2{"Are Extracted Skills & Dates Accurate?"}:::decision
+    C3["User Edits Skill Proficiencies & Discards Hallucinations"]:::userAction
+    C4["User Clicks 'Confirm & Write to Profile'"]:::userAction
+  end
+
+  subgraph S_PROFILE ["Lane: Attested Talent Profile"]
+    D1["Verified Skills Written to User Profile"]:::aiSystem
+    D2["User Configures Visibility: Public vs Recruiters Only"]:::userAction
+    D3["Candidate Added to AI Talent Matching Radar"]:::aiSystem
+    D4(["End: Ready for Collaborator & Job Matching"]):::startEnd
+  end
+
+  A1 --> A2 --> A3 --> A4
+  A4 --> B1 --> B2 --> B3 --> B4
+  B4 --> C1 --> C2
+  C2 -- "No (Needs Edits)" --> C3 --> C4
+  C2 -- "Yes (Accurate)" --> C4
+  C4 --> D1 --> D2 --> D3 --> D4
+
+%% --- SAME STEPS IN WORDS (Accessibility Alternative) ---
+%% 1. Upload: User uploads resume file (PDF or DOCX) in Resume Intelligence.
+%% 2. AI Parsing: System parses work history, educational degrees, and technical skills.
+%% 3. Taxonomy Normalization: Raw skill variants (e.g. 'React.js', 'ReactJS') are mapped to canonical taxonomy IDs ('React').
+%% 4. Mandatory Human Review: Extracted data is presented in a quarantine review screen; no data is written to profile automatically.
+%% 5. User Confirmation: User reviews, edits, or deletes any incorrect entity, then confirms.
+%% 6. Profile Activation: Normalized skills appear on user profile, activating AI project and recruiter matching.

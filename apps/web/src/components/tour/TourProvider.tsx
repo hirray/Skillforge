@@ -1,35 +1,67 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { welcomeTourSteps, TourStep } from '../../config/tours.config';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import {
+  TourDefinition,
+  TourStep,
+  allToursCatalog,
+  getWelcomeTourForContext,
+  welcomeIndividualTour
+} from '../../config/tours.config';
 
 interface TourContextType {
   isActive: boolean;
+  currentTour: TourDefinition | null;
   currentStepIndex: number;
   currentStep: TourStep | null;
-  startTour: (steps?: TourStep[]) => void;
+  startTour: (tourIdOrDef?: string | TourDefinition) => void;
   nextStep: () => void;
   prevStep: () => void;
-  endTour: () => void;
+  endTour: (status?: 'completed' | 'skipped') => void;
+  resetAllTours: () => void;
+  isTourCompleted: (tourId: string) => boolean;
+  allTours: TourDefinition[];
 }
 
 const TourContext = createContext<TourContextType>({
   isActive: false,
+  currentTour: null,
   currentStepIndex: 0,
   currentStep: null,
   startTour: () => {},
   nextStep: () => {},
   prevStep: () => {},
   endTour: () => {},
+  resetAllTours: () => {},
+  isTourCompleted: () => false,
+  allTours: allToursCatalog,
 });
 
 export const useTour = () => useContext(TourContext);
 
 export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [steps, setSteps] = useState<TourStep[]>(welcomeTourSteps);
+  const [currentTour, setCurrentTour] = useState<TourDefinition | null>(null);
   const [isActive, setIsActive] = useState<boolean>(false);
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+  const [showExitConfirm, setShowExitConfirm] = useState<boolean>(false);
+  const clickHandlerRef = useRef<(() => void) | null>(null);
 
+  const steps = currentTour?.steps || welcomeIndividualTour.steps;
   const currentStep = isActive && steps[currentStepIndex] ? steps[currentStepIndex] : null;
+  const currentUserId = localStorage.getItem('token') || 'user-001';
+
+  // Persistence keys
+  const getTourStorageKey = (tourId: string, version: number) =>
+    `sf_tour_${currentUserId}_${tourId}_v${version}`;
+
+  const isTourCompleted = useCallback(
+    (tourId: string): boolean => {
+      const tour = allToursCatalog.find((t) => t.tourId === tourId);
+      if (!tour) return false;
+      const record = localStorage.getItem(getTourStorageKey(tour.tourId, tour.version));
+      return record === 'completed';
+    },
+    [currentUserId]
+  );
 
   // Measure element location & dimensions
   const updateTargetRect = useCallback(() => {
@@ -47,11 +79,24 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [currentStep]);
 
-  // Elevate the toured element so it is 100% sharp, bright, and interactive
+  // Navigate to step route if different
+  useEffect(() => {
+    if (!isActive || !currentStep?.route) return;
+    const currentPath = window.location.pathname;
+    if (currentPath !== currentStep.route && !currentPath.startsWith(currentStep.route)) {
+      window.history.pushState({}, '', currentStep.route);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }
+  }, [isActive, currentStep]);
+
+  // Target element elevation & mutation observer resilience
   useEffect(() => {
     if (!isActive || !currentStep) return;
-    const el = document.querySelector(currentStep.target) as HTMLElement | null;
-    if (el) {
+
+    let observer: MutationObserver | null = null;
+    let timeoutId: any = null;
+
+    const attachToElement = (el: HTMLElement) => {
       const prevZ = el.style.zIndex;
       const prevPos = el.style.position;
       const prevBoxShadow = el.style.boxShadow;
@@ -71,6 +116,17 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
       el.style.filter = 'brightness(1.15) contrast(1.05)';
       el.style.boxShadow = '0 0 25px rgba(168, 85, 247, 0.5)';
 
+      updateTargetRect();
+
+      // Click-to-advance handling
+      if (currentStep.advanceOn === 'click-target') {
+        const handleClick = () => {
+          setTimeout(() => nextStep(), 100);
+        };
+        el.addEventListener('click', handleClick, { capture: true, once: true });
+        clickHandlerRef.current = () => el.removeEventListener('click', handleClick, { capture: true });
+      }
+
       return () => {
         el.style.zIndex = prevZ;
         if (!prevPos || prevPos === 'static') {
@@ -81,10 +137,43 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (parentStack) {
           parentStack.style.zIndex = prevParentZ;
         }
+        if (clickHandlerRef.current) {
+          clickHandlerRef.current();
+          clickHandlerRef.current = null;
+        }
+      };
+    };
+
+    const targetEl = document.querySelector(currentStep.target) as HTMLElement | null;
+    if (targetEl) {
+      return attachToElement(targetEl);
+    } else {
+      // Resilience: wait up to 3s for target to render via MutationObserver
+      observer = new MutationObserver(() => {
+        const el = document.querySelector(currentStep.target) as HTMLElement | null;
+        if (el) {
+          if (observer) observer.disconnect();
+          attachToElement(el);
+        }
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+
+      // If never appears within 3000ms, auto-advance silently to avoid blocking user
+      timeoutId = setTimeout(() => {
+        if (observer) observer.disconnect();
+        if (currentStepIndex < steps.length - 1) {
+          setCurrentStepIndex((prev) => prev + 1);
+        }
+      }, 3000);
+
+      return () => {
+        if (observer) observer.disconnect();
+        if (timeoutId) clearTimeout(timeoutId);
       };
     }
-  }, [isActive, currentStep, currentStepIndex]);
+  }, [isActive, currentStep, currentStepIndex, steps.length, updateTargetRect]);
 
+  // Window resize & scroll listeners
   useEffect(() => {
     if (isActive) {
       updateTargetRect();
@@ -99,38 +188,70 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [isActive, currentStepIndex, updateTargetRect]);
 
-  // Auto-launch on first visit
+  // Deep-link check for ?tour=<tourId> and auto-launch
   useEffect(() => {
-    const hasSeenTour = localStorage.getItem('skillforge_guided_tour_done');
-    if (!hasSeenTour) {
+    const params = new URLSearchParams(window.location.search);
+    const deepLinkTour = params.get('tour');
+    if (deepLinkTour) {
+      const match = allToursCatalog.find((t) => t.tourId === deepLinkTour);
+      if (match) {
+        startTour(match);
+        return;
+      }
+    }
+
+    // Auto-launch context-appropriate welcome tour on first login
+    const activeCtx = localStorage.getItem('skillforge_active_context') || 'individual';
+    const welcomeDef = getWelcomeTourForContext(activeCtx);
+    const hasSeenWelcome = localStorage.getItem(getTourStorageKey(welcomeDef.tourId, welcomeDef.version));
+
+    if (!hasSeenWelcome) {
       const timer = setTimeout(() => {
-        setIsActive(true);
-        setCurrentStepIndex(0);
-      }, 800);
+        startTour(welcomeDef);
+      }, 900);
       return () => clearTimeout(timer);
     }
   }, []);
 
-  const startTour = (customSteps?: TourStep[]) => {
-    if (customSteps && customSteps.length > 0) {
-      setSteps(customSteps);
+  const startTour = (tourIdOrDef?: string | TourDefinition) => {
+    let selectedTour: TourDefinition = welcomeIndividualTour;
+    if (typeof tourIdOrDef === 'string') {
+      const found = allToursCatalog.find((t) => t.tourId === tourIdOrDef);
+      if (found) selectedTour = found;
+    } else if (tourIdOrDef) {
+      selectedTour = tourIdOrDef;
     } else {
-      setSteps(welcomeTourSteps);
+      const activeCtx = localStorage.getItem('skillforge_active_context') || 'individual';
+      selectedTour = getWelcomeTourForContext(activeCtx);
     }
+
+    setCurrentTour(selectedTour);
     setCurrentStepIndex(0);
     setIsActive(true);
+    setShowExitConfirm(false);
   };
 
-  const endTour = () => {
+  const endTour = (status: 'completed' | 'skipped' = 'completed') => {
+    if (currentTour) {
+      localStorage.setItem(getTourStorageKey(currentTour.tourId, currentTour.version), status);
+    }
     setIsActive(false);
-    localStorage.setItem('skillforge_guided_tour_done', 'true');
+    setShowExitConfirm(false);
+  };
+
+  const resetAllTours = () => {
+    allToursCatalog.forEach((t) => {
+      localStorage.removeItem(getTourStorageKey(t.tourId, t.version));
+    });
+    const activeCtx = localStorage.getItem('skillforge_active_context') || 'individual';
+    startTour(getWelcomeTourForContext(activeCtx));
   };
 
   const nextStep = () => {
     if (currentStepIndex < steps.length - 1) {
       setCurrentStepIndex((prev) => prev + 1);
     } else {
-      endTour();
+      endTour('completed');
     }
   };
 
@@ -144,30 +265,41 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!isActive) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') endTour();
-      if (e.key === 'ArrowRight' || e.key === 'Enter') nextStep();
-      if (e.key === 'ArrowLeft') prevStep();
+      if (e.key === 'Escape') {
+        setShowExitConfirm(true);
+      }
+      if (e.key === 'ArrowRight' || (e.key === 'Enter' && !showExitConfirm)) nextStep();
+      if (e.key === 'ArrowLeft' && !showExitConfirm) prevStep();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isActive, currentStepIndex, steps.length]);
+  }, [isActive, currentStepIndex, steps.length, showExitConfirm]);
+
+  const remainingSeconds = Math.max(
+    10,
+    Math.round(((steps.length - currentStepIndex) / steps.length) * (currentTour?.estimatedSeconds || 40))
+  );
 
   return (
     <TourContext.Provider
       value={{
         isActive,
+        currentTour,
         currentStepIndex,
         currentStep,
         startTour,
         nextStep,
         prevStep,
         endTour,
+        resetAllTours,
+        isTourCompleted,
+        allTours: allToursCatalog,
       }}
     >
       {children}
 
       {/* =========================================================================
-          SPOTLIGHT OVERLAY & POPUP (SVG Cutout Hole + Floating Tooltip)
+          SPOTLIGHT OVERLAY & POPUP (9999px Box-Shadow Cutout + Tooltip Popover)
       ========================================================================= */}
       {isActive && currentStep && (
         <div className="fixed inset-0 z-[99990] pointer-events-auto overflow-hidden">
@@ -180,15 +312,41 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 left: `${Math.max(0, targetRect.left - 6)}px`,
                 width: `${targetRect.width + 12}px`,
                 height: `${targetRect.height + 12}px`,
-                boxShadow: '0 0 0 9999px rgba(5, 7, 15, 0.82), 0 0 30px rgba(168, 85, 247, 0.75), inset 0 0 15px rgba(168, 85, 247, 0.25)',
+                boxShadow:
+                  '0 0 0 9999px rgba(5, 7, 15, 0.82), 0 0 30px rgba(168, 85, 247, 0.75), inset 0 0 15px rgba(168, 85, 247, 0.25)',
                 border: '2px solid #a855f7',
               }}
             >
-              {/* Outer pulsing ring */}
               <div className="absolute -inset-1 rounded-2xl border border-[#a855f7]/60 animate-ping pointer-events-none" />
             </div>
           ) : (
             <div className="fixed inset-0 bg-[#05070f]/80 pointer-events-none z-[99992]" />
+          )}
+
+          {/* Escape Exit Confirmation Dialog */}
+          {showExitConfirm && (
+            <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+              <div className="bg-[#181726] border border-[#393750] rounded-2xl p-6 max-w-sm w-full shadow-2xl text-white">
+                <h4 className="text-base font-bold mb-2">Pause Guided Tour?</h4>
+                <p className="text-xs text-[#d1d5db] mb-5 leading-relaxed">
+                  Would you like to skip this tour completely, or pause and replay it anytime from the top-bar ✨ Tour button?
+                </p>
+                <div className="flex gap-2 justify-end">
+                  <button
+                    onClick={() => setShowExitConfirm(false)}
+                    className="px-3 py-1.5 rounded-lg bg-[#252436] hover:bg-[#302f44] text-xs font-semibold text-white transition-colors"
+                  >
+                    Resume Tour
+                  </button>
+                  <button
+                    onClick={() => endTour('skipped')}
+                    className="px-3.5 py-1.5 rounded-lg bg-[#8861dc] hover:bg-[#784fce] text-xs font-bold text-white transition-colors"
+                  >
+                    Skip Tour
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* Floating Tooltip Popover Card */}
@@ -197,8 +355,8 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
             style={{
               top: targetRect
                 ? Math.min(
-                    window.innerHeight - 240,
-                    Math.max(20, targetRect.bottom + 16 > window.innerHeight - 200 ? targetRect.top - 220 : targetRect.bottom + 16)
+                    window.innerHeight - 250,
+                    Math.max(20, targetRect.bottom + 16 > window.innerHeight - 200 ? targetRect.top - 230 : targetRect.bottom + 16)
                   )
                 : '50%',
               left: targetRect
@@ -210,30 +368,67 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
               transform: !targetRect ? 'translate(-50%, -50%)' : undefined,
             }}
           >
-            {/* Header: Step counter & Close button */}
+            {/* Header: Step counter, time left & Close button */}
             <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#2d2c3e]">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#a855f7] animate-pulse" />
                 <span className="text-[11px] font-extrabold text-[#c4b5fd] uppercase tracking-wider">
-                  Tour • Step {currentStepIndex + 1} of {steps.length}
+                  {currentTour?.title || 'Tour'} • Step {currentStepIndex + 1} of {steps.length}
                 </span>
               </div>
-              <button
-                onClick={endTour}
-                className="text-[#9ca3af] hover:text-white text-xs px-1.5 py-0.5 rounded hover:bg-[#252436] transition-colors"
-                title="Dismiss tour"
-              >
-                ✕
-              </button>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-[#9ca3af] font-medium">~{remainingSeconds}s left</span>
+                <button
+                  onClick={() => setShowExitConfirm(true)}
+                  className="text-[#9ca3af] hover:text-white text-xs px-1.5 py-0.5 rounded hover:bg-[#252436] transition-colors"
+                  title="Dismiss tour"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
             {/* Title & Description */}
             <h3 className="text-base font-extrabold text-white tracking-tight mb-1.5">
               {currentStep.title}
             </h3>
-            <p className="text-xs text-[#d1d5db] leading-relaxed mb-4">
+            <p className="text-xs text-[#d1d5db] leading-relaxed mb-3">
               {currentStep.description}
             </p>
+
+            {/* Advance On Click-Target Hint */}
+            {currentStep.advanceOn === 'click-target' && (
+              <div className="mb-3 px-2.5 py-1.5 rounded-lg bg-[#a855f7]/15 border border-[#a855f7]/30 text-[11px] text-[#e9d5ff] flex items-center gap-2">
+                <span className="animate-bounce">👉</span>
+                <span>Click the highlighted button above to continue.</span>
+              </div>
+            )}
+
+            {/* Learn More Links (Manual & Flowchart) */}
+            {currentStep.learnMore && (
+              <div className="flex items-center gap-2 mb-3 text-[11px]">
+                {currentStep.learnMore.chapter && (
+                  <a
+                    href={`/help#${currentStep.learnMore.chapter}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[#93b2f8] hover:text-white underline decoration-[#93b2f8]/50"
+                  >
+                    📖 Read full guide
+                  </a>
+                )}
+                {currentStep.learnMore.flowchart && (
+                  <a
+                    href={`/help#${currentStep.learnMore.flowchart}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[#f1b94c] hover:text-white underline decoration-[#f1b94c]/50"
+                  >
+                    ⚡ View workflow
+                  </a>
+                )}
+              </div>
+            )}
 
             {/* Step Progress Dots */}
             <div className="flex items-center gap-1.5 mb-4">
@@ -254,7 +449,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
             {/* Footer Navigation Buttons */}
             <div className="flex items-center justify-between pt-2 border-t border-[#2d2c3e]">
               <button
-                onClick={endTour}
+                onClick={() => setShowExitConfirm(true)}
                 className="text-xs text-[#9ca3af] hover:text-white transition-colors"
               >
                 Skip Tour

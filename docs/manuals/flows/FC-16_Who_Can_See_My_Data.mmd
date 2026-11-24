@@ -1,0 +1,57 @@
+%% Source files: apps/web/src/modules/settings/PrivacyCentrePage.tsx, apps/api/src/core/visibility.ts
+%% Enums & models: ProfileVisibility, ConsentRecord, PortfolioSettings
+%% Title: FC-16 Privacy Boundaries, Data Visibility & Confidentiality
+%% Purpose: Visualizes granular privacy layers, recruiter boundaries, and strictly confidential project data.
+%% Audience: Privacy Officers, All Users, Security Evaluators
+
+flowchart TD
+  classDef startEnd fill:#0A1680,stroke:#93B2F8,stroke-width:2px,color:#FCFDFF,rx:20,ry:20;
+  classDef userAction fill:#FFFFFF,stroke:#0A1680,stroke-width:2px,color:#16213A;
+  classDef decision fill:#FBEDB0,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+  classDef aiSystem fill:#FCFDFF,stroke:#93B2F8,stroke-width:3px,stroke-dasharray: 4 2,color:#0A1680;
+  classDef notification fill:#FFFFFF,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+
+  subgraph S_DATA_TYPES ["Lane: Candidate & Project Data Assets"]
+    A1["Public Portfolio & Verified Completion Certificates"]:::userAction
+    A2["Normalized Technical Skills & Past Project Case Studies"]:::userAction
+    A3["Contact Information (Email, Phone, Discord)"]:::userAction
+    A4["Internal Project Room Chats, Meeting Notes & Handover Logs"]:::userAction
+  end
+
+  subgraph S_VISIBILITY_LEVELS ["Lane: User-Controlled Privacy Policies"]
+    B1{"User Profile Visibility Setting?"}:::decision
+    B2["Level 1: Public Web (Visible to Entire Internet via URL/QR)"]:::userAction
+    B3["Level 2: SkillForge Community (Registered Members Only)"]:::userAction
+    B4["Level 3: Verified Recruiters Only (Hidden from General Public)"]:::userAction
+    B5["Level 4: Private (Only Co-Team Members See Profile)"]:::userAction
+  end
+
+  subgraph S_RECRUITER_RADAR ["Lane: What Recruiters CAN and CANNOT See"]
+    C1["Recruiter Searches Talent Radar with Verified Skill Filters"]:::userAction
+    C2["CAN SEE: Verified Project Badges, Commits Count, Skill Proficiencies"]:::aiSystem
+    C3{"Has Candidate Enabled Inbound Recruiter Outreach?"}:::decision
+    C4["CANNOT SEE: Direct Contact Info (Email/Phone Hidden Until Mutual Match)"]:::notification
+    C5["NEVER VISIBLE TO ANY EXTERNAL ACTOR: Private Project Room Chats & Disputes"]:::aiSystem
+    C6(["End: Privacy Boundaries Strictly Enforced by Core Visibility Layer"]):::startEnd
+  end
+
+  A1 --> B1
+  A2 --> B1
+  A3 --> C3
+  A4 --> C5
+  B1 -- "Public" --> B2 --> C2
+  B1 -- "Members Only" --> B3 --> C2
+  B1 -- "Recruiters Only" --> B4 --> C2
+  B1 -- "Private" --> B5
+  C1 --> C2 --> C3
+  C3 -- "Outreach Disabled" --> C4
+  C3 -- "Outreach Enabled" --> C6
+  C5 --> C6
+
+%% --- SAME STEPS IN WORDS (Accessibility Alternative) ---
+%% 1. Granular Controls: Users select between Public, Registered Members, Verified Recruiters, or Private visibility.
+%% 2. Public Credentials: Verified certificates and portfolio cards can be shared with anyone via public URLs.
+%% 3. Recruiter Visibility: Recruiters see attested proof of engineering skills, project roles, and verified code metrics.
+%% 4. Contact Protection: Real email addresses and contact information remain masked until the candidate accepts an inquiry.
+%% 5. Absolute Confidentiality: Private team chat rooms, meeting notes, and internal disputes are NEVER accessible to recruiters or companies.
+%% 6. Server-Side Enforcement: All boundaries are enforced by `core/visibility.ts` at the API layer, not just hidden in the frontend.

@@ -1,0 +1,51 @@
+%% Source files: apps/web/src/modules/hackathons/, apps/api/src/modules/hackathons/
+%% Enums & models: HackathonEvent, EventParticipant, Project
+%% Title: FC-08 Hackathon & Rapid 48-Hour Sprint Lifecycle
+%% Purpose: Time-boxed rapid engineering sprints from team formation to expedited submission and awards.
+%% Audience: Hackathon Participants, Organizers, Sponsors
+
+flowchart TD
+  classDef startEnd fill:#0A1680,stroke:#93B2F8,stroke-width:2px,color:#FCFDFF,rx:20,ry:20;
+  classDef userAction fill:#FFFFFF,stroke:#0A1680,stroke-width:2px,color:#16213A;
+  classDef decision fill:#FBEDB0,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+  classDef aiSystem fill:#FCFDFF,stroke:#93B2F8,stroke-width:3px,stroke-dasharray: 4 2,color:#0A1680;
+  classDef notification fill:#FFFFFF,stroke:#F1B94C,stroke-width:2px,color:#16213A;
+
+  subgraph S_REGISTRATION ["Lane: Event Onboarding"]
+    A1(["Start: Hackathon Announced"]):::startEnd
+    A2["Developer Registers for Hackathon Event"]:::userAction
+    A3{"Has Existing Team or Solo?"}:::decision
+    A4["Rapid AI Teammate Matcher Pairs Complementary Solos"]:::aiSystem
+    A5["Sprint Team Formed & Fast-Tracked into Sprint Room"]:::userAction
+  end
+
+  subgraph S_HACKING ["Lane: 48-Hour Sprint Room Execution"]
+    B1["Clock Starts: Real-Time Sprint Countdown Active"]:::notification
+    B2["Execute 3 High-Velocity Milestones (MVP, API, Polish)"]:::userAction
+    B3["Continuous GitHub Push Tracking with Automated Commit Stats"]:::aiSystem
+  end
+
+  subgraph S_SUBMISSION ["Lane: Judging & Expedited Certification"]
+    C1["Team Submits Video Demo, Repo Link & Pitch Deck"]:::userAction
+    C2{"Submission Meets Deadline & Baseline Criteria?"}:::decision
+    C3["Submission Disqualified or Placed in Late Queue"]:::notification
+    C4["Judging Panel Evaluates Innovation, Code Quality & Impact"]:::userAction
+    C5["Winners Announced & Hackathon Certificates Issued (FC-07)"]:::aiSystem
+    C6(["End: Hackathon Completed & Showcase Dossier Published"]):::startEnd
+  end
+
+  A1 --> A2 --> A3
+  A3 -- "Solo" --> A4 --> A5
+  A3 -- "Existing Team" --> A5
+  A5 --> B1 --> B2 --> B3 --> C1
+  C1 --> C2
+  C2 -- "No (Missed Deadline)" --> C3
+  C2 -- "Yes" --> C4 --> C5 --> C6
+
+%% --- SAME STEPS IN WORDS (Accessibility Alternative) ---
+%% 1. Registration: Developers register for upcoming hackathon events or sprints.
+%% 2. Rapid Matching: Solo participants use fast-track matching to assemble teams before the countdown.
+%% 3. Sprint Execution: Teams work inside time-boxed Sprint Rooms with expedited milestones and live clocks.
+%% 4. Submission: Teams submit their code repo, live link, and demo recording before the cutoff.
+%% 5. Evaluation: Judges grade submissions on technical completeness and innovation.
+%% 6. Certification: All valid participants receive verified Hackathon Sprint Certificates with verifiable badges.
