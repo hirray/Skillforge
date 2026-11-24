@@ -55,11 +55,21 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const prevZ = el.style.zIndex;
       const prevPos = el.style.position;
       const prevBoxShadow = el.style.boxShadow;
+      const prevFilter = el.style.filter;
+
+      // Elevate parent stacking context (e.g. topbar header or sidebar) so target breaks out above overlay
+      const parentStack = el.closest('header, nav, aside') as HTMLElement | null;
+      const prevParentZ = parentStack ? parentStack.style.zIndex : '';
+      if (parentStack) {
+        parentStack.style.zIndex = '99995';
+      }
+
       el.style.zIndex = '99998';
       if (!prevPos || prevPos === 'static') {
         el.style.position = 'relative';
       }
-      el.style.boxShadow = '0 0 25px rgba(168, 85, 247, 0.4)';
+      el.style.filter = 'brightness(1.15) contrast(1.05)';
+      el.style.boxShadow = '0 0 25px rgba(168, 85, 247, 0.5)';
 
       return () => {
         el.style.zIndex = prevZ;
@@ -67,6 +77,10 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
           el.style.position = prevPos;
         }
         el.style.boxShadow = prevBoxShadow;
+        el.style.filter = prevFilter;
+        if (parentStack) {
+          parentStack.style.zIndex = prevParentZ;
+        }
       };
     }
   }, [isActive, currentStep, currentStepIndex]);
@@ -157,52 +171,24 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ========================================================================= */}
       {isActive && currentStep && (
         <div className="fixed inset-0 z-[99990] pointer-events-auto overflow-hidden">
-          {/* SVG Mask: Dims background while keeping the target element 100% crisp and unblurred */}
-          <svg className="fixed inset-0 w-full h-full pointer-events-none">
-            <defs>
-              <mask id="spotlight-mask">
-                {/* 1. White fill = visible dark backdrop across the entire screen */}
-                <rect x="0" y="0" width="100%" height="100%" fill="white" />
-                {/* 2. Black cutout = completely transparent crystal-clear hole over the target element */}
-                {targetRect && (
-                  <rect
-                    x={targetRect.left - 6}
-                    y={targetRect.top - 6}
-                    width={targetRect.width + 12}
-                    height={targetRect.height + 12}
-                    rx="12"
-                    fill="black"
-                  />
-                )}
-              </mask>
-            </defs>
-            {/* The backdrop overlay rendered strictly through the cutout mask */}
-            <rect
-              x="0"
-              y="0"
-              width="100%"
-              height="100%"
-              fill="rgba(5, 7, 15, 0.78)"
-              mask="url(#spotlight-mask)"
-            />
-          </svg>
-
-          {/* Spotlight Glowing Border around target element */}
-          {targetRect && (
+          {/* Spotlight Highlight Mask: 9999px spread box-shadow guarantees the cutout hole is 100% crystal-clear and the rest of the screen is dimmed */}
+          {targetRect ? (
             <div
-              className="fixed rounded-xl transition-all duration-300 pointer-events-none z-[99997]"
+              className="fixed rounded-xl transition-all duration-300 pointer-events-none z-[99992]"
               style={{
-                top: `${targetRect.top - 6}px`,
-                left: `${targetRect.left - 6}px`,
+                top: `${Math.max(0, targetRect.top - 6)}px`,
+                left: `${Math.max(0, targetRect.left - 6)}px`,
                 width: `${targetRect.width + 12}px`,
                 height: `${targetRect.height + 12}px`,
+                boxShadow: '0 0 0 9999px rgba(5, 7, 15, 0.82), 0 0 30px rgba(168, 85, 247, 0.75), inset 0 0 15px rgba(168, 85, 247, 0.25)',
                 border: '2px solid #a855f7',
-                boxShadow: '0 0 20px rgba(168, 85, 247, 0.5), inset 0 0 12px rgba(168, 85, 247, 0.2)',
               }}
             >
               {/* Outer pulsing ring */}
-              <div className="absolute -inset-1 rounded-2xl border border-[#a855f7]/50 animate-ping pointer-events-none" />
+              <div className="absolute -inset-1 rounded-2xl border border-[#a855f7]/60 animate-ping pointer-events-none" />
             </div>
+          ) : (
+            <div className="fixed inset-0 bg-[#05070f]/80 pointer-events-none z-[99992]" />
           )}
 
           {/* Floating Tooltip Popover Card */}

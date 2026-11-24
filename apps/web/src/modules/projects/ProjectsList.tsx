@@ -2,102 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { PageShell } from '../../components/PageShell';
 import { Icon } from '../ai/shared';
+import { canonicalProjectsList, ProjectItemData } from './canonicalProjects';
 
-interface ProjectItem {
-  id: string;
-  title: string;
-  description?: string;
-  visibility?: string;
-  category?: string;
-  status: string;
-  stage?: string;
-  progress?: number;
-  membersCount?: number;
-  commitsCount?: number;
-  isOwner?: boolean;
-}
-
-// Canonical SkillForge project portfolio so projects never "disappear"
-const canonicalProjects: ProjectItem[] = [
-  {
-    id: 'proj-consensus',
-    title: 'Distributed Consensus & Event Streaming Hub',
-    description: 'High-throughput event streaming engine with raft-backed consensus, partition leader election, and automated zero-downtime failover test suite.',
-    visibility: 'Public',
-    category: 'Systems & Backend',
-    status: 'Active',
-    stage: 'Production MVP',
-    progress: 85,
-    membersCount: 3,
-    commitsCount: 14,
-    isOwner: true,
-  },
-  {
-    id: 'proj-monorepo',
-    title: 'SkillForge Universal Monorepo Shell',
-    description: 'AI-powered collaborative workspace architecture spanning React, Express, Prisma, and Python services with contract validation.',
-    visibility: 'Public',
-    category: 'Fullstack Engineering',
-    status: 'Active',
-    stage: 'Architecture AI',
-    progress: 60,
-    membersCount: 4,
-    commitsCount: 28,
-    isOwner: false,
-  },
-  {
-    id: 'proj-security',
-    title: 'Security Auditing & Microservices',
-    description: 'Enterprise OAuth2 authorization server, RBAC token verification, and automated vulnerability scanning pipeline.',
-    visibility: 'Public',
-    category: 'Security & Cloud',
-    status: 'Active',
-    stage: 'Active Sprint',
-    progress: 72,
-    membersCount: 2,
-    commitsCount: 19,
-    isOwner: true,
-  },
-  {
-    id: 'proj-swarm',
-    title: 'Autonomous Agent Swarm Orchestrator',
-    description: 'Multi-agent orchestration framework leveraging LangGraph and vector memory for parallel architectural synthesis.',
-    visibility: 'Public',
-    category: 'AI & Autonomous Systems',
-    status: 'Active',
-    stage: 'Research Alpha',
-    progress: 45,
-    membersCount: 5,
-    commitsCount: 31,
-    isOwner: false,
-  },
-  {
-    id: 'proj-fraud',
-    title: 'Real-Time Financial Fraud Detection Pipeline',
-    description: 'Low-latency streaming anomaly detector processing transactions with graph neural networks and Kafka integration.',
-    visibility: 'Public',
-    category: 'Machine Learning',
-    status: 'Active',
-    stage: 'Sponsored Challenge',
-    progress: 90,
-    membersCount: 3,
-    commitsCount: 22,
-    isOwner: false,
-  },
-  {
-    id: 'proj-whiteboard',
-    title: 'High-Throughput Collaborative Canvas Engine',
-    description: 'Zero-latency vector drawing and architecture diagramming engine powered by WebSockets and CRDT synchronization.',
-    visibility: 'Public',
-    category: 'Frontend & Realtime',
-    status: 'Active',
-    stage: 'Beta',
-    progress: 65,
-    membersCount: 2,
-    commitsCount: 16,
-    isOwner: true,
-  },
-];
+type ProjectItem = ProjectItemData;
+const canonicalProjects = canonicalProjectsList;
 
 const ProjectsList: React.FC = () => {
   const [projects, setProjects] = useState<ProjectItem[]>(canonicalProjects);
@@ -132,6 +40,7 @@ const ProjectsList: React.FC = () => {
               );
               const mapped: ProjectItem = {
                 id: apiProj.id,
+                ownerId: apiProj.ownerId || 'user-001',
                 title: apiProj.title,
                 description: apiProj.description || 'Collaborative engineering project registered on SkillForge.',
                 visibility: apiProj.visibility || 'Public',
