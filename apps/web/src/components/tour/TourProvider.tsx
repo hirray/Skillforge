@@ -31,7 +31,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const currentStep = isActive && steps[currentStepIndex] ? steps[currentStepIndex] : null;
 
-  // Measure element location
+  // Measure element location & dimensions
   const updateTargetRect = useCallback(() => {
     if (!currentStep) {
       setTargetRect(null);
@@ -47,10 +47,34 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [currentStep]);
 
+  // Elevate the toured element so it is 100% sharp, bright, and interactive
+  useEffect(() => {
+    if (!isActive || !currentStep) return;
+    const el = document.querySelector(currentStep.target) as HTMLElement | null;
+    if (el) {
+      const prevZ = el.style.zIndex;
+      const prevPos = el.style.position;
+      const prevBoxShadow = el.style.boxShadow;
+      el.style.zIndex = '99998';
+      if (!prevPos || prevPos === 'static') {
+        el.style.position = 'relative';
+      }
+      el.style.boxShadow = '0 0 25px rgba(168, 85, 247, 0.4)';
+
+      return () => {
+        el.style.zIndex = prevZ;
+        if (!prevPos || prevPos === 'static') {
+          el.style.position = prevPos;
+        }
+        el.style.boxShadow = prevBoxShadow;
+      };
+    }
+  }, [isActive, currentStep, currentStepIndex]);
+
   useEffect(() => {
     if (isActive) {
       updateTargetRect();
-      const timer = setTimeout(updateTargetRect, 200);
+      const timer = setTimeout(updateTargetRect, 150);
       window.addEventListener('resize', updateTargetRect);
       window.addEventListener('scroll', updateTargetRect, true);
       return () => {
@@ -129,39 +153,66 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
       {children}
 
       {/* =========================================================================
-          SPOTLIGHT OVERLAY & POPUP (Blurs background, highlights target)
+          SPOTLIGHT OVERLAY & POPUP (SVG Cutout Hole + Floating Tooltip)
       ========================================================================= */}
       {isActive && currentStep && (
-        <div className="fixed inset-0 z-[99999] pointer-events-auto">
-          {/* Semi-transparent dimmed & blurred backdrop */}
-          <div className="absolute inset-0 bg-black/75 backdrop-blur-[3px] transition-all duration-300" />
+        <div className="fixed inset-0 z-[99990] pointer-events-auto overflow-hidden">
+          {/* SVG Mask: Dims background while keeping the target element 100% crisp and unblurred */}
+          <svg className="fixed inset-0 w-full h-full pointer-events-none">
+            <defs>
+              <mask id="spotlight-mask">
+                {/* 1. White fill = visible dark backdrop across the entire screen */}
+                <rect x="0" y="0" width="100%" height="100%" fill="white" />
+                {/* 2. Black cutout = completely transparent crystal-clear hole over the target element */}
+                {targetRect && (
+                  <rect
+                    x={targetRect.left - 6}
+                    y={targetRect.top - 6}
+                    width={targetRect.width + 12}
+                    height={targetRect.height + 12}
+                    rx="12"
+                    fill="black"
+                  />
+                )}
+              </mask>
+            </defs>
+            {/* The backdrop overlay rendered strictly through the cutout mask */}
+            <rect
+              x="0"
+              y="0"
+              width="100%"
+              height="100%"
+              fill="rgba(5, 7, 15, 0.78)"
+              mask="url(#spotlight-mask)"
+            />
+          </svg>
 
-          {/* Spotlight Cutout Frame around target element */}
+          {/* Spotlight Glowing Border around target element */}
           {targetRect && (
             <div
-              className="absolute rounded-xl transition-all duration-300 pointer-events-none"
+              className="fixed rounded-xl transition-all duration-300 pointer-events-none z-[99997]"
               style={{
                 top: `${targetRect.top - 6}px`,
                 left: `${targetRect.left - 6}px`,
                 width: `${targetRect.width + 12}px`,
                 height: `${targetRect.height + 12}px`,
-                boxShadow: '0 0 0 9999px rgba(8, 10, 18, 0.78)',
                 border: '2px solid #a855f7',
+                boxShadow: '0 0 20px rgba(168, 85, 247, 0.5), inset 0 0 12px rgba(168, 85, 247, 0.2)',
               }}
             >
-              {/* Animated pulsating ring */}
-              <div className="absolute -inset-1 rounded-2xl border-2 border-[#8861dc]/60 animate-ping pointer-events-none" />
+              {/* Outer pulsing ring */}
+              <div className="absolute -inset-1 rounded-2xl border border-[#a855f7]/50 animate-ping pointer-events-none" />
             </div>
           )}
 
           {/* Floating Tooltip Popover Card */}
           <div
-            className="absolute transition-all duration-300 z-50 p-5 rounded-2xl bg-gradient-to-b from-[#1c1b2b] via-[#161524] to-[#12111d] border border-[#3c3a54] shadow-[0_20px_50px_rgba(0,0,0,0.8)] text-white w-[90vw] max-w-sm"
+            className="fixed transition-all duration-300 z-[99999] p-5 rounded-2xl bg-gradient-to-b from-[#1c1b2b] via-[#161524] to-[#12111d] border border-[#3c3a54] shadow-[0_20px_50px_rgba(0,0,0,0.85)] text-white w-[92vw] max-w-sm pointer-events-auto"
             style={{
               top: targetRect
                 ? Math.min(
                     window.innerHeight - 240,
-                    Math.max(20, targetRect.bottom + 16 > window.innerHeight - 200 ? targetRect.top - 210 : targetRect.bottom + 16)
+                    Math.max(20, targetRect.bottom + 16 > window.innerHeight - 200 ? targetRect.top - 220 : targetRect.bottom + 16)
                   )
                 : '50%',
               left: targetRect
