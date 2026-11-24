@@ -11,6 +11,7 @@ import { useTour } from '../../components/tour/TourProvider';
 import { navigationConfig } from '../../config/navigation';
 import { UnifiedHome } from '../home/UnifiedHome';
 import { DiscoverPage } from '../discover/DiscoverPage';
+import { HelpCenterPage } from '../help/HelpCenterPage';
 import { AccessDenied } from '../../components/AccessDenied';
 
 import Requirements from './Requirements';
@@ -353,6 +354,10 @@ export default function Member2Workspace() {
                   )
                 }
               />
+
+              {/* Help Center & Product Manuals */}
+              <Route path="/help" element={<HelpCenterPage />} />
+              <Route path="/help/*" element={<HelpCenterPage />} />
 
               {/* Profile, Auth & Settings */}
               <Route path="/auth/login" element={<SignInPage />} />

@@ -14,7 +14,7 @@
 - [ ] **Phase 3: Interconnection and Next-Step Guidance** (entity chips, ROUTES.md, nextBestActions, command palette, empty states)
 - [ ] **Phase 4: Visual Clean-Up** (deduplicate components, single StatusChip, design token alignment, accessibility & responsive checks)
 - [x] **Phase 5: Guided Tours** (TourProvider, tours.config.ts, spotlight backdrop-blur UI, step tooltips, auto-launch on first visit, re-triggerable ✨ Tour button)
-- [ ] **Phase 6: Help Center and Manuals** (Markdown manuals 00-14, /help route, route-to-manual drawer, docs:screenshots)
+- [x] **Phase 6: Help Center and Manuals** (In-app /help route, interactive visual workflow pipeline flowcharts for project-to-cert, recruiter hiring, hackathons, and mentorship, written manuals 00-14, FAQ & troubleshooting)
 - [ ] **Phase 7: End-to-End QA by Role** (Playwright test suite for F1-F11, full story test, security/auth sweep, QA_REPORT.md)
 - [ ] **Phase 8: Final Acceptance** (re-run audit, FINAL_REPORT.md, DEMO_SCRIPT.md, release branch verification)
 
