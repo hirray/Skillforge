@@ -5,9 +5,9 @@ import {
   Brand,
   Icon,
   Loading,
-  PageHeader,
 } from './shared';
 import { useActiveContext, ContextSwitcher } from '../../context/ContextModel';
+import { useTour } from '../../components/tour/TourProvider';
 import { navigationConfig } from '../../config/navigation';
 import { UnifiedHome } from '../home/UnifiedHome';
 import { DiscoverPage } from '../discover/DiscoverPage';
@@ -59,6 +59,7 @@ const fallbackContext: WorkspaceContext = {
 
 export default function Member2Workspace() {
   const { activeContext } = useActiveContext();
+  const { startTour } = useTour();
   const [context, setContext] = useState<WorkspaceContext | null>(null);
   const [loading, setLoading] = useState(true);
   const [mobileNav, setMobileNav] = useState(false);
@@ -140,7 +141,7 @@ export default function Member2Workspace() {
         </div>
 
         {/* Dynamic Navigation rendered strictly from navigationConfig */}
-        <nav aria-label="Main navigation">
+        <nav aria-label="Main navigation" data-tour="sidebar-nav">
           <span className="st-nav-label">Navigation ({navCfg.primaryItems.length})</span>
           {navCfg.primaryItems.map((item) => (
             <NavLink
@@ -227,6 +228,15 @@ export default function Member2Workspace() {
             <div data-tour="topbar-bell">
               <NotificationBell />
             </div>
+
+            {/* Guided Feature Tour Button */}
+            <button
+              onClick={() => startTour()}
+              className="px-2.5 py-1 rounded-full bg-[#8861dc]/15 hover:bg-[#8861dc]/30 border border-[#8861dc]/35 text-[#c4b5fd] hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+              title="Start feature tour"
+            >
+              <span>✨ Tour</span>
+            </button>
 
             {/* Help Button */}
             <Link

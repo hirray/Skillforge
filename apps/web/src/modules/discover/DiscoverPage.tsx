@@ -124,7 +124,11 @@ export const DiscoverPage: React.FC = () => {
       }
     >
       {/* Tab 1: Projects List */}
-      {currentTab === 'projects' && (
+      {loading ? (
+        <div className="py-16 text-center text-xs text-[#96939f]">Loading discovery feed...</div>
+      ) : (
+        <>
+          {currentTab === 'projects' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
           {filteredProjects.length === 0 ? (
             <div className="col-span-full py-16 text-center text-xs text-[#6b7280] bg-[#111116] border border-[#262533] rounded-2xl">
@@ -246,6 +250,8 @@ export const DiscoverPage: React.FC = () => {
             ))
           )}
         </div>
+      )}
+        </>
       )}
     </PageShell>
   );

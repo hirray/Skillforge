@@ -1,12 +1,15 @@
 import { BrowserRouter } from 'react-router-dom';
 import { ContextProvider } from '../context/ContextModel';
+import { TourProvider } from '../components/tour/TourProvider';
 import Member2Workspace from '../modules/ai/Workspace';
 
 const App = () => {
   return (
     <BrowserRouter>
       <ContextProvider>
-        <Member2Workspace />
+        <TourProvider>
+          <Member2Workspace />
+        </TourProvider>
       </ContextProvider>
     </BrowserRouter>
   );
