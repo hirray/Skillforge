@@ -174,6 +174,14 @@ export const navigationConfig: Record<ContextType, ContextNavConfig> = {
         requiredContext: ['individual'],
         dataTour: 'nav-health',
       },
+      {
+        id: 'github-integration',
+        label: 'GitHub Integration',
+        icon: 'code',
+        route: '/integrations/github',
+        requiredContext: ['individual'],
+        dataTour: 'nav-github-integration',
+      },
     ],
     shortcuts: [
       {

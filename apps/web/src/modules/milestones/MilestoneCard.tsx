@@ -12,7 +12,7 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
   milestone,
   onClick,
   onOpenCompleteModal,
-  canEdit = true,
+  canEdit: _canEdit = true,
 }) => {
   const isDone = milestone.status === 'Done';
   const isOverdue = milestone.isOverdue && !isDone;
@@ -128,7 +128,7 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
             isOverdue={isOverdue}
           />
 
-          {!isDone && canEdit && onOpenCompleteModal && (
+          {!isDone && onOpenCompleteModal && (
             <button
               type="button"
               onClick={(e) => {

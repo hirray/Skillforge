@@ -166,6 +166,12 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
   };
 
   const handleUpdateTaskStatus = async (taskId: string, newStatus: string) => {
+    // 1. Optimistically update local task state immediately
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
+    if (selectedTask?.id === taskId) {
+      setSelectedTask((prev: any) => prev ? { ...prev, status: newStatus } : null);
+    }
+
     try {
       const res = await fetch(`/api/v1/projects/${projectId}/tasks/${taskId}`, {
         method: 'PATCH',
@@ -176,20 +182,25 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
         body: JSON.stringify({ status: newStatus })
       });
       const data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error?.message || 'Status update failed');
-
-      // Update state locally and refresh task details if open
-      setTasks(prev => prev.map(t => t.id === taskId ? data.data : t));
-      if (selectedTask?.id === taskId) {
-        setSelectedTask(data.data);
+      if (res.ok && data.data) {
+        setTasks(prev => prev.map(t => t.id === taskId ? data.data : t));
+        if (selectedTask?.id === taskId) {
+          setSelectedTask(data.data);
+        }
       }
     } catch (e: any) {
-      alert(e.message);
+      console.warn('Task status update warning:', e?.message || e);
     }
   };
 
   const handleUpdateTaskField = async (taskId: string, fields: any) => {
     setActionError(null);
+    // Optimistic update
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, ...fields } : t));
+    if (selectedTask?.id === taskId) {
+      setSelectedTask((prev: any) => prev ? { ...prev, ...fields } : null);
+    }
+
     try {
       const res = await fetch(`/api/v1/projects/${projectId}/tasks/${taskId}`, {
         method: 'PATCH',
@@ -200,10 +211,10 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
         body: JSON.stringify(fields)
       });
       const data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error?.message || 'Update failed');
-
-      setTasks(prev => prev.map(t => t.id === taskId ? data.data : t));
-      setSelectedTask(data.data);
+      if (res.ok && data.data) {
+        setTasks(prev => prev.map(t => t.id === taskId ? data.data : t));
+        setSelectedTask(data.data);
+      }
     } catch (e: any) {
       setActionError(e.message);
     }
@@ -211,23 +222,43 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
 
   const handleDeleteTask = async (taskId: string) => {
     if (!confirm('Are you sure you want to delete this task?')) return;
+    setTasks(prev => prev.filter(t => t.id !== taskId));
+    setSelectedTask(null);
+
     try {
       const res = await fetch(`/api/v1/projects/${projectId}/tasks/${taskId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${currentUserId}` }
       });
       const data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error?.message || 'Delete failed');
-
-      setSelectedTask(null);
+      if (!res.ok || data.error) {
+        console.warn('Delete task notice:', data.error?.message);
+      }
       fetchTasksAndMembers();
     } catch (e: any) {
-      alert(e.message);
+      console.warn('Delete task warning:', e?.message || e);
     }
   };
 
   const handleAddComment = async () => {
     if (!newCommentText.trim() || !selectedTask) return;
+    const commentText = newCommentText.trim();
+    setNewCommentText('');
+
+    const optimisticComment = {
+      id: `comm-${Date.now()}`,
+      content: commentText,
+      createdAt: new Date().toISOString(),
+      user: { id: currentUserId, email: 'you@skillforge.io' }
+    };
+
+    if (selectedTask) {
+      setSelectedTask((prev: any) => prev ? {
+        ...prev,
+        comments: [...(prev.comments || []), optimisticComment]
+      } : null);
+    }
+
     try {
       const res = await fetch(`/api/v1/projects/${projectId}/tasks/${selectedTask.id}/comments`, {
         method: 'POST',
@@ -235,21 +266,21 @@ export const TasksSection = ({ projectId, project }: TasksSectionProps) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${currentUserId}`
         },
-        body: JSON.stringify({ content: newCommentText.trim() })
+        body: JSON.stringify({ content: commentText })
       });
       const data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error?.message || 'Failed to post comment');
-
-      setNewCommentText('');
-      // Reload task details to fetch updated comments and history
-      const updatedRes = await fetch(`/api/v1/projects/${projectId}/tasks/${selectedTask.id}`, {
-        headers: { 'Authorization': `Bearer ${currentUserId}` }
-      });
-      const updatedData = await updatedRes.json();
-      setSelectedTask(updatedData.data);
-      setTasks(prev => prev.map(t => t.id === selectedTask.id ? updatedData.data : t));
+      if (res.ok && data.data) {
+        const updatedRes = await fetch(`/api/v1/projects/${projectId}/tasks/${selectedTask.id}`, {
+          headers: { 'Authorization': `Bearer ${currentUserId}` }
+        });
+        const updatedData = await updatedRes.json();
+        if (updatedData.data) {
+          setSelectedTask(updatedData.data);
+          setTasks(prev => prev.map(t => t.id === selectedTask.id ? updatedData.data : t));
+        }
+      }
     } catch (e: any) {
-      alert(e.message);
+      console.warn('Post comment notice:', e?.message || e);
     }
   };
 

@@ -73,6 +73,7 @@ const TABS = [
   { id: 'Milestones', icon: <IcoStar size={14} /> },
   { id: 'Contributions', icon: <IcoFlash size={14} /> },
   { id: 'Resources', icon: <IcoFile size={14} /> },
+  { id: 'GitHub', icon: <IcoCode size={14} /> },
   { id: 'Discussions', icon: <IcoMsg size={14} /> },
   { id: 'Analytics', icon: <IcoBar size={14} /> },
   {
@@ -1192,6 +1193,11 @@ export const ProjectDetail = () => {
         {activeTab === 'Milestones' && <MilestonesSection projectId={id!} project={project} onProjectUpdated={fetchProject} />}
         {activeTab === 'Contributions' && <ContributionsTab projectId={id!} isOwner={isOwner} />}
         {activeTab === 'Resources' && <ResourcesHub projectId={id!} isOwner={isOwner} />}
+        {activeTab === 'GitHub' && (
+          <div className="pdcard" style={{ padding: 20 }}>
+            <ProjectReposPanel projectId={id!} isOwner={isOwner} />
+          </div>
+        )}
         {activeTab === 'Discussions' && (
           <div className="pdcard" style={{ padding: 0, overflow: 'hidden' }}>
             <GroupChat projectId={id!} projectTitle={project.title} isOwner={isOwner} />

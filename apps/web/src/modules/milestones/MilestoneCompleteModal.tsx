@@ -64,7 +64,14 @@ export const MilestoneCompleteModal: React.FC<MilestoneCompleteModalProps> = ({
 
         {/* Informational callout */}
         <div className="mb-4 p-3 bg-accent/10 border border-accent/20 rounded-lg text-xs text-mainText leading-relaxed">
-          <p className="font-semibold text-primary mb-1">ℹ️ Completion Override</p>
+          <p className="font-semibold text-primary mb-1 flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <span>Completion Override</span>
+          </p>
           <p>
             Current task completion is <strong>{progress}%</strong> ({doneTasks}/{totalTasks} tasks done).
             Manual completion will record this milestone as completed without faking 100% task progress.

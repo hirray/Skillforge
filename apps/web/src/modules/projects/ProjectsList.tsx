@@ -139,8 +139,8 @@ const ProjectsList: React.FC = () => {
         </div>
       ) : filteredProjects.length === 0 ? (
         <div className="py-20 text-center bg-[#111116] border border-[#262533] rounded-2xl p-8 space-y-3">
-          <div className="w-12 h-12 rounded-2xl bg-[#1f1e2c] border border-[#2e2c40] text-[#c4b5fd] flex items-center justify-center mx-auto text-xl">
-            📁
+          <div className="w-12 h-12 rounded-2xl bg-[#1f1e2c] border border-[#2e2c40] text-[#c4b5fd] flex items-center justify-center mx-auto">
+            <Icon name="folder" />
           </div>
           <h3 className="text-base font-bold text-white">No projects found in this filter</h3>
           <p className="text-xs text-[#9ca3af] max-w-sm mx-auto">

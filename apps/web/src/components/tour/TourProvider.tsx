@@ -339,7 +339,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
               <div className="bg-[#181726] border border-[#393750] rounded-2xl p-6 max-w-sm w-full shadow-2xl text-white">
                 <h4 className="text-base font-bold mb-2">Pause Guided Tour?</h4>
                 <p className="text-xs text-[#d1d5db] mb-5 leading-relaxed">
-                  Would you like to skip this tour completely, or pause and replay it anytime from the top-bar ✨ Tour button?
+                  Would you like to skip this tour completely, or pause and replay it anytime from the top-bar Tour button?
                 </p>
                 <div className="flex gap-2 justify-end">
                   <button

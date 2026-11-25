@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Input, SkeletonLoader, LinkCard, FileCard, IcoSearch, IcoClose, IcoLink, IcoAlert, IcoFolder } from '../../design-system/components';
 import { AddLinkModal } from './AddLinkModal';
 import { FileUploadZone } from './FileUploadZone';
@@ -36,6 +37,7 @@ interface ResourcesHubProps {
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
 
 export const ResourcesHub: React.FC<ResourcesHubProps> = ({ projectId, isOwner }) => {
+  const navigate = useNavigate();
   const currentUserId = localStorage.getItem('token') || 'user-001';
 
   const [resources, setResources] = useState<ResourceItem[]>([]);
@@ -320,26 +322,19 @@ export const ResourcesHub: React.FC<ResourcesHubProps> = ({ projectId, isOwner }
             <span>Add Link</span>
           </Button>
 
-          {/* GitHub Live Sync Stub per Scope Boundary */}
-          <div className="relative group">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled
-              className="opacity-60 cursor-not-allowed border-dashed bg-bg text-muted flex items-center gap-1.5"
-            >
-              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-              </svg>
-              <span>Connect GitHub</span>
-              <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.2 rounded font-semibold ml-1">
-                Coming Soon
-              </span>
-            </Button>
-            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-[#1a1922] border border-[#33333e] text-white text-[11px] px-3 py-1.5 rounded-lg shadow-elevation-2 whitespace-nowrap z-30">
-              Live GitHub OAuth & synchronization will be available in Area 13.
-            </div>
-          </div>
+          {/* GitHub Integration Link */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/integrations/github')}
+            className="border-uiBorder bg-bg text-mainText hover:bg-uiBorder flex items-center gap-1.5"
+            title="Open GitHub Integration & Activity Sync"
+          >
+            <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+            </svg>
+            <span>GitHub Integration</span>
+          </Button>
         </div>
       </div>
 

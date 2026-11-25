@@ -217,6 +217,7 @@ export default function Member2Workspace() {
     if (pathname.startsWith('/admin')) return 'Admin Console';
     if (pathname.startsWith('/me/profile')) return 'Profile';
     if (pathname.startsWith('/notifications')) return 'Inbox';
+    if (pathname.startsWith('/integrations/github')) return 'GitHub Integration';
     if (pathname.startsWith('/help')) return 'Help Center';
     return 'SkillForge';
   };
@@ -505,6 +506,7 @@ export default function Member2Workspace() {
               <Route path="/me/portfolio/*" element={<PortfolioEditorPage />} />
               <Route path="/u/:username" element={<PublicPortfolioPage />} />
               <Route path="/portfolio/:username" element={<PublicPortfolioPage />} />
+              <Route path="/integrations/github" element={<GitHubIntegrationPage />} />
               <Route path="/integrations/github/*" element={<GitHubIntegrationPage />} />
               <Route path="/resumes/*" element={<ResumeStudio />} />
 
@@ -649,7 +651,10 @@ export default function Member2Workspace() {
                             }}
                             className="px-3.5 py-1.5 rounded-lg bg-[#8861dc] hover:bg-[#784fce] text-xs font-bold text-white transition-all shadow-md flex items-center gap-1.5"
                           >
-                            <span>✨ Start Tour</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                            </svg>
+                            <span>Start Tour</span>
                           </button>
                           <Link
                             to={`/help#${cHelp.flowchartId}`}

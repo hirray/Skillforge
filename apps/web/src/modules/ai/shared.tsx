@@ -98,6 +98,12 @@ const paths: Record<string, React.ReactNode> = {
       <circle cx="12" cy="12" r="2" />
     </>
   ),
+  code: (
+    <>
+      <polyline points="16 18 22 12 16 6" />
+      <polyline points="8 6 2 12 8 18" />
+    </>
+  ),
   book: (
     <>
       <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
