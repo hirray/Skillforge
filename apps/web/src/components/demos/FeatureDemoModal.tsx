@@ -249,8 +249,14 @@ export const FeatureDemoModal: React.FC<FeatureDemoModalProps> = ({ isOpen, onCl
         {/* Modal Top Header */}
         <div className="px-6 py-5 border-b border-[#252438] bg-gradient-to-r from-[#171626] via-[#121120] to-[#0f0e18] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#7c3aed] to-[#38bdf8] flex items-center justify-center text-white text-lg shadow-md shadow-[#7c3aed]/30">
-              🎮
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#7c3aed] to-[#38bdf8] flex items-center justify-center text-white shadow-md shadow-[#7c3aed]/30">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="6" width="20" height="12" rx="4" />
+                <line x1="6" y1="12" x2="10" y2="12" />
+                <line x1="8" y1="10" x2="8" y2="14" />
+                <line x1="15" y1="13" x2="15.01" y2="13" />
+                <line x1="18" y1="11" x2="18.01" y2="11" />
+              </svg>
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -270,8 +276,12 @@ export const FeatureDemoModal: React.FC<FeatureDemoModalProps> = ({ isOpen, onCl
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-lg bg-[#1c1b2c] hover:bg-[#28273d] text-zinc-400 hover:text-white flex items-center justify-center transition-colors border border-[#2f2e46]"
+            title="Close modal"
           >
-            ✕
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
           </button>
         </div>
 
@@ -303,7 +313,12 @@ export const FeatureDemoModal: React.FC<FeatureDemoModalProps> = ({ isOpen, onCl
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-[#181728] border border-[#2c2b42] text-xs text-white rounded-xl pl-8 pr-3 py-1.5 focus:border-[#7c3aed] focus:outline-none placeholder-zinc-500"
             />
-            <span className="absolute left-2.5 top-2 text-zinc-500 text-xs">🔍</span>
+            <span className="absolute left-2.5 top-2 text-zinc-500">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </span>
           </div>
         </div>
 
@@ -341,9 +356,12 @@ export const FeatureDemoModal: React.FC<FeatureDemoModalProps> = ({ isOpen, onCl
                     {demo.highlights.map((hl) => (
                       <span
                         key={hl}
-                        className="px-2 py-0.5 rounded text-[10px] bg-[#1a192b] border border-[#2b2a40] text-zinc-300 font-medium"
+                        className="px-2 py-0.5 rounded text-[10px] bg-[#1a192b] border border-[#2b2a40] text-zinc-300 font-medium flex items-center gap-1"
                       >
-                        ✓ {hl}
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="3">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        <span>{hl}</span>
                       </span>
                     ))}
                   </div>

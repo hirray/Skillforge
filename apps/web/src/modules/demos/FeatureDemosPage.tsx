@@ -85,15 +85,22 @@ export const FeatureDemosPage: React.FC = () => {
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => startTour('welcome-individual')}
-              className="px-4 py-2 rounded-xl bg-[#1c1b2c] hover:bg-[#28273d] text-zinc-300 hover:text-white text-xs font-bold border border-[#2f2e46] transition-all"
+              className="px-4 py-2 rounded-xl bg-[#1c1b2c] hover:bg-[#28273d] text-zinc-300 hover:text-white text-xs font-bold border border-[#2f2e46] transition-all flex items-center gap-1.5"
             >
-              ✨ Welcome Tour
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z" />
+              </svg>
+              <span>Welcome Tour</span>
             </button>
             <button
               onClick={() => navigate('/help')}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#7c3aed] to-[#6366f1] text-white text-xs font-bold transition-all shadow-md shadow-[#7c3aed]/25"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#7c3aed] to-[#6366f1] text-white text-xs font-bold transition-all shadow-md shadow-[#7c3aed]/25 flex items-center gap-1.5"
             >
-              📖 Open Manuals
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
+                <path d="M6 6h10M6 10h10" />
+              </svg>
+              <span>Open Manuals</span>
             </button>
           </div>
         </div>
@@ -160,9 +167,12 @@ export const FeatureDemosPage: React.FC = () => {
                   {demo.highlights.map((hl) => (
                     <span
                       key={hl}
-                      className="px-2 py-0.5 rounded text-[10px] bg-[#1a192b] border border-[#2b2a40] text-zinc-300 font-medium"
+                      className="px-2 py-0.5 rounded text-[10px] bg-[#1a192b] border border-[#2b2a40] text-zinc-300 font-medium flex items-center gap-1"
                     >
-                      ✓ {hl}
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="3">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      <span>{hl}</span>
                     </span>
                   ))}
                 </div>

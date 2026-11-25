@@ -151,6 +151,30 @@ export default function Member2Workspace() {
 
   const navCfg = navigationConfig[activeContext] || navigationConfig.individual;
 
+  const isRouteActive = (targetRoute: string) => {
+    const currentPath = location.pathname;
+    const currentSearch = new URLSearchParams(location.search);
+    const currentTab = currentSearch.get('tab');
+
+    const [targetPath, targetQuery] = targetRoute.split('?');
+    if (targetPath !== currentPath) {
+      if (targetPath !== '/home' && targetPath !== '/' && currentPath.startsWith(targetPath + '/')) {
+        return true;
+      }
+      return false;
+    }
+
+    const targetParams = new URLSearchParams(targetQuery || '');
+    const targetTab = targetParams.get('tab');
+
+    if (targetTab) {
+      if (!currentTab && targetTab === 'requests') return true;
+      return currentTab === targetTab;
+    }
+
+    return !currentTab;
+  };
+
   const load = () => {
     setLoading(true);
     api<{ data: WorkspaceContext }>('/ai/context')
@@ -227,33 +251,41 @@ export default function Member2Workspace() {
         {/* Dynamic Navigation rendered strictly from navigationConfig */}
         <nav aria-label="Main navigation" data-tour="sidebar-nav">
           <span className="st-nav-label">Navigation ({navCfg.primaryItems.length})</span>
-          {navCfg.primaryItems.map((item) => (
-            <NavLink
-              key={item.id}
-              to={item.route}
-              data-tour={item.dataTour}
-              onClick={() => setMobileNav(false)}
-            >
-              <Icon name={item.icon} />
-              <span>{item.label}</span>
-            </NavLink>
-          ))}
+          {navCfg.primaryItems.map((item) => {
+            const active = isRouteActive(item.route);
+            return (
+              <NavLink
+                key={item.id}
+                to={item.route}
+                data-tour={item.dataTour}
+                className={active ? 'active' : ''}
+                onClick={() => setMobileNav(false)}
+              >
+                <Icon name={item.icon} />
+                <span>{item.label}</span>
+              </NavLink>
+            );
+          })}
 
           {/* Optional Overflow Items if defined */}
           {navCfg.overflowItems.length > 0 && (
             <>
               <span className="st-nav-label mt-4">Tools &amp; Capabilities</span>
-              {navCfg.overflowItems.map((item) => (
-                <NavLink
-                  key={item.id}
-                  to={item.route}
-                  data-tour={item.dataTour}
-                  onClick={() => setMobileNav(false)}
-                >
-                  <Icon name={item.icon} />
-                  <span>{item.label}</span>
-                </NavLink>
-              ))}
+              {navCfg.overflowItems.map((item) => {
+                const active = isRouteActive(item.route);
+                return (
+                  <NavLink
+                    key={item.id}
+                    to={item.route}
+                    data-tour={item.dataTour}
+                    className={active ? 'active' : ''}
+                    onClick={() => setMobileNav(false)}
+                  >
+                    <Icon name={item.icon} />
+                    <span>{item.label}</span>
+                  </NavLink>
+                );
+              })}
             </>
           )}
         </nav>
@@ -320,7 +352,7 @@ export default function Member2Workspace() {
               className="px-2.5 py-1 rounded-full bg-gradient-to-r from-[#7c3aed]/20 to-[#38bdf8]/20 hover:from-[#7c3aed]/35 hover:to-[#38bdf8]/35 border border-[#7c3aed]/45 text-white hover:text-[#c4b5fd] text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm hover:scale-[1.02]"
               title="One-click live interactive demos for all 34 modules"
             >
-              <span>🎮</span>
+              <Icon name="gamepad" size={14} />
               <span className="hidden sm:inline">Live Demos</span>
             </button>
 
@@ -331,8 +363,9 @@ export default function Member2Workspace() {
                 className="px-2.5 py-1 rounded-full bg-[#8861dc]/15 hover:bg-[#8861dc]/30 border border-[#8861dc]/35 text-[#c4b5fd] hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
                 title="Guided tours menu"
               >
-                <span>✨ Tour</span>
-                <span className="text-[10px] text-[#c4b5fd]">▾</span>
+                <Icon name="sparkles" size={13} />
+                <span>Tour</span>
+                <Icon name="chevronDown" size={11} />
               </button>
 
               {showTourMenu && (
@@ -349,7 +382,10 @@ export default function Member2Workspace() {
                       }}
                       className="w-full text-left px-3.5 py-2 text-xs text-white hover:bg-[#1f1e2c] flex items-center justify-between transition-colors"
                     >
-                      <span>🔄 Replay Welcome Tour</span>
+                      <div className="flex items-center gap-2">
+                        <Icon name="refresh" size={13} />
+                        <span>Replay Welcome Tour</span>
+                      </div>
                       <span className="text-[10px] text-zinc-400">~45s</span>
                     </button>
                     {(() => {
@@ -362,7 +398,10 @@ export default function Member2Workspace() {
                           }}
                           className="w-full text-left px-3.5 py-2 text-xs text-[#c4b5fd] hover:bg-[#1f1e2c] font-semibold flex items-center justify-between transition-colors"
                         >
-                          <span>🎯 {cHelp.tourTitle}</span>
+                          <div className="flex items-center gap-2">
+                            <Icon name="target" size={13} />
+                            <span>{cHelp.tourTitle}</span>
+                          </div>
                           <span className="text-[10px] text-[#a855f7]">Current</span>
                         </button>
                       );
@@ -386,9 +425,11 @@ export default function Member2Workspace() {
                             <div className="flex items-center gap-1.5 shrink-0">
                               <span className="text-[10px] text-zinc-400">~{t.estimatedSeconds}s</span>
                               {done ? (
-                                <span className="text-emerald-400 text-xs font-bold">✓</span>
+                                <span className="text-emerald-400 text-xs">
+                                  <Icon name="check" size={12} />
+                                </span>
                               ) : (
-                                <span className="text-zinc-600 text-xs">•</span>
+                                <span className="w-1.5 h-1.5 rounded-full bg-zinc-600 inline-block" />
                               )}
                             </div>
                           </button>
@@ -630,7 +671,10 @@ export default function Member2Workspace() {
                             onClick={() => setShowHelpDrawer(false)}
                             className="p-2.5 rounded-lg bg-[#1e1d2c] hover:bg-[#28273a] text-xs font-medium text-white flex items-center justify-between transition-colors"
                           >
-                            <span>📖 Open Full User Manual (17 Chapters)</span>
+                            <span className="flex items-center gap-2">
+                              <Icon name="book" size={14} />
+                              <span>Open Full User Manual (17 Chapters)</span>
+                            </span>
                             <span>&rarr;</span>
                           </Link>
                           <button
@@ -640,7 +684,10 @@ export default function Member2Workspace() {
                             }}
                             className="p-2.5 rounded-lg bg-[#1e1d2c] hover:bg-[#28273a] text-xs font-medium text-white flex items-center justify-between text-left transition-colors"
                           >
-                            <span>✨ Replay Role Welcome Tour</span>
+                            <span className="flex items-center gap-2">
+                              <Icon name="sparkles" size={14} />
+                              <span>Replay Role Welcome Tour</span>
+                            </span>
                             <span>&rarr;</span>
                           </button>
                         </div>

@@ -83,6 +83,55 @@ const paths: Record<string, React.ReactNode> = {
       <path d="M3 12h18M3 6h18M3 18h18" />
     </>
   ),
+  refresh: (
+    <>
+      <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+      <path d="M21 3v5h-5" />
+      <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+      <path d="M3 21v-5h5" />
+    </>
+  ),
+  target: (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="6" />
+      <circle cx="12" cy="12" r="2" />
+    </>
+  ),
+  book: (
+    <>
+      <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
+      <path d="M6 6h10M6 10h10" />
+    </>
+  ),
+  workflow: (
+    <>
+      <rect x="3" y="3" width="6" height="6" rx="1" />
+      <rect x="15" y="15" width="6" height="6" rx="1" />
+      <path d="M6 9v3a3 3 0 0 0 3 3h6" />
+    </>
+  ),
+  chevronDown: (
+    <path d="m6 9 6 6 6-6" />
+  ),
+  play: (
+    <polygon points="5 3 19 12 5 21 5 3" />
+  ),
+  gamepad: (
+    <>
+      <line x1="6" y1="12" x2="10" y2="12" />
+      <line x1="8" y1="10" x2="8" y2="14" />
+      <line x1="15" y1="13" x2="15.01" y2="13" />
+      <line x1="18" y1="11" x2="18.01" y2="11" />
+      <rect x="2" y="6" width="20" height="12" rx="4" />
+    </>
+  ),
+  sparkles: (
+    <>
+      <path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z" />
+      <path d="m20 2 1 2 2 1-2 1-1 2-1-2-2-1 2-1Z" />
+    </>
+  ),
 };
 export const Icon = ({ name, size = 18 }: { name: string; size?: number }) => (
   <svg
