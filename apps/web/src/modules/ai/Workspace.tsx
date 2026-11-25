@@ -43,6 +43,8 @@ import { NotificationBell, NotificationsInboxPage } from '../notifications/Notif
 import { GlobalSearchPage, OpportunityFeedPage } from '../search/GlobalSearchPage';
 import { AdminConsolePage } from '../admin/AdminConsolePage';
 import { PrivacyCentrePage } from '../settings/PrivacyCentrePage';
+import { FeatureDemoModal } from '../../components/demos/FeatureDemoModal';
+import { FeatureDemosPage } from '../demos/FeatureDemosPage';
 import './studio.css';
 
 const fallbackContext: WorkspaceContext = {
@@ -66,6 +68,7 @@ export default function Member2Workspace() {
   const [mobileNav, setMobileNav] = useState(false);
   const [showTourMenu, setShowTourMenu] = useState(false);
   const [showHelpDrawer, setShowHelpDrawer] = useState(false);
+  const [showDemoModal, setShowDemoModal] = useState(false);
   const location = useLocation();
 
   const getContextualHelp = (pathname: string) => {
@@ -310,6 +313,17 @@ export default function Member2Workspace() {
               <NotificationBell />
             </div>
 
+            {/* Interactive Feature Demos Hub */}
+            <button
+              onClick={() => setShowDemoModal(true)}
+              data-tour="topbar-demos"
+              className="px-2.5 py-1 rounded-full bg-gradient-to-r from-[#7c3aed]/20 to-[#38bdf8]/20 hover:from-[#7c3aed]/35 hover:to-[#38bdf8]/35 border border-[#7c3aed]/45 text-white hover:text-[#c4b5fd] text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm hover:scale-[1.02]"
+              title="One-click live interactive demos for all 34 modules"
+            >
+              <span>🎮</span>
+              <span className="hidden sm:inline">Live Demos</span>
+            </button>
+
             {/* Tour Dropdown Menu (Requirement B4.2) */}
             <div className="relative inline-block text-left">
               <button
@@ -516,6 +530,7 @@ export default function Member2Workspace() {
               {/* Help Center & Product Manuals */}
               <Route path="/help" element={<HelpCenterPage />} />
               <Route path="/help/*" element={<HelpCenterPage />} />
+              <Route path="/demos" element={<FeatureDemosPage />} />
 
               {/* Profile, Auth & Settings */}
               <Route path="/auth/login" element={<SignInPage />} />
@@ -641,6 +656,8 @@ export default function Member2Workspace() {
             </div>
           </div>
         )}
+        {/* Feature-Wise Interactive Demos Modal */}
+        <FeatureDemoModal isOpen={showDemoModal} onClose={() => setShowDemoModal(false)} />
       </div>
     </div>
   );

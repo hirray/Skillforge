@@ -4,7 +4,7 @@ import { eventBus } from '../../core/eventBus';
 
 const prisma = new PrismaClient();
 
-const canonicalProjectsMap: Record<string, any> = {
+export const canonicalProjectsMap: Record<string, any> = {
   'proj-consensus': {
     id: 'proj-consensus',
     ownerId: 'user-003',

@@ -225,3 +225,408 @@ export const canonicalProjectsMap: Record<string, ProjectItemData> = {
 };
 
 export const canonicalProjectsList = Object.values(canonicalProjectsMap);
+
+// ── Canonical Milestones, Tasks & Resources for Zero-Error Resilience ─────────
+
+export const canonicalMilestonesMap: Record<string, any[]> = {
+  'proj-whiteboard': [
+    {
+      id: 'ms-wb-1',
+      projectId: 'proj-whiteboard',
+      title: 'Core Vector Canvas & WebGL Rendering Loop',
+      description: 'Implement 60fps hardware-accelerated 2D canvas drawing with custom shaders and vector point buffers.',
+      status: 'Done',
+      progressPercentage: 100,
+      dueDate: '2026-11-10T00:00:00.000Z',
+    },
+    {
+      id: 'ms-wb-2',
+      projectId: 'proj-whiteboard',
+      title: 'CRDT State Sync & WebSocket Binary Protocol',
+      description: 'Conflict-free replicated data types for simultaneous multi-cursor drawings and path reconciliations.',
+      status: 'In Progress',
+      progressPercentage: 65,
+      dueDate: '2026-12-05T00:00:00.000Z',
+    },
+    {
+      id: 'ms-wb-3',
+      projectId: 'proj-whiteboard',
+      title: 'Multiplayer Cursors, Gestures & Undo/Redo',
+      description: 'Smooth position interpolation, pinch-to-zoom matrix transforms, and per-user undo history stacks.',
+      status: 'To Do',
+      progressPercentage: 20,
+      dueDate: '2026-12-20T00:00:00.000Z',
+    },
+    {
+      id: 'ms-wb-4',
+      projectId: 'proj-whiteboard',
+      title: 'Latency Stress Benchmark & Verified Certification',
+      description: 'Stress testing with 100 simulated clients, commit attestation, and completion certificate issuance.',
+      status: 'To Do',
+      progressPercentage: 0,
+      dueDate: '2027-01-15T00:00:00.000Z',
+    },
+  ],
+  'proj-consensus': [
+    {
+      id: 'ms-cs-1',
+      projectId: 'proj-consensus',
+      title: 'Raft Cluster Topology & Leader Election Engine',
+      description: 'Implement core Raft state machine with leader heartbeats, vote requests, and term transitions.',
+      status: 'Done',
+      progressPercentage: 100,
+      dueDate: '2026-10-15T00:00:00.000Z',
+    },
+    {
+      id: 'ms-cs-2',
+      projectId: 'proj-consensus',
+      title: 'Kafka Ingestion & Zero-Loss Partition Buffer',
+      description: 'High-throughput event streaming queue with guaranteed delivery and exactly-once log compaction.',
+      status: 'Done',
+      progressPercentage: 100,
+      dueDate: '2026-11-01T00:00:00.000Z',
+    },
+    {
+      id: 'ms-cs-3',
+      projectId: 'proj-consensus',
+      title: 'Automated Failover CI & Chaos Testing Suite',
+      description: 'Simulate split-brain network partitions and measure time-to-recovery under continuous write pressure.',
+      status: 'In Progress',
+      progressPercentage: 80,
+      dueDate: '2026-12-01T00:00:00.000Z',
+    },
+    {
+      id: 'ms-cs-4',
+      projectId: 'proj-consensus',
+      title: 'Production Verification & Multi-Signature Sign-Off',
+      description: 'Peer code reviews, cryptographic commit signing, and issuance of SkillForge Verified Attestation.',
+      status: 'To Do',
+      progressPercentage: 10,
+      dueDate: '2026-12-25T00:00:00.000Z',
+    },
+  ],
+  'proj-monorepo': [
+    {
+      id: 'ms-mr-1',
+      projectId: 'proj-monorepo',
+      title: 'Universal Workspace Shell & 6 Role Contexts',
+      description: 'Scaffold role-aware navigation shell, top bar switcher, and isolated context permissions.',
+      status: 'Done',
+      progressPercentage: 100,
+      dueDate: '2026-10-20T00:00:00.000Z',
+    },
+    {
+      id: 'ms-mr-2',
+      projectId: 'proj-monorepo',
+      title: 'End-to-End Contract Types & Schema Validation',
+      description: 'Unified TypeScript contracts, Prisma models, and cross-service domain event bus.',
+      status: 'Done',
+      progressPercentage: 100,
+      dueDate: '2026-11-12T00:00:00.000Z',
+    },
+    {
+      id: 'ms-mr-3',
+      projectId: 'proj-monorepo',
+      title: 'Help Center, Workflow Flowcharts & 20 Guided Tours',
+      description: 'Interactive SVG pipeline diagrams, 17-chapter user manual, and spotlight feature tours.',
+      status: 'Done',
+      progressPercentage: 100,
+      dueDate: '2026-11-24T00:00:00.000Z',
+    },
+    {
+      id: 'ms-mr-4',
+      projectId: 'proj-monorepo',
+      title: 'Platform Production Hardening & Full-Suite Verification',
+      description: 'Zero-downtime failover, performance audits, and multi-tenant recruiter enterprise features.',
+      status: 'In Progress',
+      progressPercentage: 70,
+      dueDate: '2026-12-15T00:00:00.000Z',
+    },
+  ],
+};
+
+export const canonicalTasksMap: Record<string, any[]> = {
+  'proj-whiteboard': [
+    {
+      id: 'task-wb-1',
+      projectId: 'proj-whiteboard',
+      title: 'Implement WebGL 2D line drawing shaders',
+      description: 'Create fragment and vertex shaders for anti-aliased bezier curve rendering.',
+      priority: 'High',
+      status: 'Done',
+      assignee: { id: 'user-005', email: 'david.kim@skillforge.io', name: 'David Kim' },
+    },
+    {
+      id: 'task-wb-2',
+      projectId: 'proj-whiteboard',
+      title: 'Binary WebSocket serialization with Protobuf',
+      description: 'Pack cursor positions and delta paths into compressed binary frames to maintain <15ms latency.',
+      priority: 'Critical',
+      status: 'Done',
+      assignee: { id: 'user-001', email: 'alex.chen@skillforge.io', name: 'Alexandre Chen' },
+    },
+    {
+      id: 'task-wb-3',
+      projectId: 'proj-whiteboard',
+      title: 'CRDT state reconciliation engine (Yjs integration)',
+      description: 'Ensure concurrent edits from multiple developers merge deterministically without data loss.',
+      priority: 'Critical',
+      status: 'In Progress',
+      assignee: { id: 'user-005', email: 'david.kim@skillforge.io', name: 'David Kim' },
+    },
+    {
+      id: 'task-wb-4',
+      projectId: 'proj-whiteboard',
+      title: 'Multi-touch gesture zoom & pan transform matrix',
+      description: 'Support smooth pinch-to-zoom on touchpads and mobile devices with boundary clamping.',
+      priority: 'Medium',
+      status: 'In Review',
+      assignee: { id: 'user-001', email: 'alex.chen@skillforge.io', name: 'Alexandre Chen' },
+    },
+    {
+      id: 'task-wb-5',
+      projectId: 'proj-whiteboard',
+      title: 'Export canvas to SVG, PNG and JSON schema',
+      description: 'Allow users to export diagrams to vector SVG and clean structured JSON for documentation.',
+      priority: 'Low',
+      status: 'To Do',
+      assignee: { id: 'user-005', email: 'david.kim@skillforge.io', name: 'David Kim' },
+    },
+  ],
+  'proj-consensus': [
+    {
+      id: 'task-cs-1',
+      projectId: 'proj-consensus',
+      title: 'Raft heartbeat protocol implementation in Go',
+      description: 'Implement randomized election timers and leader append entries RPCs.',
+      priority: 'Critical',
+      status: 'Done',
+      assignee: { id: 'user-003', email: 'elena.rostova@skillforge.io', name: 'Elena Rostova' },
+    },
+    {
+      id: 'task-cs-2',
+      projectId: 'proj-consensus',
+      title: 'Kafka event partitioner and deduplication ring',
+      description: 'Partition event keys using xxHash64 with atomic monotonic sequence counters.',
+      priority: 'High',
+      status: 'Done',
+      assignee: { id: 'user-001', email: 'alex.chen@skillforge.io', name: 'Alexandre Chen' },
+    },
+    {
+      id: 'task-cs-3',
+      projectId: 'proj-consensus',
+      title: 'Network partition simulator for failover recovery',
+      description: 'Simulate packet loss, network split, and measure cluster re-election time.',
+      priority: 'Critical',
+      status: 'In Progress',
+      assignee: { id: 'user-007', email: 'marcus.vance@skillforge.io', name: 'Marcus Vance' },
+    },
+    {
+      id: 'task-cs-4',
+      projectId: 'proj-consensus',
+      title: 'Chaos engineering suite for leader election stress',
+      description: 'Kill leader nodes under 100k events/sec load and assert zero state divergence.',
+      priority: 'High',
+      status: 'In Review',
+      assignee: { id: 'user-003', email: 'elena.rostova@skillforge.io', name: 'Elena Rostova' },
+    },
+  ],
+};
+
+export const canonicalResourcesMap: Record<string, any[]> = {
+  'proj-whiteboard': [
+    {
+      id: 'res-wb-1',
+      projectId: 'proj-whiteboard',
+      title: 'Figma Whiteboard Canvas UI & Tooling Spec',
+      url: 'https://figma.com/file/canvas-engine-spec',
+      type: 'link',
+      category: 'Design',
+      addedBy: 'David Kim',
+      createdAt: '2026-11-05T14:20:00.000Z',
+    },
+    {
+      id: 'res-wb-2',
+      projectId: 'proj-whiteboard',
+      title: 'CRDT Binary Protocol Architecture Document',
+      url: 'https://github.com/skillforge/whiteboard-engine/docs/protocol.md',
+      type: 'link',
+      category: 'Documentation',
+      addedBy: 'Alexandre Chen',
+      createdAt: '2026-11-08T10:15:00.000Z',
+    },
+    {
+      id: 'res-wb-3',
+      projectId: 'proj-whiteboard',
+      title: 'Canvas Engine GitHub Repository',
+      url: 'https://github.com/skillforge/collaborative-canvas-core',
+      type: 'link',
+      category: 'Repository',
+      addedBy: 'David Kim',
+      createdAt: '2026-11-12T09:30:00.000Z',
+    },
+    {
+      id: 'res-wb-4',
+      projectId: 'proj-whiteboard',
+      title: 'Multiplayer Performance Benchmark Report (60fps)',
+      fileName: 'canvas_benchmark_metrics.pdf',
+      fileSize: 1845000,
+      type: 'file',
+      category: 'Dataset',
+      addedBy: 'Alexandre Chen',
+      createdAt: '2026-11-18T16:45:00.000Z',
+    },
+  ],
+  'proj-consensus': [
+    {
+      id: 'res-cs-1',
+      projectId: 'proj-consensus',
+      title: 'Raft Consensus Algorithm Paper & State Machine Spec',
+      url: 'https://raft.github.io/raft.pdf',
+      type: 'link',
+      category: 'Documentation',
+      addedBy: 'Elena Rostova',
+      createdAt: '2026-10-12T11:00:00.000Z',
+    },
+    {
+      id: 'res-cs-2',
+      projectId: 'proj-consensus',
+      title: 'Kafka Stream Clustering & Topology Guide',
+      url: 'https://github.com/skillforge/consensus-hub/docs/kafka.md',
+      type: 'link',
+      category: 'Documentation',
+      addedBy: 'Alexandre Chen',
+      createdAt: '2026-10-18T13:20:00.000Z',
+    },
+    {
+      id: 'res-cs-3',
+      projectId: 'proj-consensus',
+      title: 'Consensus Core Engine GitHub Repository',
+      url: 'https://github.com/skillforge/consensus-event-hub',
+      type: 'link',
+      category: 'Repository',
+      addedBy: 'Elena Rostova',
+      createdAt: '2026-10-25T15:10:00.000Z',
+    },
+  ],
+};
+
+// Generates fallback milestones for any project ID
+export function getFallbackMilestones(projectId: string, projectTitle?: string) {
+  if (canonicalMilestonesMap[projectId]) return canonicalMilestonesMap[projectId];
+  const title = projectTitle || 'Engineering System';
+  return [
+    {
+      id: `ms-${projectId}-1`,
+      projectId,
+      title: `1. System Architecture & Requirements for ${title}`,
+      description: 'Define technical stack, data contracts, and component boundaries.',
+      status: 'Done',
+      progressPercentage: 100,
+      dueDate: '2026-11-10T00:00:00.000Z',
+    },
+    {
+      id: `ms-${projectId}-2`,
+      projectId,
+      title: `2. Core Implementation & API Integration`,
+      description: 'Build backend endpoints, frontend components, and state management.',
+      status: 'In Progress',
+      progressPercentage: 70,
+      dueDate: '2026-12-05T00:00:00.000Z',
+    },
+    {
+      id: `ms-${projectId}-3`,
+      projectId,
+      title: `3. Testing, Performance & Peer Code Review`,
+      description: 'Comprehensive test coverage, end-to-end integration, and PR reviews.',
+      status: 'To Do',
+      progressPercentage: 25,
+      dueDate: '2026-12-20T00:00:00.000Z',
+    },
+    {
+      id: `ms-${projectId}-4`,
+      projectId,
+      title: `4. Verification & Attested Credential Release`,
+      description: 'Final multi-peer verification sign-off and digital completion certificate.',
+      status: 'To Do',
+      progressPercentage: 0,
+      dueDate: '2027-01-10T00:00:00.000Z',
+    },
+  ];
+}
+
+// Generates fallback tasks for any project ID
+export function getFallbackTasks(projectId: string) {
+  if (canonicalTasksMap[projectId]) return canonicalTasksMap[projectId];
+  return [
+    {
+      id: `task-${projectId}-1`,
+      projectId,
+      title: 'Architectural schema design and TypeScript contracts',
+      priority: 'High',
+      status: 'Done',
+      assignee: { id: 'user-001', email: 'lead@skillforge.io', name: 'Lead Architect' },
+    },
+    {
+      id: `task-${projectId}-2`,
+      projectId,
+      title: 'Core service endpoints and error handling boundaries',
+      priority: 'Critical',
+      status: 'Done',
+      assignee: { id: 'user-002', email: 'dev@skillforge.io', name: 'Senior Engineer' },
+    },
+    {
+      id: `task-${projectId}-3`,
+      projectId,
+      title: 'Interactive UI views and state integration',
+      priority: 'Medium',
+      status: 'In Progress',
+      assignee: { id: 'user-003', email: 'frontend@skillforge.io', name: 'Frontend Engineer' },
+    },
+    {
+      id: `task-${projectId}-4`,
+      projectId,
+      title: 'Automated test suite and CI deployment verification',
+      priority: 'High',
+      status: 'To Do',
+      assignee: { id: 'user-001', email: 'lead@skillforge.io', name: 'Lead Architect' },
+    },
+  ];
+}
+
+// Generates fallback resources for any project ID
+export function getFallbackResources(projectId: string) {
+  if (canonicalResourcesMap[projectId]) return canonicalResourcesMap[projectId];
+  return [
+    {
+      id: `res-${projectId}-1`,
+      projectId,
+      title: 'Project Architecture & Technical Specification',
+      url: 'https://docs.skillforge.io/architecture/spec',
+      type: 'link',
+      category: 'Documentation',
+      addedBy: 'System Architect',
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: `res-${projectId}-2`,
+      projectId,
+      title: 'GitHub Source Code Repository',
+      url: 'https://github.com/skillforge/project-repository',
+      type: 'link',
+      category: 'Repository',
+      addedBy: 'Lead Developer',
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: `res-${projectId}-3`,
+      projectId,
+      title: 'Figma Component & Screen Design Tokens',
+      url: 'https://figma.com/file/skillforge-design-spec',
+      type: 'link',
+      category: 'Design',
+      addedBy: 'Design Lead',
+      createdAt: new Date().toISOString(),
+    },
+  ];
+}

@@ -773,7 +773,13 @@ export const UnifiedHome: React.FC = () => {
               Workspace Capabilities &amp; Launchpad
             </h3>
           </div>
-          <span className="text-xs text-[#6b7280] font-medium">Quick launch tools</span>
+          <Link
+            to="/demos"
+            className="text-xs text-[#c4b5fd] hover:text-white font-bold flex items-center gap-1.5 transition-colors bg-[#7c3aed]/15 hover:bg-[#7c3aed]/30 px-2.5 py-1 rounded-full border border-[#7c3aed]/30 shadow-xs"
+          >
+            <span>🎮 Live Feature Demos</span>
+            <span>&rarr;</span>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
