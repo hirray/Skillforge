@@ -319,22 +319,22 @@ export function SkillForgeDashboard({ context }: SkillForgeDashboardProps) {
           3. ASYMMETRIC BENTO COCKPIT (Flight Control & Active Telemetry)
       ========================================================================= */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
-        {/* LEFT BENTO (Span 7): ACTIVE REPOSITORY FLIGHT CONTROL */}
+        {/* LEFT BENTO (Span 7): CURRENT PROJECT FOCUS & WORKSPACE */}
         <div className="lg:col-span-7 relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#14141c] via-[#101015] to-[#0d0d11] border border-[#282738] p-5 shadow-md flex flex-col justify-between">
           <div className="space-y-4">
             {/* Header with Project Status */}
             <div className="flex items-center justify-between border-b border-[#252433] pb-3">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#10b981] animate-ping" />
+                <span className="w-2 h-2 rounded-full bg-[#10b981]" />
                 <span className="text-xs font-bold text-white uppercase tracking-wider">
-                  Active Sprint Flight Control
+                  Current Project Focus
                 </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#8861dc]/15 text-[#c084fc] border border-[#8861dc]/30">
-                  Production MVP
+                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#10b981]/15 text-[#34d399] border border-[#10b981]/30">
+                  Active • In Progress
                 </span>
               </div>
               <Link to="/projects" className="text-xs text-[#b29af5] hover:underline font-semibold flex items-center gap-1">
-                <span>All Projects</span>
+                <span>All Projects (6)</span>
                 <span>&rarr;</span>
               </Link>
             </div>
@@ -347,66 +347,66 @@ export function SkillForgeDashboard({ context }: SkillForgeDashboardProps) {
                     Distributed Consensus &amp; Event Streaming Hub
                   </h3>
                   <p className="text-xs text-[#9ca3af] mt-1 max-w-xl leading-relaxed">
-                    High-throughput event streaming engine with raft-backed consensus, partition leader election, and automated zero-downtime failover test suite.
+                    Real-time event streaming platform with automatic failover, cluster leader election, and distributed testing suite.
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <div className="text-xl font-extrabold text-[#34d399]">85%</div>
-                  <div className="text-[10px] text-[#6b7280]">Milestone Velocity</div>
+                  <div className="text-xl font-extrabold text-[#34d399]">75%</div>
+                  <div className="text-[10px] text-[#6b7280]">Completed</div>
                 </div>
               </div>
 
-              {/* Multi-Stage Visual Sprint Rail */}
+              {/* Clear Roadmap / Milestone Steps */}
               <div className="pt-2">
-                <div className="grid grid-cols-4 gap-2 text-center text-[11px] mb-2 font-medium">
-                  <div className="text-[#34d399] flex items-center justify-center gap-1">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-[11px] mb-2 font-medium">
+                  <div className="text-[#34d399] flex items-center justify-center gap-1 bg-[#10b981]/10 py-1 rounded border border-[#10b981]/20">
                     <Icon name="check" size={12} />
-                    <span>Raft Protocol</span>
+                    <span>1. Architecture</span>
                   </div>
-                  <div className="text-[#34d399] flex items-center justify-center gap-1">
+                  <div className="text-[#34d399] flex items-center justify-center gap-1 bg-[#10b981]/10 py-1 rounded border border-[#10b981]/20">
                     <Icon name="check" size={12} />
-                    <span>Kafka Ingest</span>
+                    <span>2. Core APIs</span>
                   </div>
-                  <div className="text-[#c084fc] font-bold flex items-center justify-center gap-1">
+                  <div className="text-[#c084fc] font-bold flex items-center justify-center gap-1 bg-[#8861dc]/20 py-1 rounded border border-[#8861dc]/30">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#c084fc] animate-pulse" />
-                    <span>Failover CI</span>
+                    <span>3. Testing</span>
                   </div>
-                  <div className="text-[#6b7280]">Deploy Prod</div>
+                  <div className="text-[#6b7280] bg-[#181824] py-1 rounded border border-[#282738]">4. Release</div>
                 </div>
 
                 {/* Progress Track */}
                 <div className="w-full bg-[#181824] rounded-full h-2 overflow-hidden border border-[#2b2a3c]">
                   <div
-                    className="bg-gradient-to-r from-[#10b981] via-[#34d399] to-[#8861dc] h-2 rounded-full shadow-[0_0_12px_rgba(52,211,153,0.5)] transition-all"
-                    style={{ width: '85%' }}
+                    className="bg-gradient-to-r from-[#10b981] via-[#34d399] to-[#8861dc] h-2 rounded-full transition-all"
+                    style={{ width: '75%' }}
                   />
                 </div>
               </div>
 
-              {/* Telemetry Stats Bar */}
+              {/* Simple Human-Friendly Stats Bar */}
               <div className="grid grid-cols-3 gap-2.5 pt-3">
                 <div className="p-2.5 rounded-xl bg-[#171722] border border-[#282738] flex items-center justify-between">
                   <div>
-                    <div className="text-[10px] text-[#6b7280]">Verified Commits</div>
-                    <div className="text-sm font-bold text-white mt-0.5">14 Commits</div>
+                    <div className="text-[10px] text-[#6b7280]">Team Members</div>
+                    <div className="text-sm font-bold text-white mt-0.5">3 Collaborators</div>
                   </div>
-                  <span className="text-[#34d399] text-xs font-semibold">100% Signed</span>
+                  <span className="text-[#34d399] text-xs font-semibold">Active</span>
                 </div>
 
                 <div className="p-2.5 rounded-xl bg-[#171722] border border-[#282738] flex items-center justify-between">
                   <div>
-                    <div className="text-[10px] text-[#6b7280]">Team Synergy</div>
-                    <div className="text-sm font-bold text-white mt-0.5">3 Engineers</div>
+                    <div className="text-[10px] text-[#6b7280]">Tasks Progress</div>
+                    <div className="text-sm font-bold text-white mt-0.5">12 Done, 3 Open</div>
                   </div>
-                  <span className="text-[#c084fc] text-xs font-semibold">96% Fit</span>
+                  <span className="text-[#c084fc] text-xs font-semibold">On Track</span>
                 </div>
 
                 <div className="p-2.5 rounded-xl bg-[#171722] border border-[#282738] flex items-center justify-between">
                   <div>
-                    <div className="text-[10px] text-[#6b7280]">Automated CI</div>
-                    <div className="text-sm font-bold text-[#34d399] mt-0.5">Passing</div>
+                    <div className="text-[10px] text-[#6b7280]">Code Commits</div>
+                    <div className="text-sm font-bold text-[#34d399] mt-0.5">14 Commits</div>
                   </div>
-                  <span className="text-[#6b7280] text-[11px]">0 errors</span>
+                  <span className="text-[#34d399] text-[11px]">Synced</span>
                 </div>
               </div>
             </div>

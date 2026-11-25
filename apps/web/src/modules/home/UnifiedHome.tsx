@@ -362,15 +362,15 @@ export const UnifiedHome: React.FC = () => {
         return [
           {
             id: 'nba-1',
-            tag: 'ACTIVE SPRINT',
-            text: 'Milestone 4 code review approved for Distributed Consensus Hub. Sign commit hash to seal.',
+            tag: 'NEXT ACTION',
+            text: 'Milestone 3 review ready for Distributed Consensus Hub. Review pull request with your team.',
             action: 'Enter Project Room',
-            route: '/chat',
+            route: '/projects/proj-consensus',
           },
           {
             id: 'nba-2',
-            tag: 'RECRUITER RADAR',
-            text: 'Northstar Labs sent a fast-track interview inquiry for Staff Systems Engineer.',
+            tag: 'RECRUITER INQUIRY',
+            text: 'Northstar Labs sent a direct interview inquiry for Senior Systems Engineer.',
             action: 'Review Inquiry',
             route: '/opportunities',
           },
@@ -543,22 +543,25 @@ export const UnifiedHome: React.FC = () => {
           ZONE C & D: THE ASYMMETRIC INTELLIGENCE BENTO (COCKPIT)
       ========================================================================= */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
-        {/* LEFT BENTO (Span 8): ACTIVE REPOSITORY FLIGHT CONTROL & SPRINT RUNWAY */}
+        {/* LEFT BENTO (Span 8): CURRENT PROJECT FOCUS & ACTIVE WORKSPACE */}
         <div className="lg:col-span-8 relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#14141e] via-[#101017] to-[#0c0c12] border border-[#2b2a3c] p-5 shadow-lg flex flex-col justify-between space-y-4">
           <div className="space-y-3.5">
             {/* Header with Project Status & Deep Links */}
             <div className="flex items-center justify-between border-b border-[#252435] pb-3">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#10b981] animate-ping" />
-                <span className="text-xs font-black text-white uppercase tracking-wider">
-                  Active Sprint Flight Control
+                <span className="w-2.5 h-2.5 rounded-full bg-[#10b981]" />
+                <span className="text-xs font-bold text-white uppercase tracking-wider">
+                  Current Project Focus
                 </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#7c3aed]/20 text-[#c4b5fd] border border-[#7c3aed]/40">
-                  Production MVP
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#10b981]/15 text-[#34d399] border border-[#10b981]/30">
+                  Active • In Progress
+                </span>
+                <span className="text-[10px] text-[#9ca3af] hidden sm:inline">
+                  Fullstack Systems
                 </span>
               </div>
               <Link to="/projects" className="text-xs text-[#b29af5] hover:text-white font-bold flex items-center gap-1 transition-colors">
-                <span>View All Projects</span>
+                <span>All Projects (6)</span>
                 <span>&rarr;</span>
               </Link>
             </div>
@@ -570,79 +573,84 @@ export const UnifiedHome: React.FC = () => {
                   Distributed Consensus &amp; Event Streaming Hub
                 </h2>
                 <p className="text-xs text-[#9ca3af] mt-1 max-w-xl leading-relaxed">
-                  High-throughput event streaming engine with raft-backed consensus, partition leader election, and automated zero-downtime failover test suite.
+                  Real-time event streaming platform with automatic failover, cluster leader election, and distributed testing suite.
                 </p>
               </div>
               <div className="shrink-0 text-right">
-                <div className="text-2xl font-black text-[#34d399]">85%</div>
-                <div className="text-[10px] text-[#6b7280] font-bold uppercase tracking-wider">Sprint Velocity</div>
+                <div className="text-2xl font-black text-[#34d399]">75%</div>
+                <div className="text-[10px] text-[#6b7280] font-bold uppercase tracking-wider">Completed</div>
               </div>
             </div>
 
-            {/* Multi-Stage Visual Sprint Rail */}
+            {/* Clear Roadmap / Milestone Steps */}
             <div className="pt-1">
-              <div className="grid grid-cols-4 gap-2 text-center text-[11px] mb-2 font-bold">
-                <div className="text-[#34d399] flex items-center justify-center gap-1 bg-[#10b981]/10 py-1 rounded-md border border-[#10b981]/20">
+              <div className="flex items-center justify-between text-[11px] mb-1.5 font-medium text-[#9ca3af]">
+                <span>Project Milestones (3 of 4 in progress)</span>
+                <span className="text-xs text-[#c4b5fd] font-bold">Target: Dec 15</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-[11px] mb-2 font-medium">
+                <div className="text-[#34d399] flex items-center justify-center gap-1.5 bg-[#10b981]/10 py-1.5 px-2 rounded-lg border border-[#10b981]/20">
                   <Icon name="check" size={12} />
-                  <span>Raft Protocol</span>
+                  <span className="truncate">1. Architecture</span>
                 </div>
-                <div className="text-[#34d399] flex items-center justify-center gap-1 bg-[#10b981]/10 py-1 rounded-md border border-[#10b981]/20">
+                <div className="text-[#34d399] flex items-center justify-center gap-1.5 bg-[#10b981]/10 py-1.5 px-2 rounded-lg border border-[#10b981]/20">
                   <Icon name="check" size={12} />
-                  <span>Kafka Ingest</span>
+                  <span className="truncate">2. Core APIs</span>
                 </div>
-                <div className="text-[#c4b5fd] flex items-center justify-center gap-1 bg-[#7c3aed]/15 py-1 rounded-md border border-[#7c3aed]/30 animate-pulse">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#c4b5fd]" />
-                  <span>Failover CI</span>
+                <div className="text-[#c4b5fd] flex items-center justify-center gap-1.5 bg-[#7c3aed]/20 py-1.5 px-2 rounded-lg border border-[#7c3aed]/40 font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#c4b5fd] animate-pulse" />
+                  <span className="truncate">3. Testing &amp; Polish</span>
                 </div>
-                <div className="text-[#6b7280] flex items-center justify-center gap-1 bg-[#181824] py-1 rounded-md border border-[#262535]">
-                  <span>Deploy Prod</span>
+                <div className="text-[#6b7280] flex items-center justify-center gap-1.5 bg-[#181824] py-1.5 px-2 rounded-lg border border-[#262535]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#4b5563]" />
+                  <span className="truncate">4. Verification</span>
                 </div>
               </div>
 
-              {/* Glowing Progress Track */}
-              <div className="w-full bg-[#181824] rounded-full h-2.5 overflow-hidden border border-[#2b2a3c]">
+              {/* Progress Track */}
+              <div className="w-full bg-[#181824] rounded-full h-2 overflow-hidden border border-[#2b2a3c]">
                 <div
-                  className="bg-gradient-to-r from-[#10b981] via-[#34d399] to-[#8861dc] h-full rounded-full shadow-[0_0_16px_rgba(52,211,153,0.6)] transition-all"
-                  style={{ width: '85%' }}
+                  className="bg-gradient-to-r from-[#10b981] via-[#34d399] to-[#8861dc] h-full rounded-full transition-all"
+                  style={{ width: '75%' }}
                 />
               </div>
             </div>
 
-            {/* Telemetry Stats Bar */}
+            {/* Simple Human-Friendly Stats Bar */}
             <div className="grid grid-cols-3 gap-2.5 pt-1">
               <div className="p-2.5 rounded-xl bg-[#171724] border border-[#272638] flex items-center justify-between">
                 <div>
-                  <div className="text-[10px] text-[#6b7280] font-medium">Verified Commits</div>
-                  <div className="text-xs font-bold text-white mt-0.5">14 Signed Commits</div>
+                  <div className="text-[10px] text-[#6b7280] font-medium">Team Members</div>
+                  <div className="text-xs font-bold text-white mt-0.5">3 Collaborators</div>
                 </div>
                 <span className="text-[#34d399] text-[10px] font-bold bg-[#10b981]/10 px-2 py-0.5 rounded border border-[#10b981]/20">
-                  100% Attested
+                  Active
                 </span>
               </div>
 
               <div className="p-2.5 rounded-xl bg-[#171724] border border-[#272638] flex items-center justify-between">
                 <div>
-                  <div className="text-[10px] text-[#6b7280] font-medium">Core Engineering</div>
-                  <div className="text-xs font-bold text-white mt-0.5">3 Peer Engineers</div>
+                  <div className="text-[10px] text-[#6b7280] font-medium">Tasks Progress</div>
+                  <div className="text-xs font-bold text-white mt-0.5">12 Done, 3 Open</div>
                 </div>
                 <span className="text-[#c4b5fd] text-[10px] font-bold bg-[#7c3aed]/15 px-2 py-0.5 rounded border border-[#7c3aed]/30">
-                  94% Synergy
+                  On Track
                 </span>
               </div>
 
               <div className="p-2.5 rounded-xl bg-[#171724] border border-[#272638] flex items-center justify-between">
                 <div>
-                  <div className="text-[10px] text-[#6b7280] font-medium">Security &amp; QA</div>
-                  <div className="text-xs font-bold text-white mt-0.5">0 Vulnerabilities</div>
+                  <div className="text-[10px] text-[#6b7280] font-medium">Codebase Commits</div>
+                  <div className="text-xs font-bold text-white mt-0.5">14 Commits</div>
                 </div>
                 <span className="text-[#34d399] text-[10px] font-bold bg-[#10b981]/10 px-2 py-0.5 rounded border border-[#10b981]/20">
-                  Audit Passed
+                  Synced
                 </span>
               </div>
             </div>
           </div>
 
-          {/* ZONE C: NEXT BEST ACTION (INTEGRATED INTO MISSION CONTROL) */}
+          {/* ZONE C: NEXT BEST ACTION (INTEGRATED INTO CURRENT WORKSPACE) */}
           <div className="pt-2 border-t border-[#252435]">
             <div className="space-y-2">
               {getNextBestActions().map((nba) => (
@@ -651,7 +659,7 @@ export const UnifiedHome: React.FC = () => {
                   className="flex items-center justify-between gap-3 p-3 rounded-xl bg-gradient-to-r from-[#181827] via-[#141420] to-[#12121c] border border-[#2f2e42] hover:border-[#8861dc]/60 transition-all shadow-sm"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="px-2 py-0.5 rounded text-[9px] font-black tracking-wider bg-[#8861dc]/25 text-[#c4b5fd] border border-[#8861dc]/40 shrink-0">
+                    <span className="px-2 py-0.5 rounded text-[9px] font-bold tracking-wider bg-[#8861dc]/25 text-[#c4b5fd] border border-[#8861dc]/40 shrink-0">
                       {nba.tag}
                     </span>
                     <p className="text-xs text-[#e2e8f0] font-medium truncate">

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { PageShell } from '../../components/PageShell';
 import { useTour } from '../../components/tour/TourProvider';
-import { allToursCatalog, TourDefinition } from '../../config/tours.config';
+import { allToursCatalog } from '../../config/tours.config';
 
 interface FlowchartNode {
   id: string;
@@ -331,13 +331,11 @@ const manualChapters: ManualChapter[] = [
 
 export const HelpCenterPage: React.FC = () => {
   const { startTour } = useTour();
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'flowcharts' | 'manuals' | 'tours' | 'faq'>('flowcharts');
   const [selectedFlow, setSelectedFlow] = useState<WorkflowPipeline>(flowchartsCatalog[0]);
   const [selectedChapter, setSelectedChapter] = useState<ManualChapter>(manualChapters[0]);
   const [flowViewMode, setFlowViewMode] = useState<'diagram' | 'plainWords' | 'mermaidSrc'>('diagram');
   const [zoomLevel, setZoomLevel] = useState<number>(1);
-  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Handle hash deep-links (e.g. /help#FC-02)
@@ -360,7 +358,7 @@ export const HelpCenterPage: React.FC = () => {
 
   return (
     <PageShell
-      breadcrumb={{ label: 'Workspace', href: '/' }}
+      breadcrumb={[{ label: 'Workspace', href: '/home' }, { label: 'Help Center' }]}
       title="Help Center, User Manual & Workflows"
       description="Visual workflow pipelines, interactive flowcharts, full product manual, and guided feature tours."
       primaryAction={
@@ -550,7 +548,7 @@ export const HelpCenterPage: React.FC = () => {
                 style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }}
               >
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                  {selectedFlow.nodes.map((node, idx) => (
+                  {selectedFlow.nodes.map((node) => (
                     <div
                       key={node.id}
                       className="relative p-4 rounded-xl bg-[#171624] border border-[#2d2c44] hover:border-[#8861dc] transition-all flex flex-col justify-between space-y-3"

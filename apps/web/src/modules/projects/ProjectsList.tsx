@@ -94,6 +94,7 @@ const ProjectsList: React.FC = () => {
 
   return (
     <PageShell
+      maxWidth="max-w-[1520px]"
       title="My Projects"
       description="Manage, build, and deliver your team repositories, active sprints, and collaborative codebases."
       breadcrumb={[
@@ -153,36 +154,34 @@ const ProjectsList: React.FC = () => {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           {filteredProjects.map((p) => (
             <div
               key={p.id}
-              className="group relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#151522] via-[#111118] to-[#0e0e14] border border-[#2b2a3d] hover:border-[#8861dc]/60 p-5 transition-all duration-200 flex flex-col justify-between space-y-4 shadow-sm hover:shadow-[0_12px_36px_rgba(0,0,0,0.6)] hover:-translate-y-0.5"
+              className="group relative overflow-hidden rounded-xl bg-gradient-to-b from-[#151522] via-[#111118] to-[#0e0e14] border border-[#262536] hover:border-[#8861dc]/70 p-3.5 transition-all duration-200 flex flex-col justify-between space-y-3 shadow-sm hover:shadow-[0_8px_24px_rgba(0,0,0,0.5)] hover:-translate-y-0.5"
             >
-              {/* Top ambient highlight */}
-              <div className="space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#7c3aed]/30 to-[#4f46e5]/20 text-[#c4b5fd] border border-[#7c3aed]/40 flex items-center justify-center font-black text-sm shrink-0 shadow-sm">
+              {/* Top info */}
+              <div className="space-y-2.5">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#7c3aed]/30 to-[#4f46e5]/20 text-[#c4b5fd] border border-[#7c3aed]/40 flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
                       {p.title.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#7c3aed]/15 text-[#c4b5fd] border border-[#7c3aed]/30">
-                          {p.stage || 'Active Sprint'}
-                        </span>
-                        <span className="text-[10px] font-medium text-[#9ca3af]">
-                          {p.category || 'Engineering'}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#7c3aed]/15 text-[#c4b5fd] border border-[#7c3aed]/30">
+                          {p.stage || 'Active'}
                         </span>
                         {p.isOwner && (
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-[#10b981]/15 text-[#34d399] border border-[#10b981]/30">
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#10b981]/15 text-[#34d399] border border-[#10b981]/30">
                             Owner
                           </span>
                         )}
                       </div>
                       <h3
                         onClick={() => navigate(`/projects/${p.id}`)}
-                        className="text-sm md:text-base font-extrabold text-white group-hover:text-[#c4b5fd] transition-colors truncate mt-1 cursor-pointer"
+                        title={p.title}
+                        className="text-xs md:text-sm font-bold text-white group-hover:text-[#c4b5fd] transition-colors truncate mt-0.5 cursor-pointer"
                       >
                         {p.title}
                       </h3>
@@ -190,17 +189,16 @@ const ProjectsList: React.FC = () => {
                   </div>
 
                   <span className="shrink-0 text-right">
-                    <div className="text-sm font-black text-[#34d399]">{p.progress || 75}%</div>
-                    <div className="text-[9px] text-[#6b7280] font-bold uppercase tracking-wider">Velocity</div>
+                    <div className="text-xs font-black text-[#34d399]">{p.progress || 75}%</div>
                   </span>
                 </div>
 
-                <p className="text-xs text-[#9ca3af] leading-relaxed line-clamp-2">
+                <p className="text-[11px] text-[#9ca3af] leading-snug line-clamp-2 min-h-[30px]">
                   {p.description}
                 </p>
 
                 {/* Progress bar */}
-                <div className="w-full bg-[#191924] rounded-full h-1.5 overflow-hidden border border-[#2b2a3c]">
+                <div className="w-full bg-[#181824] rounded-full h-1 overflow-hidden border border-[#272638]">
                   <div
                     className="bg-gradient-to-r from-[#10b981] via-[#34d399] to-[#8861dc] h-full rounded-full"
                     style={{ width: `${p.progress || 75}%` }}
@@ -209,28 +207,28 @@ const ProjectsList: React.FC = () => {
               </div>
 
               {/* Bottom Telemetry & Quick Action */}
-              <div className="pt-3 border-t border-[#252435] flex items-center justify-between text-xs">
-                <div className="flex items-center gap-3 text-[#9ca3af] text-[11px] font-medium">
+              <div className="pt-2.5 border-t border-[#20202e] flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2 text-[#9ca3af] text-[10px]">
                   <span className="flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
-                    <span>{p.commitsCount || 14} Commits</span>
+                    <span>{p.commitsCount || 12} commits</span>
                   </span>
                   <span>•</span>
-                  <span>{p.membersCount || 3} Members</span>
+                  <span>{p.membersCount || 3} members</span>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <Link
                     to="/chat"
-                    className="px-2.5 py-1 rounded-lg bg-[#1e1d2c] hover:bg-[#28273b] text-[#c4b5fd] text-xs font-semibold border border-[#343247] transition-all"
+                    className="px-2 py-0.5 rounded-md bg-[#191924] hover:bg-[#232233] text-[#c4b5fd] text-[11px] font-semibold border border-[#2e2c40] transition-all"
                   >
                     Room
                   </Link>
                   <button
                     onClick={() => navigate(`/projects/${p.id}`)}
-                    className="px-3 py-1 rounded-lg bg-gradient-to-r from-[#7c3aed] to-[#6366f1] hover:from-[#8b5cf6] hover:to-[#7c3aed] text-white text-xs font-bold transition-all shadow-sm"
+                    className="px-2.5 py-0.5 rounded-md bg-gradient-to-r from-[#7c3aed] to-[#6366f1] hover:from-[#8b5cf6] hover:to-[#7c3aed] text-white text-[11px] font-bold transition-all shadow-sm"
                   >
-                    Open Workspace &rarr;
+                    Workspace &rarr;
                   </button>
                 </div>
               </div>
