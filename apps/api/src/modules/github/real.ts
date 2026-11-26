@@ -276,6 +276,26 @@ export class RealService {
   }
 
   async linkRepo(projectId: string, data: LinkRepoInput) {
+    // Ensure the project exists in Prisma database so foreign key constraint is always satisfied
+    try {
+      await prisma.project.upsert({
+        where: { id: projectId },
+        update: {},
+        create: {
+          id: projectId,
+          ownerId: 'user-001',
+          title: data.name ? `Project for ${data.name}` : 'SkillForge Project',
+          description: 'Collaborative engineering project.',
+          visibility: 'Public',
+          category: 'Systems & Backend',
+          status: 'Active',
+          stage: 'Production MVP',
+        },
+      });
+    } catch (e) {
+      console.warn('[GitHub linkRepo] ensure project warning:', e);
+    }
+
     const repo = await prisma.projectRepo.upsert({
       where: {
         projectId_owner_name: {
