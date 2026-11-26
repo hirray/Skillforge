@@ -59,22 +59,30 @@ export function ProjectCertificationTab({
         loadedCerts = Array.isArray(data) ? data : [];
       }
 
+      // Read explicit owner-signed approval IDs from localStorage (defaults to empty: unverified)
+      let savedApproved: string[] = [];
+      try {
+        const raw = localStorage.getItem(`sf_approved_${projectId}`);
+        if (raw) savedApproved = JSON.parse(raw);
+      } catch {}
+
       if (loadedCerts.length === 0) {
-        // Build stage-aware milestone certificates for all confirmed team members
+        // Build stage-aware milestone certificates for confirmed team members
         const currentStage = project?.stage || project?.status || 'Active Development';
         const members = (project?.members && project.members.length > 0)
           ? project.members
           : [
-              { id: 'm-1', role: 'Fullstack Lead', user: { id: 'user-001', name: 'Alexandre Chen' } },
-              { id: 'm-2', role: 'Backend Engineer', user: { id: 'user-002', name: 'Sarah Lin' } },
-              { id: 'm-3', role: 'Systems Engineer', user: { id: 'user-003', name: 'Elena Rostova' } },
+              { id: 'm-1', role: 'Lead Architect', user: { id: 'user-003', name: 'Elena Rostova' } },
+              { id: 'm-2', role: 'Distributed Systems Engineer', user: { id: 'user-001', name: 'Alexandre Chen' } },
+              { id: 'm-3', role: 'DevOps / Performance', user: { id: 'user-007', name: 'Marcus Vance' } },
             ];
 
         loadedCerts = members.map((m: any, idx: number) => {
-          const userName = m.user?.name || m.userName || (m.userId === 'user-001' ? 'Alexandre Chen' : (m.userId === 'user-002' ? 'Sarah Lin' : 'Team Contributor'));
+          const userName = m.user?.name || m.userName || (m.userId === 'user-001' ? 'Alexandre Chen' : (m.userId === 'user-003' ? 'Elena Rostova' : (m.userId === 'user-007' ? 'Marcus Vance' : 'Team Contributor')));
           const memberRole = m.role || 'Software Engineering Contributor';
           const memberId = m.user?.id || m.userId || `user-00${idx + 1}`;
           const certNum = `CERT-${projectId.toUpperCase().replace(/^PROJ-/, '')}-${memberId.toUpperCase()}`;
+          const isSigned = savedApproved.includes(certNum) || savedApproved.includes(`cert-${projectId}-${memberId}`);
           return {
             id: `cert-${projectId}-${memberId}`,
             certNumber: certNum,
@@ -85,9 +93,9 @@ export function ProjectCertificationTab({
             projectStage: currentStage,
             stage: currentStage,
             roles: [memberRole],
-            skills: project?.requirements?.map((r: any) => r.skill || r.name) || ['TypeScript', 'System Design', 'React'],
-            status: 'valid',
-            issuerName: 'Verified & Signed by Project Owner',
+            skills: project?.requirements?.map((r: any) => r.skill || r.name) || ['Kafka', 'Raft Consensus', 'Go', 'Docker'],
+            status: isSigned ? 'valid' : 'pending',
+            issuerName: isSigned ? 'Verified & Signed by Project Owner' : 'Pending Owner Verification',
             issuedAt: new Date().toISOString(),
             completedAt: new Date().toISOString(),
             verificationUrl: `https://skillforge.dev/verify/${certNum}`,
@@ -112,16 +120,20 @@ export function ProjectCertificationTab({
             }
           };
         });
+      } else {
+        // Sync loaded database certificates: must NOT be verified by default unless explicitly signed by owner
+        loadedCerts = loadedCerts.map((c: any) => {
+          const isSigned = savedApproved.includes(c.certNumber) || savedApproved.includes(c.id);
+          return {
+            ...c,
+            status: isSigned ? 'valid' : 'pending',
+            issuerName: isSigned ? (c.issuerName?.includes('Owner') ? c.issuerName : 'Verified & Signed by Project Owner') : 'Pending Owner Verification',
+          };
+        });
       }
 
       setCertificates(loadedCerts);
-      const validIds = loadedCerts
-        .filter((c: any) => c.status === 'valid')
-        .map((c: any) => c.certNumber || c.id);
-      setApprovedIds(validIds);
-      try {
-        localStorage.setItem(`sf_approved_${projectId}`, JSON.stringify(validIds));
-      } catch {}
+      setApprovedIds(savedApproved);
     } catch (err: any) {
       console.error('Failed to fetch certificates:', err);
       setError('Could not load project certificates');
@@ -247,6 +259,66 @@ export function ProjectCertificationTab({
       }
     } catch (err) {
       console.error('Failed to approve certificate:', err);
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleApproveAll = async () => {
+    try {
+      setProcessingId('all');
+      const allIds = certificates.map((c) => c.certNumber || c.id);
+      const updatedApproved = Array.from(new Set([...approvedIds, ...allIds]));
+      setApprovedIds(updatedApproved);
+      try {
+        localStorage.setItem(`sf_approved_${projectId}`, JSON.stringify(updatedApproved));
+      } catch {}
+
+      const ownerName = project?.owner?.name || (project?.owner?.email ? project.owner.email.split('@')[0] : project?.ownerId || 'Project Owner');
+      setCertificates((prev) =>
+        prev.map((c) => ({
+          ...c,
+          status: 'valid',
+          issuerName: `Verified & Signed by Project Owner (${ownerName})`,
+        }))
+      );
+
+      const token = getAuthToken();
+      for (const id of allIds) {
+        await fetch(`/api/v1/certificates/${id}/approve`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ ownerName }),
+        }).catch(() => {});
+      }
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleRevokeSignOff = async (certId: string) => {
+    try {
+      setProcessingId(certId);
+      const updatedApproved = approvedIds.filter((id) => id !== certId && !certId.includes(id) && !id.includes(certId));
+      setApprovedIds(updatedApproved);
+      try {
+        localStorage.setItem(`sf_approved_${projectId}`, JSON.stringify(updatedApproved));
+      } catch {}
+
+      setCertificates((prev) =>
+        prev.map((c) =>
+          c.id === certId || c.certNumber === certId
+            ? {
+                ...c,
+                status: 'pending',
+                issuerName: 'Pending Owner Verification',
+              }
+            : c
+        )
+      );
     } finally {
       setProcessingId(null);
     }
@@ -417,29 +489,55 @@ export function ProjectCertificationTab({
         </div>
 
         {isOwner && (
-          <button
-            onClick={handleIssueCertificates}
-            disabled={issuing}
-            style={{
-              padding: '10px 18px',
-              borderRadius: '10px',
-              background: '#0A1680',
-              border: '1px solid #93B2F8',
-              color: '#FCFDFF',
-              fontSize: '13px',
-              fontWeight: 600,
-              cursor: issuing ? 'wait' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              boxShadow: '0 2px 10px rgba(10, 22, 128, 0.4)',
-            }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-            </svg>
-            {issuing ? 'Generating...' : 'Refresh / Issue All Certificates'}
-          </button>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={handleApproveAll}
+              disabled={processingId === 'all'}
+              style={{
+                padding: '10px 18px',
+                borderRadius: '10px',
+                background: '#059669',
+                border: '1px solid #34D399',
+                color: '#FCFDFF',
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: processingId === 'all' ? 'wait' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 2px 10px rgba(5, 150, 105, 0.4)',
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              {processingId === 'all' ? 'Signing All...' : '✓ Verify & Sign All Certificates'}
+            </button>
+
+            <button
+              onClick={handleIssueCertificates}
+              disabled={issuing}
+              style={{
+                padding: '10px 18px',
+                borderRadius: '10px',
+                background: '#0A1680',
+                border: '1px solid #93B2F8',
+                color: '#FCFDFF',
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: issuing ? 'wait' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 2px 10px rgba(10, 22, 128, 0.4)',
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+              </svg>
+              {issuing ? 'Generating...' : 'Refresh Certificates'}
+            </button>
+          </div>
         )}
       </div>
 
@@ -561,9 +659,7 @@ export function ProjectCertificationTab({
             const isCertRevoked = cert.status === 'revoked';
             const isCertApproved =
               !isCertRevoked &&
-              ((cert.status === 'valid' && (cert.issuerName?.includes('Verified & Signed') || cert.issuerName?.includes('Owner'))) ||
-                approvedIds.includes(cert.id) ||
-                approvedIds.includes(cert.certNumber));
+              (approvedIds.includes(cert.id) || approvedIds.includes(cert.certNumber));
             const roles = cert.roles || [];
             const perf = cert.performance || { score: 98, onTimeRate: '100% On-Time' };
             const contrib = cert.contributions || { totalEvents: 27, commits: 14, tasksCompleted: 8 };
@@ -754,45 +850,64 @@ export function ProjectCertificationTab({
                           ⚡ Reinstate & Verify
                         </button>
                       ) : isCertApproved ? (
-                        <span
-                          style={{
-                            padding: '8px 14px',
-                            borderRadius: '8px',
-                            background: 'rgba(16, 185, 129, 0.12)',
-                            border: '1px solid rgba(16, 185, 129, 0.35)',
-                            color: '#34D399',
-                            fontSize: '12.5px',
-                            fontWeight: 600,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                          }}
-                        >
-                          ✓ Signed & Verified
-                        </span>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                          <span
+                            style={{
+                              padding: '8px 14px',
+                              borderRadius: '8px',
+                              background: 'rgba(16, 185, 129, 0.12)',
+                              border: '1px solid rgba(16, 185, 129, 0.35)',
+                              color: '#34D399',
+                              fontSize: '12.5px',
+                              fontWeight: 600,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                            }}
+                          >
+                            ✓ Signed & Verified
+                          </span>
+                          <button
+                            onClick={() => handleRevokeSignOff(cert.certNumber || cert.id)}
+                            disabled={processingId === (cert.certNumber || cert.id)}
+                            style={{
+                              padding: '7px 12px',
+                              borderRadius: '8px',
+                              background: 'rgba(239, 68, 68, 0.1)',
+                              border: '1px solid rgba(239, 68, 68, 0.35)',
+                              color: '#F87171',
+                              fontSize: '12px',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                            }}
+                            title="Undo owner signature and return to pending"
+                          >
+                            Revoke Sign-off
+                          </button>
+                        </div>
                       ) : (
                         <button
                           onClick={() => handleApprove(cert.certNumber || cert.id)}
                           disabled={processingId === (cert.certNumber || cert.id)}
                           style={{
-                            padding: '8px 14px',
+                            padding: '8px 16px',
                             borderRadius: '8px',
-                            background: '#0A1680',
-                            border: '1px solid #93B2F8',
+                            background: '#059669',
+                            border: '1px solid #34D399',
                             color: '#FCFDFF',
                             fontSize: '12.5px',
-                            fontWeight: 600,
+                            fontWeight: 700,
                             cursor: processingId === (cert.certNumber || cert.id) ? 'wait' : 'pointer',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '6px',
-                            boxShadow: '0 2px 8px rgba(10, 22, 128, 0.4)',
+                            boxShadow: '0 2px 10px rgba(5, 150, 105, 0.35)',
                           }}
                         >
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                             <polyline points="20 6 9 17 4 12" />
                           </svg>
-                          {processingId === (cert.certNumber || cert.id) ? 'Signing...' : 'Approve & Sign'}
+                          {processingId === (cert.certNumber || cert.id) ? 'Signing...' : 'Verify & Sign Certificate'}
                         </button>
                       )}
 

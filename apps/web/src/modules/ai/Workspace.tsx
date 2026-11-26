@@ -224,7 +224,16 @@ export default function Member2Workspace() {
         </div>
 
         <nav aria-label="Main navigation">
-          <span className="st-nav-label">Build together</span>
+          {/* ROLE 1: DEVELOPER / CONTRIBUTOR */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '14px 12px 6px', padding: '0 4px' }}>
+            <span className="st-nav-label" style={{ margin: 0, fontWeight: 700, color: '#93B2F8', letterSpacing: '0.08em' }}>
+              DEVELOPER & FREELANCER
+            </span>
+            <span style={{ fontSize: '9px', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', background: 'rgba(147, 178, 248, 0.15)', color: '#93B2F8', border: '1px solid rgba(147, 178, 248, 0.3)' }}>
+              BUILDER
+            </span>
+          </div>
+
           <NavLink to="/projects" onClick={() => setMobileNav(false)}>
             <Icon name="folder" />
             Projects
@@ -241,9 +250,9 @@ export default function Member2Workspace() {
             <Icon name="chat" />
             Project rooms
           </NavLink>
-          <NavLink to="/mentors" onClick={() => setMobileNav(false)}>
-            <Icon name="spark" />
-            Mentors & Advisors
+          <NavLink to="/integrations/github" onClick={() => setMobileNav(false)}>
+            <Icon name="document" />
+            GitHub Integration
           </NavLink>
           <NavLink to="/hackathons" onClick={() => setMobileNav(false)}>
             <Icon name="rocket" />
@@ -265,18 +274,17 @@ export default function Member2Workspace() {
             <Icon name="people" />
             My Portfolio
           </NavLink>
-          <NavLink to="/integrations/github" onClick={() => setMobileNav(false)}>
-            <Icon name="document" />
-            GitHub Integration
-          </NavLink>
-          <NavLink to="/companies" onClick={() => setMobileNav(false)}>
-            <Icon name="shield" />
-            Company & Recruiters
-          </NavLink>
-          <NavLink to="/jobs" onClick={() => setMobileNav(false)}>
-            <Icon name="job" />
-            Opportunities & Jobs
-          </NavLink>
+
+          {/* ROLE 2: COMPANY / RECRUITER / SPONSOR */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '22px 12px 6px', padding: '0 4px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '16px' }}>
+            <span className="st-nav-label" style={{ margin: 0, fontWeight: 700, color: '#C084FC', letterSpacing: '0.08em' }}>
+              COMPANY & RECRUITER
+            </span>
+            <span style={{ fontSize: '9px', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', background: 'rgba(192, 132, 252, 0.15)', color: '#C084FC', border: '1px solid rgba(192, 132, 252, 0.3)' }}>
+              HIRING & SPONSOR
+            </span>
+          </div>
+
           <NavLink to="/talent" onClick={() => setMobileNav(false)}>
             <Icon name="team" />
             Recruiter Talent Search
@@ -285,16 +293,70 @@ export default function Member2Workspace() {
             <Icon name="folder" />
             Hiring Pipeline
           </NavLink>
-          <NavLink to="/opportunities" onClick={() => setMobileNav(false)}>
-            <Icon name="chat" />
-            Opportunities Inbox
+          <NavLink to="/jobs" onClick={() => setMobileNav(false)}>
+            <Icon name="job" />
+            Opportunities & Jobs
           </NavLink>
           <NavLink to="/challenges" onClick={() => setMobileNav(false)}>
             <Icon name="rocket" />
             Sponsored Challenges
           </NavLink>
+          <NavLink to="/opportunities" onClick={() => setMobileNav(false)}>
+            <Icon name="chat" />
+            Inbound Inquiries
+          </NavLink>
+          <NavLink to="/companies" onClick={() => setMobileNav(false)}>
+            <Icon name="shield" />
+            Company & Recruiters
+          </NavLink>
+          <NavLink to="/mentors" onClick={() => setMobileNav(false)}>
+            <Icon name="spark" />
+            Mentors & Advisors
+          </NavLink>
 
-          <span className="st-nav-label">Identity & Discovery</span>
+          {/* SHARED AI INTELLIGENCE */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '22px 12px 6px', padding: '0 4px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '16px' }}>
+            <span className="st-nav-label" style={{ margin: 0, fontWeight: 700, color: '#34D399', letterSpacing: '0.08em' }}>
+              WORKSPACE AI TOOLS
+            </span>
+            <span style={{ fontSize: '9px', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', background: 'rgba(52, 211, 153, 0.15)', color: '#34D399', border: '1px solid rgba(52, 211, 153, 0.3)' }}>
+              AI SUITE
+            </span>
+          </div>
+
+          <NavLink to="/ai/requirements" onClick={() => setMobileNav(false)}>
+            <Icon name="spark" />
+            Project Blueprint AI
+            <span className="st-nav-new">AI</span>
+          </NavLink>
+          <NavLink to="/resumes" onClick={() => setMobileNav(false)}>
+            <Icon name="resume" />
+            Resume Intelligence
+          </NavLink>
+          <NavLink to="/ai/match/demo" onClick={() => setMobileNav(false)}>
+            <Icon name="people" />
+            Find Collaborators
+          </NavLink>
+          <NavLink to="/ai/health" onClick={() => setMobileNav(false)}>
+            <Icon name="health" />
+            Project Health Telemetry
+          </NavLink>
+          <NavLink to="/ai/job-match/demo" onClick={() => setMobileNav(false)}>
+            <Icon name="job" />
+            Talent Matching AI
+          </NavLink>
+          <NavLink to="/analytics" onClick={() => setMobileNav(false)}>
+            <Icon name="chart" />
+            Analytics & Velocity
+          </NavLink>
+
+          {/* IDENTITY & SETTINGS */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '22px 12px 6px', padding: '0 4px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '16px' }}>
+            <span className="st-nav-label" style={{ margin: 0, fontWeight: 700, color: '#9CA3AF', letterSpacing: '0.08em' }}>
+              IDENTITY & SETTINGS
+            </span>
+          </div>
+
           <NavLink to="/search" onClick={() => setMobileNav(false)}>
             <Icon name="overview" />
             Search & Discovery
@@ -307,56 +369,9 @@ export default function Member2Workspace() {
             <Icon name="people" />
             Profile & Skills
           </NavLink>
-          <NavLink to="/admin" onClick={() => setMobileNav(false)}>
-            <Icon name="shield" />
-            Admin &amp; Moderation
-          </NavLink>
-          <NavLink to="/admin/skills" onClick={() => setMobileNav(false)}>
-            <Icon name="spark" />
-            Taxonomy Governance
-          </NavLink>
-          <NavLink to="/settings/privacy" onClick={() => setMobileNav(false)}>
-            <Icon name="shield" />
-            Privacy &amp; Data Rights
-          </NavLink>
           <NavLink to="/notifications" onClick={() => setMobileNav(false)}>
             <Icon name="chat" />
             Notification Inbox
-          </NavLink>
-          <NavLink to="/auth/settings" onClick={() => setMobileNav(false)}>
-            <Icon name="document" />
-            Account Settings
-          </NavLink>
-
-          <span className="st-nav-label">Intelligence</span>
-          <NavLink end to="/ai" onClick={() => setMobileNav(false)}>
-            <Icon name="overview" />
-            Overview
-          </NavLink>
-          <NavLink to="/resumes" onClick={() => setMobileNav(false)}>
-            <Icon name="resume" />
-            Resume intelligence
-          </NavLink>
-          <NavLink to="/ai/requirements" onClick={() => setMobileNav(false)}>
-            <Icon name="spark" />
-            Project blueprint
-            <span className="st-nav-new">AI</span>
-          </NavLink>
-          <NavLink to="/ai/match/demo" onClick={() => setMobileNav(false)}>
-            <Icon name="people" />
-            Find collaborators
-          </NavLink>
-          <NavLink to="/ai/health" onClick={() => setMobileNav(false)}>
-            <Icon name="health" />
-            Project health
-          </NavLink>
-          <NavLink to="/ai/job-match/demo" onClick={() => setMobileNav(false)}>
-            <Icon name="job" />
-            Talent matching
-          </NavLink>
-          <NavLink to="/analytics" onClick={() => setMobileNav(false)}>
-            <Icon name="chart" />
-            Analytics & evaluation
           </NavLink>
         </nav>
 
@@ -364,6 +379,10 @@ export default function Member2Workspace() {
           <NavLink to="/ai/preferences">
             <Icon name="shield" />
             Discovery settings
+          </NavLink>
+          <NavLink to="/auth/settings">
+            <Icon name="document" />
+            Account settings
           </NavLink>
           <div className="st-sidebar-note">
             <span className="st-dot" />
