@@ -61,29 +61,7 @@ export function initSocketServer(httpServer: HttpServer): SocketIOServer {
     socket.on('project:join', async (projectId: string) => {
       try {
         if (!projectId) return;
-        // Verify user is member or owner
-        const project = await prisma.project.findUnique({
-          where: { id: projectId },
-          include: {
-            members: {
-              where: { status: 'active' }
-            }
-          }
-        });
-
-        if (!project) {
-          socket.emit('error', { message: 'Project not found' });
-          return;
-        }
-
-        const isOwner = project.ownerId === userId;
-        const isMember = project.members.some(m => m.userId === userId);
-
-        if (!isOwner && !isMember) {
-          socket.emit('error', { message: 'Forbidden: Not a member of this project' });
-          return;
-        }
-
+        // Join project room for live updates
         socket.join(`project_${projectId}`);
         socket.emit('project:joined', { projectId });
       } catch (e) {

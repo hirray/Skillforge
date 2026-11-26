@@ -32,11 +32,36 @@ export function useSocket({
 
   const currentUserId = localStorage.getItem('token') || 'user-001';
 
+  // Store latest callbacks in ref to avoid stale closures
+  const callbacksRef = useRef({
+    onNewMessage,
+    onEditMessage,
+    onDeleteMessage,
+    onReadMessage,
+    onTypingStart,
+    onTypingStop,
+    onPresenceUpdate,
+    onProjectKicked,
+  });
+
+  useEffect(() => {
+    callbacksRef.current = {
+      onNewMessage,
+      onEditMessage,
+      onDeleteMessage,
+      onReadMessage,
+      onTypingStart,
+      onTypingStop,
+      onPresenceUpdate,
+      onProjectKicked,
+    };
+  });
+
   useEffect(() => {
     const socket = io('http://localhost:4000', {
       auth: { token: currentUserId },
       transports: ['websocket', 'polling'],
-      reconnectionAttempts: 10,
+      reconnectionAttempts: 20,
       reconnectionDelay: 1000,
     });
 
@@ -60,39 +85,39 @@ export function useSocket({
       if (data?.onlineUserIds) {
         setOnlineUserIds(data.onlineUserIds);
       }
-      onPresenceUpdate?.(data as any);
+      callbacksRef.current.onPresenceUpdate?.(data as any);
     });
 
     socket.on('message:new', (msg: any) => {
-      onNewMessage?.(msg);
+      callbacksRef.current.onNewMessage?.(msg);
     });
 
     socket.on('message:edit', (msg: any) => {
-      onEditMessage?.(msg);
+      callbacksRef.current.onEditMessage?.(msg);
     });
 
     socket.on('message:delete', (msg: any) => {
-      onDeleteMessage?.(msg);
+      callbacksRef.current.onDeleteMessage?.(msg);
     });
 
     socket.on('message:read', (data: any) => {
-      onReadMessage?.(data);
+      callbacksRef.current.onReadMessage?.(data);
     });
 
     socket.on('typing:start', (data: any) => {
       if (data.userId !== currentUserId) {
-        onTypingStart?.(data);
+        callbacksRef.current.onTypingStart?.(data);
       }
     });
 
     socket.on('typing:stop', (data: any) => {
       if (data.userId !== currentUserId) {
-        onTypingStop?.(data);
+        callbacksRef.current.onTypingStop?.(data);
       }
     });
 
     socket.on('project:kicked', (data: any) => {
-      onProjectKicked?.(data);
+      callbacksRef.current.onProjectKicked?.(data);
     });
 
     return () => {

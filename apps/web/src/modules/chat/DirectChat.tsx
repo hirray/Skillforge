@@ -124,26 +124,43 @@ export const DirectChat: React.FC<DirectChatProps> = ({
   }, [projectId, currentUserId]);
 
   // Fetch messages for active 1:1 room
-  const fetchRoomMessages = async (roomId: string) => {
-    setLoadingMessages(true);
+  const fetchRoomMessages = async (roomId: string, silent: boolean = false) => {
+    if (!silent) setLoadingMessages(true);
     try {
       const res = await fetch(`/api/v1/chats/${roomId}/messages?limit=100`, {
         headers: { Authorization: `Bearer ${currentUserId}` },
       });
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error?.message || 'Failed to load messages');
-      setMessages(data.data.items || []);
-      setLoadingMessages(false);
-      setTimeout(scrollToBottom, 50);
+      const incoming = data.data?.items || [];
+      setMessages((prev) => {
+        if (incoming.length === 0) return prev;
+        const prevIds = new Set(prev.map((m) => m.id));
+        const hasNew = incoming.some((m: any) => !prevIds.has(m.id));
+        if (hasNew || incoming.length !== prev.length) {
+          return incoming;
+        }
+        return prev;
+      });
+      if (!silent) {
+        setLoadingMessages(false);
+        setTimeout(scrollToBottom, 50);
+      }
     } catch (err: any) {
-      setError(err.message);
-      setLoadingMessages(false);
+      if (!silent) {
+        setError(err.message);
+        setLoadingMessages(false);
+      }
     }
   };
 
   useEffect(() => {
     if (activeRoom) {
       fetchRoomMessages(activeRoom.id);
+      const interval = setInterval(() => {
+        fetchRoomMessages(activeRoom.id, true);
+      }, 2000);
+      return () => clearInterval(interval);
     } else {
       setMessages([]);
     }
@@ -246,6 +263,14 @@ export const DirectChat: React.FC<DirectChatProps> = ({
       });
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error?.message || 'Failed to send message');
+
+      const sentMsg = data.data || data;
+      if (sentMsg && sentMsg.id) {
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === sentMsg.id)) return prev;
+          return [...prev, sentMsg];
+        });
+      }
 
       setInputValue('');
       setTimeout(scrollToBottom, 50);

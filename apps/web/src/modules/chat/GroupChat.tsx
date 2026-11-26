@@ -93,19 +93,29 @@ export const GroupChat: React.FC<GroupChatProps> = ({
       .catch((err) => console.error('Failed to load members for mentions:', err));
   }, [projectId, currentUserId]);
 
-  // Fetch initial messages
-  const fetchMessages = () => {
-    setLoading(true);
+  // Fetch initial messages with background sync support
+  const fetchMessages = (silent: boolean = false) => {
+    if (!silent) setLoading(true);
     fetch(`/api/v1/projects/${projectId}/messages?limit=100`, {
       headers: { Authorization: `Bearer ${currentUserId}` },
     })
       .then((r) => r.json())
       .then((d) => {
         if (d.error) throw new Error(d.error.message);
-        setMessages(d.data.items || []);
-        setLoading(false);
+        const incoming = d.data?.items || [];
+        setMessages((prev) => {
+          if (incoming.length === 0) return prev;
+          // Only update if there are new messages or changes
+          const prevIds = new Set(prev.map((m) => m.id));
+          const hasNew = incoming.some((m: any) => !prevIds.has(m.id));
+          if (hasNew || incoming.length !== prev.length) {
+            return incoming;
+          }
+          return prev;
+        });
+        if (!silent) setLoading(false);
         // Mark as read
-        if (d.data.roomId) {
+        if (d.data?.roomId) {
           fetch(`/api/v1/projects/${projectId}/messages/read`, {
             method: 'POST',
             headers: {
@@ -117,13 +127,20 @@ export const GroupChat: React.FC<GroupChatProps> = ({
         }
       })
       .catch((e) => {
-        setError(e.message);
-        setLoading(false);
+        if (!silent) {
+          setError(e.message);
+          setLoading(false);
+        }
       });
   };
 
   useEffect(() => {
     fetchMessages();
+    // Live background polling sync ensures messages appear even if sockets drop
+    const interval = setInterval(() => {
+      fetchMessages(true);
+    }, 2000);
+    return () => clearInterval(interval);
   }, [projectId, currentUserId]);
 
   // Socket.IO hook
@@ -290,6 +307,14 @@ export const GroupChat: React.FC<GroupChatProps> = ({
       const d = await res.json();
       if (!res.ok || d.error) throw new Error(d.error?.message || 'Failed to send message');
 
+      const sentMsg = d.data || d;
+      if (sentMsg && sentMsg.id) {
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === sentMsg.id)) return prev;
+          return [...prev, sentMsg];
+        });
+      }
+
       setInputValue('');
       setAttachments([]);
       setReplyingTo(null);
@@ -434,7 +459,7 @@ export const GroupChat: React.FC<GroupChatProps> = ({
           <Button
             size="sm"
             variant="outline"
-            onClick={fetchMessages}
+            onClick={() => fetchMessages()}
             className="!text-white !border-white/30 hover:!bg-white/10 text-xs flex items-center gap-1.5"
           >
             <IcoRefresh size={12} />
