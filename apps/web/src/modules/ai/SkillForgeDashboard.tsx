@@ -319,22 +319,22 @@ export function SkillForgeDashboard({ context }: SkillForgeDashboardProps) {
           3. ASYMMETRIC BENTO COCKPIT (Flight Control & Active Telemetry)
       ========================================================================= */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
-        {/* LEFT BENTO (Span 7): ACTIVE REPOSITORY FLIGHT CONTROL */}
+        {/* LEFT BENTO (Span 7): ACTIVE REPOSITORY WORKSPACE */}
         <div className="lg:col-span-7 relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#14141c] via-[#101015] to-[#0d0d11] border border-[#282738] p-5 shadow-md flex flex-col justify-between">
           <div className="space-y-4">
             {/* Header with Project Status */}
             <div className="flex items-center justify-between border-b border-[#252433] pb-3">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#10b981] animate-ping" />
+                <span className="w-2 h-2 rounded-full bg-[#10b981]" />
                 <span className="text-xs font-bold text-white uppercase tracking-wider">
-                  Active Sprint Flight Control
+                  Active Project Workspace
                 </span>
                 <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#8861dc]/15 text-[#c084fc] border border-[#8861dc]/30">
                   Production MVP
                 </span>
               </div>
               <Link to="/projects" className="text-xs text-[#b29af5] hover:underline font-semibold flex items-center gap-1">
-                <span>All Projects</span>
+                <span>View All Projects</span>
                 <span>&rarr;</span>
               </Link>
             </div>
@@ -352,7 +352,7 @@ export function SkillForgeDashboard({ context }: SkillForgeDashboardProps) {
                 </div>
                 <div className="shrink-0 text-right">
                   <div className="text-xl font-extrabold text-[#34d399]">85%</div>
-                  <div className="text-[10px] text-[#6b7280]">Milestone Velocity</div>
+                  <div className="text-[10px] text-[#6b7280]">Project Delivery</div>
                 </div>
               </div>
 
@@ -368,10 +368,10 @@ export function SkillForgeDashboard({ context }: SkillForgeDashboardProps) {
                     <span>Kafka Ingest</span>
                   </div>
                   <div className="text-[#c084fc] font-bold flex items-center justify-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#c084fc] animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#c084fc]" />
                     <span>Failover CI</span>
                   </div>
-                  <div className="text-[#6b7280]">Deploy Prod</div>
+                  <div className="text-[#6b7280]">Production Release</div>
                 </div>
 
                 {/* Progress Track */}
@@ -383,30 +383,30 @@ export function SkillForgeDashboard({ context }: SkillForgeDashboardProps) {
                 </div>
               </div>
 
-              {/* Telemetry Stats Bar */}
+              {/* Workspace Quick Stats Bar */}
               <div className="grid grid-cols-3 gap-2.5 pt-3">
                 <div className="p-2.5 rounded-xl bg-[#171722] border border-[#282738] flex items-center justify-between">
                   <div>
-                    <div className="text-[10px] text-[#6b7280]">Verified Commits</div>
+                    <div className="text-[10px] text-[#6b7280]">Repository Commits</div>
                     <div className="text-sm font-bold text-white mt-0.5">14 Commits</div>
                   </div>
-                  <span className="text-[#34d399] text-xs font-semibold">100% Signed</span>
+                  <span className="text-[#34d399] text-xs font-semibold">Active</span>
                 </div>
 
                 <div className="p-2.5 rounded-xl bg-[#171722] border border-[#282738] flex items-center justify-between">
                   <div>
-                    <div className="text-[10px] text-[#6b7280]">Team Synergy</div>
-                    <div className="text-sm font-bold text-white mt-0.5">3 Engineers</div>
+                    <div className="text-[10px] text-[#6b7280]">Engineering Team</div>
+                    <div className="text-sm font-bold text-white mt-0.5">3 Members</div>
                   </div>
-                  <span className="text-[#c084fc] text-xs font-semibold">96% Fit</span>
+                  <span className="text-[#c084fc] text-xs font-semibold">Collaborating</span>
                 </div>
 
                 <div className="p-2.5 rounded-xl bg-[#171722] border border-[#282738] flex items-center justify-between">
                   <div>
-                    <div className="text-[10px] text-[#6b7280]">Automated CI</div>
-                    <div className="text-sm font-bold text-[#34d399] mt-0.5">Passing</div>
+                    <div className="text-[10px] text-[#6b7280]">Project Health</div>
+                    <div className="text-sm font-bold text-[#34d399] mt-0.5">On Schedule</div>
                   </div>
-                  <span className="text-[#6b7280] text-[11px]">0 errors</span>
+                  <span className="text-[#6b7280] text-[11px]">0 blockers</span>
                 </div>
               </div>
             </div>
@@ -415,13 +415,13 @@ export function SkillForgeDashboard({ context }: SkillForgeDashboardProps) {
           {/* Footer Action Strip */}
           <div className="mt-4 pt-3 border-t border-[#252433] flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono text-[#8861dc] bg-[#8861dc]/10 px-2 py-0.5 rounded border border-[#8861dc]/25">
-                SHA-256: 0x8f4b..3a12
+              <span className="text-[11px] text-[#9ca3af]">
+                Stage: <strong className="text-white">Production MVP</strong>
               </span>
-              <span className="text-[11px] text-[#6b7280]">Cryptographic proof locked</span>
+              <span className="text-[11px] text-[#6b7280]">• Milestone 3 of 4</span>
             </div>
             <Link
-              to="/projects/proj-001"
+              to="/projects/proj-consensus"
               className="px-3.5 py-1.5 rounded-lg bg-[#8861dc]/20 hover:bg-[#8861dc]/30 border border-[#8861dc]/40 text-[#c084fc] hover:text-white text-xs font-bold transition-all flex items-center gap-1.5"
             >
               <span>Open Project Workspace</span>

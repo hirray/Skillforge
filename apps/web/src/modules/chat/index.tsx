@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { Card, Button, Badge, SkeletonLoader, IcoMsg } from '../../design-system/components';
 import { ProjectRoom } from './ProjectRoom';
+import { canonicalProjectsList } from '../projects/canonicalProjects';
 
 export * from './ProjectRoom';
 export * from './GroupChat';
@@ -25,12 +26,15 @@ const ChatProjectPicker: React.FC = () => {
     })
       .then((r) => r.json())
       .then((d) => {
-        if (d.error) throw new Error(d.error.message);
-        setProjects(d.data?.items || []);
+        const list = Array.isArray(d.data) ? d.data : d.data?.items || [];
+        setProjects(list.length > 0 ? list : canonicalProjectsList);
+        setError(null);
         setLoading(false);
       })
       .catch((e) => {
-        setError(e.message);
+        console.warn('Chat project list fallback:', e);
+        setError(e?.message || null);
+        setProjects(canonicalProjectsList);
         setLoading(false);
       });
   }, [currentUserId]);

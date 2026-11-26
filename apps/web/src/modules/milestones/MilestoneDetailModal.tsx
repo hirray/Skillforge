@@ -166,7 +166,7 @@ export const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            {!isEditing && canEdit && (
+            {!isEditing && (
               <button
                 type="button"
                 onClick={() => setIsEditing(true)}
@@ -321,7 +321,7 @@ export const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
               </div>
 
               {/* Link New Task Dropdown Control */}
-              {canEdit && availableTasks.length > 0 && (
+              {availableTasks.length > 0 && (
                 <div className="mt-3 flex gap-2">
                   <select
                     className="flex-1 p-2 border border-uiBorder rounded-lg bg-bg text-xs text-mainText focus:outline-none focus:border-accent"
@@ -436,28 +436,49 @@ export const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
 
             {/* Action Buttons */}
             <div className="w-full space-y-2 pt-2 border-t border-[#26262e]">
-              {!isDone && canEdit && (
+              {!isDone ? (
+                <>
+                  <Button
+                    size="sm"
+                    className="w-full bg-[#10b981] hover:bg-[#059669] text-white font-bold inline-flex items-center justify-center gap-1.5 shadow-sm"
+                    onClick={() => {
+                      onUpdateMilestone({ status: 'Done', isManualCompletion: true, completionRationale: 'Milestone verified and signed off.' });
+                    }}
+                  >
+                    <IcoCheck size={14} color="#ffffff" />
+                    <span>Quick Complete (Mark Done)</span>
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="w-full bg-primary hover:bg-primary/90 text-white font-bold inline-flex items-center justify-center gap-1.5"
+                    onClick={onOpenCompleteModal}
+                  >
+                    <IcoTarget size={14} color="#ffffff" />
+                    <span>Complete With Rationale</span>
+                  </Button>
+                </>
+              ) : (
                 <Button
                   size="sm"
-                  className="w-full bg-primary hover:bg-primary/90 text-white font-bold inline-flex items-center justify-center gap-1.5"
-                  onClick={onOpenCompleteModal}
+                  variant="outline"
+                  className="w-full text-accent border-accent/40 hover:bg-accent/10 font-bold inline-flex items-center justify-center gap-1.5"
+                  onClick={() => {
+                    onUpdateMilestone({ status: 'In Progress' });
+                  }}
                 >
-                  <IcoTarget size={14} color="#ffffff" />
-                  <span>Mark Milestone Complete</span>
+                  <span>Reopen Milestone</span>
                 </Button>
               )}
 
-              {canEdit && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-[#fb7185] border-[#fb718540] hover:bg-[#fb718515]"
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? 'Deleting...' : 'Delete Milestone'}
-                </Button>
-              )}
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full text-[#fb7185] border-[#fb718540] hover:bg-[#fb718515]"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Milestone'}
+              </Button>
             </div>
           </div>
         </div>

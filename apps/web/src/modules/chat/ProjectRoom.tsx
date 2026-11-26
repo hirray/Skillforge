@@ -8,6 +8,7 @@ import { ActivityFeed } from './ActivityFeed';
 import { ProjectOverviewTab } from './ProjectOverviewTab';
 import { ResourcesHub } from '../resources';
 import { useSocket } from './useSocket';
+import { canonicalProjectsMap } from '../projects/canonicalProjects';
 
 export const ProjectRoom: React.FC<{ projectId?: string }> = ({ projectId: propProjectId }) => {
   const { id } = useParams<{ id: string }>();
@@ -31,23 +32,35 @@ export const ProjectRoom: React.FC<{ projectId?: string }> = ({ projectId: propP
     })
       .then((r) => r.json())
       .then((d) => {
-        if (d.error) throw new Error(d.error.message);
-        setProject(d.data);
+        if (d.data) {
+          setProject(d.data);
+          setError(null);
+        } else if (canonicalProjectsMap[projectId]) {
+          setProject(canonicalProjectsMap[projectId]);
+          setError(null);
+        } else {
+          throw new Error(d.error?.message || 'Project not found');
+        }
         setLoading(false);
       })
       .catch((e) => {
-        setError(e.message);
+        if (canonicalProjectsMap[projectId]) {
+          setProject(canonicalProjectsMap[projectId]);
+          setError(null);
+        } else {
+          setError(e.message);
+        }
         setLoading(false);
       });
   };
 
   useEffect(() => {
     fetchProject();
-  }, [id, currentUserId]);
+  }, [projectId, currentUserId]);
 
   // Real-time socket for presence
   const { isConnected, onlineUserIds } = useSocket({
-    projectId: id,
+    projectId,
     onProjectKicked: ({ message }) => {
       alert(message || 'You are no longer a member of this project.');
       navigate('/projects');

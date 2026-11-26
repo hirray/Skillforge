@@ -406,6 +406,29 @@ export function CertificateDocument({
             {certificate.projectName}
           </div>
 
+          {/* Prominent Stage Badge on Certificate */}
+          <div style={{ marginTop: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '2px 10px',
+                borderRadius: '12px',
+                background: '#EEF2FF',
+                border: '1px solid #C7D2FE',
+                color: '#3730A3',
+                fontSize: '11px',
+                fontWeight: 700,
+                letterSpacing: '0.02em',
+                textTransform: 'uppercase',
+              }}
+            >
+              <span>Project Stage:</span>
+              <span>{(certificate as any).projectStage || (certificate as any).stage || 'Active Development'}</span>
+            </span>
+          </div>
+
           <div style={{ marginTop: '6px' }}>
             <span
               style={{
