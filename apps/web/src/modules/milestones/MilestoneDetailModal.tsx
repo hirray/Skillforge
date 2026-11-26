@@ -41,7 +41,7 @@ export const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
 
   const isDone = milestone.status === 'Done';
   const isOverdue = milestone.isOverdue && !isDone;
-  const progress = milestone.calculatedProgress !== undefined ? milestone.calculatedProgress : (milestone.progress || 0);
+  const progress = isDone ? 100 : (milestone.calculatedProgress !== undefined ? milestone.calculatedProgress : (milestone.progressPercentage || milestone.progress || 0));
 
   const linkedTasks = milestone.tasks || [];
   const linkedTaskIds = linkedTasks.map((t: any) => t.id);

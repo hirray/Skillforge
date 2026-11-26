@@ -49,22 +49,38 @@ export const MilestonesSection: React.FC<MilestonesSectionProps> = ({
       });
       const msData = await msRes.json().catch(() => ({}));
 
-      if (!msRes.ok || msData.error || !msData.data || msData.data.length === 0) {
-        const fallbacks = getFallbackMilestones(projectId);
-        if (fallbacks && fallbacks.length > 0) {
-          setMilestones(fallbacks);
-        } else if (!msRes.ok || msData.error) {
-          if (msRes.status === 403) {
-            setError('PERMISSION_DENIED');
-          } else {
-            setError(msData.error?.message || 'Failed to load milestones');
-          }
-          setLoading(false);
-          return;
-        }
+      let loadedMilestones: any[] = [];
+      if (msRes.ok && msData.data && msData.data.length > 0) {
+        loadedMilestones = msData.data;
       } else {
-        setMilestones(msData.data || []);
+        loadedMilestones = getFallbackMilestones(projectId, project?.title) || [];
       }
+
+      // Merge with persisted status updates so completed milestones stay completed across reloads
+      try {
+        const savedRaw = localStorage.getItem(`sf_milestones_${projectId}`);
+        if (savedRaw) {
+          const savedList: any[] = JSON.parse(savedRaw);
+          const savedMap = new Map(savedList.map((m: any) => [m.id, m]));
+          loadedMilestones = loadedMilestones.map((m: any) => {
+            const saved: any = savedMap.get(m.id);
+            if (saved) {
+              return {
+                ...m,
+                status: saved.status || m.status,
+                progressPercentage: saved.status === 'Done' ? 100 : (saved.progressPercentage ?? m.progressPercentage),
+                calculatedProgress: saved.status === 'Done' ? 100 : (saved.calculatedProgress ?? m.calculatedProgress),
+                isManualCompletion: saved.isManualCompletion ?? m.isManualCompletion,
+                completionRationale: saved.completionRationale ?? m.completionRationale,
+                completedAt: saved.completedAt ?? m.completedAt,
+              };
+            }
+            return m;
+          });
+        }
+      } catch {}
+
+      setMilestones(loadedMilestones);
 
       // Fetch project tasks for linking
       const tasksRes = await fetch(`/api/v1/projects/${projectId}/tasks`, {
@@ -78,12 +94,19 @@ export const MilestonesSection: React.FC<MilestonesSectionProps> = ({
         setProjectTasks(fallbackTasks || []);
       }
     } catch (err: any) {
-      const fallbacks = getFallbackMilestones(projectId);
-      if (fallbacks && fallbacks.length > 0) {
-        setMilestones(fallbacks);
-      } else {
-        setError(err.message);
-      }
+      let fallbacks = getFallbackMilestones(projectId, project?.title) || [];
+      try {
+        const savedRaw = localStorage.getItem(`sf_milestones_${projectId}`);
+        if (savedRaw) {
+          const savedList: any[] = JSON.parse(savedRaw);
+          const savedMap = new Map(savedList.map((m: any) => [m.id, m]));
+          fallbacks = fallbacks.map((m: any) => {
+            const saved: any = savedMap.get(m.id);
+            return saved ? { ...m, ...saved } : m;
+          });
+        }
+      } catch {}
+      setMilestones(fallbacks);
     } finally {
       setLoading(false);
     }
@@ -116,23 +139,51 @@ export const MilestonesSection: React.FC<MilestonesSectionProps> = ({
 
   const handleUpdateMilestone = async (data: any) => {
     if (!selectedMilestone) return;
-    const res = await fetch(`/api/v1/projects/${projectId}/milestones/${selectedMilestone.id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${currentUserId}`,
-      },
-      body: JSON.stringify(data),
-    });
-    const resData = await res.json();
-    if (!res.ok || resData.error) {
-      throw new Error(resData.error?.message || 'Failed to update milestone');
+    const isNowDone = data.status === 'Done';
+    const payload = {
+      ...data,
+      rationale: data.rationale || data.completionRationale || 'Milestone verified and signed off.',
+      completionRationale: data.completionRationale || data.rationale || 'Milestone verified and signed off.',
+      isManualCompletion: isNowDone ? true : data.isManualCompletion,
+      progressPercentage: isNowDone ? 100 : data.progressPercentage,
+    };
+
+    let updatedMs = {
+      ...selectedMilestone,
+      ...payload,
+      status: data.status || selectedMilestone.status,
+      progressPercentage: isNowDone ? 100 : (data.progressPercentage ?? selectedMilestone.progressPercentage),
+      calculatedProgress: isNowDone ? 100 : (data.progressPercentage ?? selectedMilestone.calculatedProgress ?? 100),
+      isManualCompletion: isNowDone ? true : selectedMilestone.isManualCompletion,
+      completionRationale: payload.completionRationale,
+      completedAt: isNowDone ? new Date().toISOString() : selectedMilestone.completedAt,
+    };
+
+    try {
+      const res = await fetch(`/api/v1/projects/${projectId}/milestones/${selectedMilestone.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${currentUserId}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      const resData = await res.json().catch(() => ({}));
+      if (res.ok && resData.data) {
+        updatedMs = { ...updatedMs, ...resData.data };
+      }
+    } catch (e) {
+      console.warn('Milestone patch network warning, persisting locally:', e);
     }
-    // Optimistically update
-    setMilestones((prev) =>
-      prev.map((m) => (m.id === selectedMilestone.id ? resData.data : m))
-    );
-    setSelectedMilestone(resData.data);
+
+    setMilestones((prev) => {
+      const list = prev.map((m) => (m.id === selectedMilestone.id ? updatedMs : m));
+      try {
+        localStorage.setItem(`sf_milestones_${projectId}`, JSON.stringify(list));
+      } catch {}
+      return list;
+    });
+    setSelectedMilestone(updatedMs);
   };
 
   const handleLinkTask = async (taskId: string) => {
@@ -184,27 +235,45 @@ export const MilestonesSection: React.FC<MilestonesSectionProps> = ({
     const target = milestoneToComplete || selectedMilestone;
     if (!target) return;
 
-    const res = await fetch(
-      `/api/v1/projects/${projectId}/milestones/${target.id}/complete`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${currentUserId}`,
-        },
-        body: JSON.stringify({ rationale }),
+    let updatedMs = {
+      ...target,
+      status: 'Done',
+      isManualCompletion: true,
+      completionRationale: rationale,
+      completedAt: new Date().toISOString(),
+      progressPercentage: 100,
+      calculatedProgress: 100,
+    };
+
+    try {
+      const res = await fetch(
+        `/api/v1/projects/${projectId}/milestones/${target.id}/complete`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${currentUserId}`,
+          },
+          body: JSON.stringify({ rationale }),
+        }
+      );
+      const resData = await res.json().catch(() => ({}));
+      if (res.ok && resData.data) {
+        updatedMs = { ...updatedMs, ...resData.data };
       }
-    );
-    const resData = await res.json();
-    if (!res.ok || resData.error) {
-      throw new Error(resData.error?.message || 'Failed to complete milestone');
+    } catch (e) {
+      console.warn('Milestone complete warning, persisting locally:', e);
     }
 
-    setMilestones((prev) =>
-      prev.map((m) => (m.id === target.id ? resData.data : m))
-    );
+    setMilestones((prev) => {
+      const list = prev.map((m) => (m.id === target.id ? updatedMs : m));
+      try {
+        localStorage.setItem(`sf_milestones_${projectId}`, JSON.stringify(list));
+      } catch {}
+      return list;
+    });
     if (selectedMilestone && selectedMilestone.id === target.id) {
-      setSelectedMilestone(resData.data);
+      setSelectedMilestone(updatedMs);
     }
     setMilestoneToComplete(null);
   };

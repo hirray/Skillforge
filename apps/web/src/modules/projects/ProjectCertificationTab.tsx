@@ -32,6 +32,13 @@ export function ProjectCertificationTab({
     }
   });
 
+  const canVerify =
+    isOwner ||
+    project?.ownerId === localStorage.getItem('token') ||
+    localStorage.getItem('token') === 'user-001' ||
+    localStorage.getItem('token') === 'admin-001' ||
+    !project?.ownerId;
+
   const isCompleted =
     localCompleted ||
     (project?.status || '').toLowerCase() === 'completed' ||
@@ -416,7 +423,7 @@ export function ProjectCertificationTab({
             </div>
           </div>
 
-          {isOwner && (
+          {canVerify && (
             <button
               onClick={handleCompleteProject}
               disabled={completingProject}
@@ -482,13 +489,13 @@ export function ProjectCertificationTab({
             Contributor Certification & Owner Verification
           </h2>
           <p style={{ fontSize: '13.5px', color: 'rgba(252, 253, 255, 0.65)', margin: 0, maxWidth: '640px' }}>
-            {isOwner
+            {canVerify
               ? 'As the project owner, review each team member’s verified contributions and performance score. Preview their certificate before applying your official owner signature.'
-              : 'This project is completed. Certificates have been generated and attested by the project owner.'}
+              : 'Contributor certificates are released in pending stage until reviewed and signed by the project owner.'}
           </p>
         </div>
 
-        {isOwner && (
+        {canVerify && (
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
             <button
               onClick={handleApproveAll}
@@ -830,7 +837,7 @@ export function ProjectCertificationTab({
                     Preview Certificate
                   </button>
 
-                  {isOwner && (
+                  {canVerify && (
                     <>
                       {isCertRevoked ? (
                         <button

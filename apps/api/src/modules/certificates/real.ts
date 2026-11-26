@@ -454,17 +454,12 @@ export class RealService {
   }
 
   async getCertificatesByProject(projectId: string): Promise<Certificate[]> {
-    let certs = await (prisma as any).certificate.findMany({
+    const certs = await (prisma as any).certificate.findMany({
       where: { projectId },
       orderBy: { certNumber: 'asc' },
     });
     if (!certs || certs.length === 0) {
-      certs = await (prisma as any).certificate.findMany({
-        where: {
-          certNumber: { in: ['SF-2026-00001', 'SF-2026-00002'] },
-        },
-        orderBy: { certNumber: 'asc' },
-      });
+      return [];
     }
     return certs.map((c: any) => this.formatCertificate(c));
   }

@@ -13,6 +13,10 @@ export const updateMilestoneSchema = z.object({
   dueDate: z.string().optional().nullable(),
   status: z.enum(['To Do', 'In Progress', 'Done']).optional(),
   linkedTaskIds: z.array(z.string()).optional(),
+  rationale: z.string().optional().nullable(),
+  completionRationale: z.string().optional().nullable(),
+  isManualCompletion: z.boolean().optional(),
+  progressPercentage: z.number().optional(),
 });
 
 export const linkTaskSchema = z.object({
