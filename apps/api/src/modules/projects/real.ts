@@ -358,16 +358,20 @@ export class RealService {
       'Recruiting': ['Active'],
       'Active': ['Paused', 'Completed', 'Verified'],
       'Paused': ['Active'],
-      'Completed': ['Archived'],
+      'Completed': ['Verified', 'Archived'],
       'Verified': ['Archived']
     };
 
     const currentNorm = existing.status.charAt(0).toUpperCase() + existing.status.slice(1).toLowerCase();
     const targetNorm = newStatus.charAt(0).toUpperCase() + newStatus.slice(1).toLowerCase();
 
-    if (currentNorm === 'Completed' || currentNorm === 'Verified') {
+    if (currentNorm === 'Completed') {
+      if (targetNorm !== 'Archived' && targetNorm !== 'Verified') {
+        throw { status: 400, code: 'INVALID_TRANSITION', message: `Cannot transition from ${existing.status} to ${newStatus}. Only Verified or Archived is allowed.` };
+      }
+    } else if (currentNorm === 'Verified') {
       if (targetNorm !== 'Archived') {
-         throw { status: 400, code: 'INVALID_TRANSITION', message: `Cannot transition from ${existing.status} to ${newStatus}. Only Archived is allowed.` };
+        throw { status: 400, code: 'INVALID_TRANSITION', message: `Cannot transition from ${existing.status} to ${newStatus}. Only Archived is allowed.` };
       }
     }
 

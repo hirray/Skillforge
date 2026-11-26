@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   WorkspaceContext,
   RequirementResult,
   intelligence,
   api,
 } from './client';
+import { canonicalProjectsList } from '../projects/canonicalProjects';
 import {
   Button,
   PageHeader,
@@ -52,6 +53,20 @@ export function AiRequirementPanel({
     [excluded, setExcluded] = useState<number[]>([]);
   const { result, setResult, loading, error, suggest } =
     useRequirementSuggestions();
+
+  useEffect(() => {
+    if (selectedProject) {
+      const proj =
+        (context?.projects || []).find((p) => p.id === selectedProject) ||
+        canonicalProjectsList.find((p) => p.id === selectedProject);
+      if (proj && !description) {
+        setDescription(
+          (proj as any).description ||
+            `Architectural blueprint for ${proj.title}: modern distributed fullstack system with real-time state synchronization, verified database persistence, high-throughput microservices, and end-to-end telemetry.`
+        );
+      }
+    }
+  }, [selectedProject, context]);
   const update = (i: number, key: string, value: string) => {
     setSaved(false);
     if (result)

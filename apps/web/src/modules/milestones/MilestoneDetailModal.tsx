@@ -118,15 +118,14 @@ export const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-2 mb-1.5">
               <span
-                className={`text-xs px-2.5 py-0.5 rounded-full font-bold inline-flex items-center gap-1 ${
-                  isDone
-                    ? 'bg-[#221a36] text-[#b29af5] border border-[#8861dc50]'
-                    : isOverdue
+                className={`text-xs px-2.5 py-0.5 rounded-full font-bold inline-flex items-center gap-1 ${isDone
+                  ? 'bg-[#221a36] text-[#b29af5] border border-[#8861dc50]'
+                  : isOverdue
                     ? 'bg-warning/20 text-warning border border-warning/30'
                     : progress > 0
-                    ? 'bg-accent/20 text-primary border border-accent/40'
-                    : 'bg-[#1a1922] text-[#aba6b6] border border-[#33333e]'
-                }`}
+                      ? 'bg-accent/20 text-primary border border-accent/40'
+                      : 'bg-[#1a1922] text-[#aba6b6] border border-[#33333e]'
+                  }`}
               >
                 {isDone ? (
                   <>
@@ -279,13 +278,12 @@ export const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
                     >
                       <div className="flex items-center gap-2 min-w-0 flex-1">
                         <span
-                          className={`w-2 h-2 rounded-full shrink-0 ${
-                            task.status === 'Done'
-                              ? 'bg-primary'
-                              : task.status === 'In Progress'
+                          className={`w-2 h-2 rounded-full shrink-0 ${task.status === 'Done'
+                            ? 'bg-primary'
+                            : task.status === 'In Progress'
                               ? 'bg-accent'
                               : 'bg-muted'
-                          }`}
+                            }`}
                         />
                         <span className={`truncate font-medium ${task.status === 'Done' ? 'line-through text-muted' : 'text-mainText'}`}>
                           {task.title}
@@ -294,11 +292,10 @@ export const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
 
                       <div className="flex items-center gap-2 shrink-0">
                         <span
-                          className={`text-[10px] px-2 py-0.5 rounded font-bold ${
-                            task.status === 'Done'
-                              ? 'bg-primary text-white'
-                              : 'bg-uiBorder text-muted'
-                          }`}
+                          className={`text-[10px] px-2 py-0.5 rounded font-bold ${task.status === 'Done'
+                            ? 'bg-primary text-white'
+                            : 'bg-uiBorder text-muted'
+                            }`}
                         >
                           {task.status}
                         </span>
@@ -399,10 +396,10 @@ export const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
                   <span className={`font-semibold text-xs ${isOverdue ? 'text-warning' : 'text-mainText'}`}>
                     {milestone.dueDate
                       ? new Date(milestone.dueDate).toLocaleDateString(undefined, {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })
                       : 'Not set'}
                   </span>
                 ) : (

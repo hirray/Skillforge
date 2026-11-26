@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { PageShell } from '../../components/PageShell';
 import { Icon } from '../ai/shared';
-import { canonicalProjectsList, ProjectItemData } from './canonicalProjects';
+import { canonicalProjectsList, ProjectItemData, calculateProjectProgress } from './canonicalProjects';
 
 type ProjectItem = ProjectItemData;
 const canonicalProjects = canonicalProjectsList;
@@ -14,10 +14,7 @@ const ProjectsList: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    let isMounted = true;
-    setLoading(true);
-
+  const loadProjects = useCallback(() => {
     fetch('/api/v1/projects')
       .then(async (r) => {
         if (!r.ok) return null;
@@ -29,50 +26,60 @@ const ProjectsList: React.FC = () => {
         }
       })
       .then((d) => {
-        if (isMounted) {
-          const apiProjects: any[] = d?.data || [];
-          if (apiProjects.length > 0) {
-            // Merge database projects with canonical ones so user never sees an empty screen
-            const merged = [...canonicalProjects];
-            apiProjects.forEach((apiProj) => {
-              const existingIdx = merged.findIndex(
-                (p) => p.id === apiProj.id || p.title.toLowerCase() === apiProj.title.toLowerCase()
-              );
-              const mapped: ProjectItem = {
-                id: apiProj.id,
-                ownerId: apiProj.ownerId || 'user-001',
-                title: apiProj.title,
-                description: apiProj.description || 'Collaborative engineering project registered on SkillForge.',
-                visibility: apiProj.visibility || 'Public',
-                category: apiProj.category || 'Web App',
-                status: apiProj.status || 'Active',
-                stage: apiProj.stage || 'Active',
-                progress: 75,
-                membersCount: apiProj.members?.length || 2,
-                commitsCount: 12,
-                isOwner: true,
-              };
-              if (existingIdx >= 0) {
-                merged[existingIdx] = mapped;
-              } else {
-                merged.unshift(mapped);
-              }
-            });
-            setProjects(merged);
-          }
+        const apiProjects: any[] = d?.data || [];
+        if (apiProjects.length > 0) {
+          // Merge database projects with canonical ones so user never sees an empty screen
+          const merged = [...canonicalProjects];
+          apiProjects.forEach((apiProj) => {
+            const existingIdx = merged.findIndex(
+              (p) => p.id === apiProj.id || p.title.toLowerCase() === apiProj.title.toLowerCase()
+            );
+            const mapped: ProjectItem = {
+              id: apiProj.id,
+              ownerId: apiProj.ownerId || 'user-001',
+              title: apiProj.title,
+              description: apiProj.description || 'Collaborative engineering project registered on SkillForge.',
+              visibility: apiProj.visibility || 'Public',
+              category: apiProj.category || 'Web App',
+              status: apiProj.status || 'Active',
+              stage: apiProj.stage || 'Active',
+              progress: calculateProjectProgress(apiProj),
+              membersCount: apiProj.members?.length || 2,
+              commitsCount: 12,
+              isOwner: true,
+            };
+            if (existingIdx >= 0) {
+              merged[existingIdx] = mapped;
+            } else {
+              merged.unshift(mapped);
+            }
+          });
+          setProjects(merged);
         }
       })
       .catch((err) => {
         console.warn('Projects API fetch notice:', err);
       })
       .finally(() => {
-        if (isMounted) setLoading(false);
+        setLoading(false);
       });
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    loadProjects();
+
+    const handleStorageUpdate = () => {
+      loadProjects();
+    };
+    window.addEventListener('storage', handleStorageUpdate);
+    window.addEventListener('sf_milestones_updated', handleStorageUpdate);
 
     return () => {
-      isMounted = false;
+      window.removeEventListener('storage', handleStorageUpdate);
+      window.removeEventListener('sf_milestones_updated', handleStorageUpdate);
     };
-  }, []);
+  }, [loadProjects]);
 
   const filteredProjects = projects.filter((p) => {
     // Filter by tab
@@ -189,7 +196,7 @@ const ProjectsList: React.FC = () => {
                   </div>
 
                   <span className="shrink-0 text-right">
-                    <div className="text-xs font-black text-[#34d399]">{p.progress || 75}%</div>
+                    <div className="text-xs font-black text-[#34d399]">{calculateProjectProgress(p)}%</div>
                   </span>
                 </div>
 
@@ -200,8 +207,8 @@ const ProjectsList: React.FC = () => {
                 {/* Progress bar */}
                 <div className="w-full bg-[#181824] rounded-full h-1 overflow-hidden border border-[#272638]">
                   <div
-                    className="bg-gradient-to-r from-[#10b981] via-[#34d399] to-[#8861dc] h-full rounded-full"
-                    style={{ width: `${p.progress || 75}%` }}
+                    className="bg-gradient-to-r from-[#10b981] via-[#34d399] to-[#8861dc] h-full rounded-full transition-all duration-300"
+                    style={{ width: `${calculateProjectProgress(p)}%` }}
                   />
                 </div>
               </div>

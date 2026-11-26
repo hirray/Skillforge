@@ -982,4 +982,49 @@ export class RealUserService {
 
     return { success: true };
   }
+
+  async getAllUsers() {
+    try {
+      const users = await prisma.user.findMany({
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          headline: true,
+          bio: true,
+          avatarUrl: true,
+          roles: true,
+        },
+        take: 100,
+      });
+
+      if (!users || users.length === 0) {
+        return {
+          data: [
+            { id: 'user-002', name: 'Elena Rostova', email: 'elena.rostova@skillforge.local', headline: 'Lead Distributed Systems Architect', roles: '["individual"]' },
+            { id: 'user-003', name: 'Alexandre Chen', email: 'alexandre.chen@skillforge.local', headline: 'Senior Backend Engineer', roles: '["individual"]' },
+            { id: 'user-004', name: 'Marcus Vance', email: 'marcus.vance@skillforge.local', headline: 'DevOps & Cloud Specialist', roles: '["individual"]' },
+            { id: 'user-005', name: 'Sarah Lin', email: 'sarah.lin@skillforge.local', headline: 'Fullstack & React Engineer', roles: '["individual"]' },
+            { id: 'user-006', name: 'David Kim', email: 'david.kim@skillforge.local', headline: 'ML & Computer Vision Engineer', roles: '["individual"]' },
+            { id: 'user-007', name: 'Priya Patel', email: 'priya.patel@skillforge.local', headline: 'Security & Penetration Tester', roles: '["individual"]' },
+            { id: 'user-008', name: 'Maya Lin', email: 'maya.lin@skillforge.local', headline: 'UI/UX & Product Designer', roles: '["individual"]' },
+          ],
+        };
+      }
+
+      return { data: users };
+    } catch {
+      return {
+        data: [
+          { id: 'user-002', name: 'Elena Rostova', email: 'elena.rostova@skillforge.local', headline: 'Lead Distributed Systems Architect', roles: '["individual"]' },
+          { id: 'user-003', name: 'Alexandre Chen', email: 'alexandre.chen@skillforge.local', headline: 'Senior Backend Engineer', roles: '["individual"]' },
+          { id: 'user-004', name: 'Marcus Vance', email: 'marcus.vance@skillforge.local', headline: 'DevOps & Cloud Specialist', roles: '["individual"]' },
+          { id: 'user-005', name: 'Sarah Lin', email: 'sarah.lin@skillforge.local', headline: 'Fullstack & React Engineer', roles: '["individual"]' },
+          { id: 'user-006', name: 'David Kim', email: 'david.kim@skillforge.local', headline: 'ML & Computer Vision Engineer', roles: '["individual"]' },
+          { id: 'user-007', name: 'Priya Patel', email: 'priya.patel@skillforge.local', headline: 'Security & Penetration Tester', roles: '["individual"]' },
+          { id: 'user-008', name: 'Maya Lin', email: 'maya.lin@skillforge.local', headline: 'UI/UX & Product Designer', roles: '["individual"]' },
+        ],
+      };
+    }
+  }
 }

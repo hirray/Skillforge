@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ApiError, WorkspaceContext } from './client';
+import { canonicalProjectsList } from '../projects/canonicalProjects';
 
 const paths: Record<string, React.ReactNode> = {
   overview: (
@@ -198,15 +199,31 @@ export function ProjectPicker({
   onChange: (id: string) => void;
   ownerOnly?: boolean;
 }) {
-  const projects = context.projects.filter(
-    (p) => !ownerOnly || p.ownerId === context.user.id
+  const mergedProjects = [
+    ...(context.projects || []),
+    ...canonicalProjectsList
+      .filter((cp) => !(context.projects || []).some((p) => p.id === cp.id))
+      .map((cp) => ({
+        id: cp.id,
+        title: cp.title,
+        ownerId: cp.ownerId || context.user?.id || 'user-001',
+        status: cp.status || 'active',
+        roles: (cp as any).openRoles?.map((r: any) => ({ title: r.title })) || [],
+      })),
+  ];
+
+  const filtered = mergedProjects.filter(
+    (p) => !ownerOnly || p.ownerId === context.user?.id
   );
+
+  const displayList = filtered.length > 0 ? filtered : mergedProjects;
+
   return (
     <label className="st-field">
       Project
       <select value={value} onChange={(e) => onChange(e.target.value)}>
         <option value="">Select a project</option>
-        {projects.map((p) => (
+        {displayList.map((p) => (
           <option key={p.id} value={p.id}>
             {p.title}
           </option>
@@ -215,19 +232,33 @@ export function ProjectPicker({
     </label>
   );
 }
+
 export function useProject(context: WorkspaceContext, ownerOnly = false) {
-  const [id, setId] = useState(
-    () =>
-      context.projects.find((p) => !ownerOnly || p.ownerId === context.user.id)
-        ?.id || ''
+  const mergedProjects = [
+    ...(context.projects || []),
+    ...canonicalProjectsList
+      .filter((cp) => !(context.projects || []).some((p) => p.id === cp.id))
+      .map((cp) => ({
+        id: cp.id,
+        title: cp.title,
+        ownerId: cp.ownerId || context.user?.id || 'user-001',
+      })),
+  ];
+
+  const filtered = mergedProjects.filter(
+    (p) => !ownerOnly || p.ownerId === context.user?.id
   );
+
+  const pool = filtered.length > 0 ? filtered : mergedProjects;
+  const initialId = pool[0]?.id || '';
+
+  const [id, setId] = useState(() => initialId);
+
   useEffect(() => {
-    if (!context.projects.some((p) => p.id === id))
-      setId(
-        context.projects.find(
-          (p) => !ownerOnly || p.ownerId === context.user.id
-        )?.id || ''
-      );
-  }, [context, id, ownerOnly]);
+    if (!id && pool.length > 0) {
+      setId(pool[0].id);
+    }
+  }, [pool, id]);
+
   return [id, setId] as const;
 }

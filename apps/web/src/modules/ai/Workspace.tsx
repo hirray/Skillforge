@@ -29,7 +29,14 @@ import { MyCertificatesPage, PublicVerifyPage } from '../certificates';
 import { VerifiedExperiencePage, PortfolioEditorPage, PublicPortfolioPage } from '../portfolio';
 import { PipelineBoardPage, OpportunitiesInboxPage } from '../pipeline';
 import { ChallengeBoardPage, ChallengeDetailPage } from '../challenges';
-import { SignInPage, RegisterPage, AccountSettingsPage } from '../auth/AuthPages';
+import {
+  SignInPage,
+  RegisterPage,
+  ForgotPasswordPage,
+  ResetPasswordPage,
+  VerifyEmailPage,
+  AccountSettingsPage,
+} from '../auth/AuthPages';
 import { ProfileEditorPage } from '../users/ProfileEditorPage';
 import { PublicProfilePage } from '../users/PublicProfilePage';
 import { AdminSkillsPage } from '../skills/AdminSkillsPage';
@@ -203,6 +210,48 @@ export default function Member2Workspace() {
   };
 
   const activeContext = context || fallbackContext;
+
+  const isAuthRoute =
+    location.pathname.startsWith('/auth/login') ||
+    location.pathname.startsWith('/auth/register') ||
+    location.pathname.startsWith('/auth/forgot-password') ||
+    location.pathname.startsWith('/auth/reset-password') ||
+    location.pathname.startsWith('/auth/verify-email') ||
+    location.pathname === '/login' ||
+    location.pathname === '/register';
+
+  if (isAuthRoute) {
+    return (
+      <div style={{ minHeight: '100vh', width: '100%', background: '#090a0f', display: 'flex', flexDirection: 'column' }}>
+        {/* Minimal Auth Header without sidebar */}
+        <div style={{ padding: '20px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+          <Link to="/projects" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', color: '#ffffff' }}>
+            <Brand />
+            <span style={{ fontWeight: 800, fontSize: '18px', letterSpacing: '-0.02em' }}>
+              skillforge<span style={{ color: '#93B2F8' }}>.</span>
+            </span>
+          </Link>
+          <Link to="/projects" style={{ fontSize: '12.5px', fontWeight: 600, color: '#93B2F8', textDecoration: 'none' }}>
+            Explore Projects &rarr;
+          </Link>
+        </div>
+
+        {/* Focused Full-Screen Auth View */}
+        <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <Routes>
+            <Route path="/auth/login" element={<SignInPage />} />
+            <Route path="/login" element={<SignInPage />} />
+            <Route path="/auth/register" element={<RegisterPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
+            <Route path="*" element={<Navigate to="/auth/login" replace />} />
+          </Routes>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="studio">
@@ -384,6 +433,39 @@ export default function Member2Workspace() {
             <Icon name="document" />
             Account settings
           </NavLink>
+          <button
+            type="button"
+            onClick={() => {
+              localStorage.removeItem('token');
+              localStorage.removeItem('refreshToken');
+              localStorage.removeItem('sf_user_email');
+              window.location.href = '/auth/login';
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 12px',
+              background: 'transparent',
+              border: 'none',
+              color: '#fda4af',
+              fontSize: '12px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              width: '100%',
+              borderRadius: '8px',
+              textAlign: 'left',
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.background = 'rgba(244, 63, 94, 0.12)')}
+            onMouseOut={(e) => (e.currentTarget.style.background = 'transparent')}
+          >
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            Sign Out
+          </button>
           <div className="st-sidebar-note">
             <span className="st-dot" />
             Made for the work ahead.
@@ -405,10 +487,29 @@ export default function Member2Workspace() {
             <Icon name="chevron" size={13} />
             <strong>{getPageTitle(location.pathname)}</strong>
           </div>
-          <div className="st-topbar-right">
+          <div className="st-topbar-right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <NotificationBell />
-            <span className="st-preview-tag">Local preview</span>
-            <label className="st-account">
+            
+            <Link
+              to="/auth/settings"
+              title="Account & Security Settings"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                color: '#a1a1aa',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                textDecoration: 'none',
+              }}
+            >
+              <Icon name="shield" size={14} />
+            </Link>
+
+            <label className="st-account" style={{ margin: 0 }}>
               <span className="st-user-avatar">
                 {activeContext.user.name
                   ?.split(' ')
@@ -417,10 +518,11 @@ export default function Member2Workspace() {
                   .join('') || 'SF'}
               </span>
               <select
-                aria-label="Preview account"
+                aria-label="Current Account"
                 value={token()}
                 onChange={(e) => {
                   localStorage.setItem('token', e.target.value);
+                  localStorage.removeItem('sf_user_email');
                   window.location.reload();
                 }}
               >
@@ -431,6 +533,37 @@ export default function Member2Workspace() {
                 ))}
               </select>
             </label>
+
+            <button
+              type="button"
+              onClick={() => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('refreshToken');
+                localStorage.removeItem('sf_user_email');
+                window.location.href = '/auth/login';
+              }}
+              title="Sign out of SkillForge"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '5px 10px',
+                borderRadius: '8px',
+                background: 'rgba(244, 63, 94, 0.12)',
+                color: '#fda4af',
+                border: '1px solid rgba(244, 63, 94, 0.25)',
+                fontSize: '11px',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              <span>Sign Out</span>
+            </button>
           </div>
         </header>
 
@@ -466,8 +599,14 @@ export default function Member2Workspace() {
               <Route path="/challenges/*" element={<ChallengeBoardPage />} />
 
               <Route path="/auth/login" element={<SignInPage />} />
+              <Route path="/login" element={<SignInPage />} />
               <Route path="/auth/register" element={<RegisterPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
               <Route path="/auth/settings" element={<AccountSettingsPage />} />
+              <Route path="/settings/account" element={<AccountSettingsPage />} />
               <Route path="/me/profile/*" element={<ProfileEditorPage />} />
               <Route path="/users/:id" element={<PublicProfilePage />} />
               <Route path="/admin" element={<AdminConsolePage />} />

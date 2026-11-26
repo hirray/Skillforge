@@ -741,7 +741,21 @@ export const ProjectDetail = () => {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                 <h1 style={{ fontSize: 18, fontWeight: 700, color: '#ffffff', margin: 0 }}>{project.title}</h1>
-                <Badge status={project.status?.toLowerCase() as any}>{project.status}</Badge>
+                {(() => {
+                  const isVerifiedLocally = id ? localStorage.getItem(`sf_verified_project_${id}`) === 'true' : false;
+                  const approvedCerts: string[] = id ? JSON.parse(localStorage.getItem(`sf_approved_${id}`) || '[]') : [];
+                  const isProjectVerified =
+                    (project.status || '').toLowerCase() === 'verified' ||
+                    isVerifiedLocally ||
+                    (approvedCerts.length > 0 && (project.status || '').toLowerCase() === 'completed');
+                  const displayStatus = isProjectVerified ? 'Verified' : (project.status || 'Active');
+
+                  return (
+                    <Badge status={displayStatus.toLowerCase() as any}>
+                      {isProjectVerified ? '✓ Verified' : displayStatus}
+                    </Badge>
+                  );
+                })()}
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
                 {project.category && <span className="pdmeta"><IcoCode size={13} /> {project.category}</span>}
@@ -761,39 +775,53 @@ export const ProjectDetail = () => {
                   Pipeline:
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }}>
-                  {['Draft', 'Recruiting', 'Active', 'Completed', 'Verified'].map((stageName, idx) => {
-                    const currentStatus = (project.status || 'Active').toLowerCase();
-                    const isCurrent =
-                      currentStatus === stageName.toLowerCase() ||
-                      (stageName === 'Active' && (currentStatus === 'in progress' || currentStatus === 'active')) ||
-                      (stageName === 'Recruiting' && currentStatus === 'recruiting') ||
-                      (stageName === 'Completed' && currentStatus === 'completed') ||
-                      (stageName === 'Verified' && currentStatus === 'verified');
-                    const isPast =
-                      stageName === 'Draft' ||
-                      (stageName === 'Recruiting' && ['active', 'in progress', 'completed', 'verified'].includes(currentStatus)) ||
-                      (stageName === 'Active' && ['completed', 'verified'].includes(currentStatus)) ||
-                      (stageName === 'Completed' && currentStatus === 'verified');
+                  {(() => {
+                    const isVerifiedLocally = id ? localStorage.getItem(`sf_verified_project_${id}`) === 'true' : false;
+                    const approvedCerts: string[] = id ? JSON.parse(localStorage.getItem(`sf_approved_${id}`) || '[]') : [];
+                    const isProjectVerified =
+                      (project.status || '').toLowerCase() === 'verified' ||
+                      isVerifiedLocally ||
+                      (approvedCerts.length > 0 && (project.status || '').toLowerCase() === 'completed');
+                    const effectiveStatus = isProjectVerified ? 'Verified' : (project.status || 'Active');
 
-                    return (
-                      <React.Fragment key={stageName}>
-                        {idx > 0 && <span style={{ color: isPast ? '#a855f7' : '#3c3a4e', fontWeight: 700 }}>&rarr;</span>}
-                        <span
-                          style={{
-                            padding: '1.5px 7px',
-                            borderRadius: 5,
-                            fontSize: 10.5,
-                            fontWeight: isCurrent ? 700 : 500,
-                            background: isCurrent ? '#8861dc' : isPast ? '#8861dc20' : '#1e1d2b',
-                            color: isCurrent ? '#ffffff' : isPast ? '#c4b5fd' : '#6b7280',
-                            border: isCurrent ? '1px solid #a855f7' : '1px solid transparent',
-                          }}
-                        >
-                          {stageName}
-                        </span>
-                      </React.Fragment>
-                    );
-                  })}
+                    return ['Draft', 'Recruiting', 'Active', 'Completed', 'Verified'].map((stageName, idx) => {
+                      const currentStatus = effectiveStatus.toLowerCase();
+                      const isCurrent =
+                        currentStatus === stageName.toLowerCase() ||
+                        (stageName === 'Active' && (currentStatus === 'in progress' || currentStatus === 'active')) ||
+                        (stageName === 'Recruiting' && currentStatus === 'recruiting') ||
+                        (stageName === 'Completed' && currentStatus === 'completed') ||
+                        (stageName === 'Verified' && currentStatus === 'verified');
+                      const isPast =
+                        stageName === 'Draft' ||
+                        (stageName === 'Recruiting' && ['active', 'in progress', 'completed', 'verified'].includes(currentStatus)) ||
+                        (stageName === 'Active' && ['completed', 'verified'].includes(currentStatus)) ||
+                        (stageName === 'Completed' && currentStatus === 'verified');
+
+                      return (
+                        <React.Fragment key={stageName}>
+                          {idx > 0 && <span style={{ color: isPast ? '#a855f7' : '#3c3a4e', fontWeight: 700 }}>&rarr;</span>}
+                          <span
+                            style={{
+                              padding: '1.5px 7px',
+                              borderRadius: 5,
+                              fontSize: 10.5,
+                              fontWeight: isCurrent ? 700 : 500,
+                              background: isCurrent ? (stageName === 'Verified' ? '#10b981' : '#8861dc') : isPast ? '#8861dc20' : '#1e1d2b',
+                              color: isCurrent ? '#ffffff' : isPast ? '#c4b5fd' : '#6b7280',
+                              border: isCurrent ? (stageName === 'Verified' ? '1px solid #34d399' : '1px solid #a855f7') : '1px solid transparent',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 3,
+                            }}
+                          >
+                            {stageName === 'Verified' && isCurrent && <span>✓</span>}
+                            {stageName}
+                          </span>
+                        </React.Fragment>
+                      );
+                    });
+                  })()}
                 </div>
                 <button
                   type="button"

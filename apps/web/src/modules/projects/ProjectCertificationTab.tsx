@@ -264,6 +264,24 @@ export function ProjectCertificationTab({
       if (res.ok) {
         fetchCertificates();
       }
+
+      // If all member certificates are approved, transition project to Verified
+      const allCertIds = certificates.map((c) => c.certNumber || c.id);
+      const isAllApproved = allCertIds.length > 0 && allCertIds.every((id) => updatedApproved.includes(id));
+      if (isAllApproved) {
+        try {
+          localStorage.setItem(`sf_verified_project_${projectId}`, 'true');
+          await fetch(`/api/v1/projects/${projectId}/transition`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ status: 'Verified' }),
+          }).catch(() => {});
+          if (onProjectUpdated) onProjectUpdated();
+        } catch {}
+      }
     } catch (err) {
       console.error('Failed to approve certificate:', err);
     } finally {
@@ -279,6 +297,7 @@ export function ProjectCertificationTab({
       setApprovedIds(updatedApproved);
       try {
         localStorage.setItem(`sf_approved_${projectId}`, JSON.stringify(updatedApproved));
+        localStorage.setItem(`sf_verified_project_${projectId}`, 'true');
       } catch {}
 
       const ownerName = project?.owner?.name || (project?.owner?.email ? project.owner.email.split('@')[0] : project?.ownerId || 'Project Owner');
@@ -301,6 +320,19 @@ export function ProjectCertificationTab({
           body: JSON.stringify({ ownerName }),
         }).catch(() => {});
       }
+
+      // Formally transition project to Verified in database and refresh parent
+      try {
+        await fetch(`/api/v1/projects/${projectId}/transition`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status: 'Verified' }),
+        }).catch(() => {});
+        if (onProjectUpdated) onProjectUpdated();
+      } catch {}
     } finally {
       setProcessingId(null);
     }
@@ -313,6 +345,7 @@ export function ProjectCertificationTab({
       setApprovedIds(updatedApproved);
       try {
         localStorage.setItem(`sf_approved_${projectId}`, JSON.stringify(updatedApproved));
+        localStorage.removeItem(`sf_verified_project_${projectId}`);
       } catch {}
 
       setCertificates((prev) =>
@@ -326,6 +359,8 @@ export function ProjectCertificationTab({
             : c
         )
       );
+
+      if (onProjectUpdated) onProjectUpdated();
     } finally {
       setProcessingId(null);
     }

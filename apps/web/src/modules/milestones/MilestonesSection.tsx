@@ -53,7 +53,7 @@ export const MilestonesSection: React.FC<MilestonesSectionProps> = ({
       if (msRes.ok && msData.data && msData.data.length > 0) {
         loadedMilestones = msData.data;
       } else {
-        loadedMilestones = getFallbackMilestones(projectId, project?.title) || [];
+        loadedMilestones = getFallbackMilestones(projectId, project?.title, project?.stage) || [];
       }
 
       // Merge with persisted status updates so completed milestones stay completed across reloads
@@ -78,7 +78,7 @@ export const MilestonesSection: React.FC<MilestonesSectionProps> = ({
             return m;
           });
         }
-      } catch {}
+      } catch { }
 
       setMilestones(loadedMilestones);
 
@@ -94,7 +94,7 @@ export const MilestonesSection: React.FC<MilestonesSectionProps> = ({
         setProjectTasks(fallbackTasks || []);
       }
     } catch (err: any) {
-      let fallbacks = getFallbackMilestones(projectId, project?.title) || [];
+      let fallbacks = getFallbackMilestones(projectId, project?.title, project?.stage) || [];
       try {
         const savedRaw = localStorage.getItem(`sf_milestones_${projectId}`);
         if (savedRaw) {
@@ -105,7 +105,7 @@ export const MilestonesSection: React.FC<MilestonesSectionProps> = ({
             return saved ? { ...m, ...saved } : m;
           });
         }
-      } catch {}
+      } catch { }
       setMilestones(fallbacks);
     } finally {
       setLoading(false);
@@ -180,7 +180,9 @@ export const MilestonesSection: React.FC<MilestonesSectionProps> = ({
       const list = prev.map((m) => (m.id === selectedMilestone.id ? updatedMs : m));
       try {
         localStorage.setItem(`sf_milestones_${projectId}`, JSON.stringify(list));
-      } catch {}
+        window.dispatchEvent(new Event('sf_milestones_updated'));
+        window.dispatchEvent(new Event('storage'));
+      } catch { }
       return list;
     });
     setSelectedMilestone(updatedMs);
@@ -204,9 +206,15 @@ export const MilestonesSection: React.FC<MilestonesSectionProps> = ({
       throw new Error(resData.error?.message || 'Failed to link task');
     }
     // Update local state
-    setMilestones((prev) =>
-      prev.map((m) => (m.id === selectedMilestone.id ? resData.data : m))
-    );
+    setMilestones((prev) => {
+      const list = prev.map((m) => (m.id === selectedMilestone.id ? resData.data : m));
+      try {
+        localStorage.setItem(`sf_milestones_${projectId}`, JSON.stringify(list));
+        window.dispatchEvent(new Event('sf_milestones_updated'));
+        window.dispatchEvent(new Event('storage'));
+      } catch {}
+      return list;
+    });
     setSelectedMilestone(resData.data);
   };
 
@@ -225,9 +233,15 @@ export const MilestonesSection: React.FC<MilestonesSectionProps> = ({
     if (!res.ok || resData.error) {
       throw new Error(resData.error?.message || 'Failed to unlink task');
     }
-    setMilestones((prev) =>
-      prev.map((m) => (m.id === selectedMilestone.id ? resData.data : m))
-    );
+    setMilestones((prev) => {
+      const list = prev.map((m) => (m.id === selectedMilestone.id ? resData.data : m));
+      try {
+        localStorage.setItem(`sf_milestones_${projectId}`, JSON.stringify(list));
+        window.dispatchEvent(new Event('sf_milestones_updated'));
+        window.dispatchEvent(new Event('storage'));
+      } catch {}
+      return list;
+    });
     setSelectedMilestone(resData.data);
   };
 
@@ -269,7 +283,9 @@ export const MilestonesSection: React.FC<MilestonesSectionProps> = ({
       const list = prev.map((m) => (m.id === target.id ? updatedMs : m));
       try {
         localStorage.setItem(`sf_milestones_${projectId}`, JSON.stringify(list));
-      } catch {}
+        window.dispatchEvent(new Event('sf_milestones_updated'));
+        window.dispatchEvent(new Event('storage'));
+      } catch { }
       return list;
     });
     if (selectedMilestone && selectedMilestone.id === target.id) {
@@ -293,7 +309,15 @@ export const MilestonesSection: React.FC<MilestonesSectionProps> = ({
     if (!res.ok || resData.error) {
       throw new Error(resData.error?.message || 'Failed to delete milestone');
     }
-    setMilestones((prev) => prev.filter((m) => m.id !== selectedMilestone.id));
+    setMilestones((prev) => {
+      const list = prev.filter((m) => m.id !== selectedMilestone.id);
+      try {
+        localStorage.setItem(`sf_milestones_${projectId}`, JSON.stringify(list));
+        window.dispatchEvent(new Event('sf_milestones_updated'));
+        window.dispatchEvent(new Event('storage'));
+      } catch {}
+      return list;
+    });
     setSelectedMilestone(null);
   };
 
@@ -353,11 +377,10 @@ export const MilestonesSection: React.FC<MilestonesSectionProps> = ({
             <button
               type="button"
               onClick={() => setViewMode('list')}
-              className={`text-xs px-3 py-1.5 rounded-md font-bold transition-all inline-flex items-center gap-1.5 ${
-                viewMode === 'list'
-                  ? 'bg-[#221a36] text-[#b29af5] border border-[#8861dc50] shadow-sm'
-                  : 'text-muted hover:text-mainText'
-              }`}
+              className={`text-xs px-3 py-1.5 rounded-md font-bold transition-all inline-flex items-center gap-1.5 ${viewMode === 'list'
+                ? 'bg-[#221a36] text-[#b29af5] border border-[#8861dc50] shadow-sm'
+                : 'text-muted hover:text-mainText'
+                }`}
             >
               <IcoClipboard size={13} />
               <span>Card List</span>
@@ -365,11 +388,10 @@ export const MilestonesSection: React.FC<MilestonesSectionProps> = ({
             <button
               type="button"
               onClick={() => setViewMode('timeline')}
-              className={`text-xs px-3 py-1.5 rounded-md font-bold transition-all inline-flex items-center gap-1.5 ${
-                viewMode === 'timeline'
-                  ? 'bg-[#221a36] text-[#b29af5] border border-[#8861dc50] shadow-sm'
-                  : 'text-muted hover:text-mainText'
-              }`}
+              className={`text-xs px-3 py-1.5 rounded-md font-bold transition-all inline-flex items-center gap-1.5 ${viewMode === 'timeline'
+                ? 'bg-[#221a36] text-[#b29af5] border border-[#8861dc50] shadow-sm'
+                : 'text-muted hover:text-mainText'
+                }`}
             >
               <IcoMap size={13} />
               <span>Roadmap Timeline</span>

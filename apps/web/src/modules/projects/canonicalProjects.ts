@@ -511,10 +511,146 @@ export const canonicalResourcesMap: Record<string, any[]> = {
   ],
 };
 
+// Calculates dynamic project delivery progress percentage across milestones, stages, and attestation status
+export function calculateProjectProgress(project: {
+  id: string;
+  status?: string;
+  stage?: string;
+  progress?: number;
+}): number {
+  if (!project || !project.id) return 0;
+
+  // 1. If project has been verified by owner or status is Verified
+  if (
+    (project.status || '').toLowerCase() === 'verified' ||
+    (typeof window !== 'undefined' && localStorage.getItem(`sf_verified_project_${project.id}`) === 'true')
+  ) {
+    return 100;
+  }
+
+  // 2. If project status is Completed
+  if ((project.status || '').toLowerCase() === 'completed') {
+    return 100;
+  }
+
+  // 3. Check if user has saved milestone states in localStorage
+  if (typeof window !== 'undefined') {
+    try {
+      const savedRaw = localStorage.getItem(`sf_milestones_${project.id}`);
+      if (savedRaw) {
+        const msList: any[] = JSON.parse(savedRaw);
+        if (Array.isArray(msList) && msList.length > 0) {
+          const total = msList.length;
+          const sum = msList.reduce((acc, m) => {
+            if (m.status === 'Done') return acc + 100;
+            const pct =
+              typeof m.progressPercentage === 'number'
+                ? m.progressPercentage
+                : typeof m.calculatedProgress === 'number'
+                ? m.calculatedProgress
+                : 0;
+            return acc + pct;
+          }, 0);
+          return Math.min(100, Math.max(0, Math.round(sum / total)));
+        }
+      }
+    } catch {}
+  }
+
+  // 4. Check canonical milestones if available
+  const canonicalMs = canonicalMilestonesMap[project.id];
+  if (canonicalMs && canonicalMs.length > 0) {
+    const total = canonicalMs.length;
+    const sum = canonicalMs.reduce((acc, m) => {
+      if (m.status === 'Done') return acc + 100;
+      return acc + (m.progressPercentage || 0);
+    }, 0);
+    return Math.min(100, Math.max(0, Math.round(sum / total)));
+  }
+
+  // 5. If canonical project has an explicit valid progress
+  const canonicalProj = canonicalProjectsMap[project.id];
+  if (canonicalProj && typeof canonicalProj.progress === 'number' && canonicalProj.progress > 0) {
+    return canonicalProj.progress;
+  }
+
+  // 6. Stage-based calculation for newly created or unconfigured projects
+  const stage = (project.stage || '').toLowerCase().trim();
+  switch (stage) {
+    case 'idea':
+      return 10;
+    case 'planning':
+      return 25;
+    case 'in progress':
+    case 'active':
+      return 50;
+    case 'near completion':
+      return 85;
+    case 'production':
+    case 'production mvp':
+      return 95;
+    case 'completed':
+    case 'verified':
+      return 100;
+    default:
+      break;
+  }
+
+  // 7. Status fallback
+  const status = (project.status || '').toLowerCase().trim();
+  if (status === 'draft') return 10;
+  if (status === 'recruiting') return 20;
+
+  return typeof project.progress === 'number' && project.progress > 0 ? project.progress : 15;
+}
+
 // Generates fallback milestones for any project ID
-export function getFallbackMilestones(projectId: string, projectTitle?: string) {
+export function getFallbackMilestones(projectId: string, projectTitle?: string, projectStage?: string) {
   if (canonicalMilestonesMap[projectId]) return canonicalMilestonesMap[projectId];
   const title = projectTitle || 'Engineering System';
+  const stage = (projectStage || '').toLowerCase().trim();
+
+  if (stage === 'idea') {
+    return [
+      {
+        id: `ms-${projectId}-1`,
+        projectId,
+        title: `1. System Architecture & Requirements for ${title}`,
+        description: 'Define technical stack, data contracts, and component boundaries.',
+        status: 'In Progress',
+        progressPercentage: 40,
+        dueDate: '2026-12-10T00:00:00.000Z',
+      },
+      {
+        id: `ms-${projectId}-2`,
+        projectId,
+        title: `2. Core Implementation & API Integration`,
+        description: 'Build backend endpoints, frontend components, and state management.',
+        status: 'To Do',
+        progressPercentage: 0,
+        dueDate: '2026-12-25T00:00:00.000Z',
+      },
+      {
+        id: `ms-${projectId}-3`,
+        projectId,
+        title: `3. Testing, Performance & Peer Code Review`,
+        description: 'Comprehensive test coverage, end-to-end integration, and PR reviews.',
+        status: 'To Do',
+        progressPercentage: 0,
+        dueDate: '2027-01-10T00:00:00.000Z',
+      },
+      {
+        id: `ms-${projectId}-4`,
+        projectId,
+        title: `4. Verification & Attested Credential Release`,
+        description: 'Final multi-peer verification sign-off and digital completion certificate.',
+        status: 'To Do',
+        progressPercentage: 0,
+        dueDate: '2027-01-25T00:00:00.000Z',
+      },
+    ];
+  }
+
   return [
     {
       id: `ms-${projectId}-1`,

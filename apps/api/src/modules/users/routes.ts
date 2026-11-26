@@ -30,6 +30,16 @@ const getAuthUser = (req: Request): string => {
   return (req.query.userId as string) || 'user-001';
 };
 
+// GET /users - List candidate users for team invites & directory
+router.get('/', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await getService().getAllUsers();
+    res.json(result);
+  } catch (e) {
+    next(e);
+  }
+});
+
 // GET /users/me - Current user's full profile
 router.get('/me', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
   try {
