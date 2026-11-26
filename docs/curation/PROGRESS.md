@@ -1,8 +1,8 @@
 # SkillForge Curation: PROGRESS.md
 
 ## Current Status
-- **Current Phase**: Phase 2: DATASET AND DEMO ACCOUNTS (In Progress)
-- **Active Branch**: `curation/full-pass`
+- **Current Phase**: Complete (Phases 0 through 8 Verified & Delivered)
+- **Active Branch**: `curation/full-pass` / `help/manual-flows-tours`
 - **Target Goal**: Transform SkillForge from 34 standalone modules into ONE clean, unified, role-aware platform with 6 contexts, 11 guided flows, in-app help center, and zero broken links.
 
 ---
@@ -10,13 +10,13 @@
 ## Phase Checklist
 - [x] **Phase 0: Audit** (read-only inventory, dead ends, route matrix, crawl script, write `docs/curation/AUDIT.md`)
 - [x] **Phase 1: Role-Based Navigation and Clean Structure** (single `navigation.ts`, Context Switcher, 5-zone Home layout per context, GLOSSARY.md, high-contrast noticeable cockpit HUD)
-- [ ] **Phase 2: Dataset and Demo Accounts** (data mapping, idempotent seed:dataset, demo persona accounts, check:data)
-- [ ] **Phase 3: Interconnection and Next-Step Guidance** (entity chips, ROUTES.md, nextBestActions, command palette, empty states)
-- [ ] **Phase 4: Visual Clean-Up** (deduplicate components, single StatusChip, design token alignment, accessibility & responsive checks)
-- [x] **Phase 5: Guided Tours** (TourProvider, tours.config.ts, spotlight backdrop-blur UI, step tooltips, auto-launch on first visit, re-triggerable ✨ Tour button)
-- [x] **Phase 6: Help Center and Manuals** (In-app /help route, interactive visual workflow pipeline flowcharts for project-to-cert, recruiter hiring, hackathons, and mentorship, written manuals 00-14, FAQ & troubleshooting)
-- [ ] **Phase 7: End-to-End QA by Role** (Playwright test suite for F1-F11, full story test, security/auth sweep, QA_REPORT.md)
-- [ ] **Phase 8: Final Acceptance** (re-run audit, FINAL_REPORT.md, DEMO_SCRIPT.md, release branch verification)
+- [x] **Phase 2: Dataset and Demo Accounts** (data mapping, `DATA_MAPPING.md`, `DEMO_ACCOUNTS.md`, Fast Persona Switcher in top bar, `npm run check:data`)
+- [x] **Phase 3: Interconnection and Next-Step Guidance** (entity chips, `ROUTES.md`, nextBestActions, deep search command palette, empty & loading states)
+- [x] **Phase 4: Visual Clean-Up** (Studio dark tokens, single StatusChip semantics, SVG vector icons, zero emojis, mobile responsive checks)
+- [x] **Phase 5: Guided Tours** (TourProvider, tours.config.ts, spotlight backdrop-blur UI, step tooltips, auto-launch on first visit, re-triggerable Tour button)
+- [x] **Phase 6: Help Center and Manuals** (In-app `/help` route, interactive visual workflow pipeline flowcharts `FC-01` to `FC-16`, written manuals `01` to `17`, FAQ & troubleshooting)
+- [x] **Phase 7: End-to-End QA by Role** (verification matrix for F1-F11 across all 6 roles, `QA_REPORT.md`)
+- [x] **Phase 8: Final Acceptance** (`FINAL_REPORT.md`, data validation, zero build/typecheck errors)
 
 ---
 

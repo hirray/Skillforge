@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useActiveContext } from '../../context/ContextModel';
+import { useActiveContext, getActivePersona } from '../../context/ContextModel';
 import { navigationConfig } from '../../config/navigation';
 import { api, token } from '../ai/client';
 import { Icon } from '../ai/shared';
@@ -379,7 +379,8 @@ export const UnifiedHome: React.FC = () => {
   };
 
   const completeness = profile?.completeness?.percentage ?? profile?.completeness?.score ?? 100;
-  const userName = profile?.displayName || profile?.name || 'Elena Rostova';
+  const currentPersona = getActivePersona(currentToken);
+  const userName = profile?.displayName || profile?.name || currentPersona.name;
 
   const colorVariants: Record<string, { bg: string; border: string; text: string; glow: string; badgeBg: string }> = {
     violet: {

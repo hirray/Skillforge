@@ -29,6 +29,7 @@
     "check:member2-migrations": "node scripts/check-migrations.js",
     "check:flows": "node scripts/check-flows.js",
     "check:manuals": "node scripts/check-manuals.js",
+    "check:data": "node scripts/check-data.js",
     "docs:manual-pdf": "node scripts/docs-manual-pdf.js",
     "docs:screenshots": "node scripts/docs-screenshots.js"
   },

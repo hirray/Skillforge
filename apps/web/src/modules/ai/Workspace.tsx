@@ -6,7 +6,7 @@ import {
   Icon,
   Loading,
 } from './shared';
-import { useActiveContext, ContextSwitcher } from '../../context/ContextModel';
+import { useActiveContext, ContextSwitcher, getActivePersona } from '../../context/ContextModel';
 import { useTour } from '../../components/tour/TourProvider';
 import { navigationConfig } from '../../config/navigation';
 import { UnifiedHome } from '../home/UnifiedHome';
@@ -48,7 +48,7 @@ import { FeatureDemosPage } from '../demos/FeatureDemosPage';
 import './studio.css';
 
 const fallbackContext: WorkspaceContext = {
-  user: { id: token(), name: 'SkillForge User', roles: ['owner'] },
+  user: { id: token(), name: getActivePersona(token()).name, roles: ['owner'] },
   projects: [],
   jobs: [],
   preference: {
