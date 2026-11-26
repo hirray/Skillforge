@@ -223,9 +223,10 @@ export default function Member2Workspace() {
   };
 
   const activeUserContext = context || fallbackContext;
+  const isCiderHome = location.pathname === '/home' || location.pathname === '/';
 
   return (
-    <div className="studio">
+    <div className={`studio ${isCiderHome ? 'cider-press-theme' : ''}`}>
       {/* =========================================================================
           DESKTOP SIDEBAR: Renders strictly from navigationConfig[activeContext]
           Max 6 primary items per context. Zero hardcoded links.

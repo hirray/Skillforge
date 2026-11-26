@@ -1,4 +1,132 @@
 /* Scoped Member 2 theme. Existing shared tokens and teammates' pages are unchanged. */
+:root {
+  --cider-bg: #FBF3E8;
+  --cider-surface: #FFFFFF;
+  --cider-sidebar: #FFF9F2;
+  --cider-text: #281A12;
+  --cider-text-secondary: #69554A;
+  --cider-text-muted: #786458;
+  --cider-primary: #B5462A;
+  --cider-primary-hover: #963A24;
+  --cider-secondary: #E3A33B;
+  --cider-border: #E5D6C8;
+  --cider-card-sand: #F0E2D0;
+  --cider-card-terracotta: #E9C5B5;
+  --cider-card-mustard: #F2D79E;
+  --cider-card-mocha: #D9C5B7;
+  --cider-surface-subtle: #F7EEE4;
+  --cider-success-bg: #E4EBDD;
+  --cider-success-text: #36543A;
+  --cider-warning-bg: #F2D79E;
+  --cider-warning-text: #67430D;
+  --cider-danger-bg: #F6DDD5;
+  --cider-danger-text: #963A24;
+}
+
+.studio.cider-press-theme {
+  --st-bg: #FBF3E8;
+  --st-panel: #FFFFFF;
+  --st-raised: #F7EEE4;
+  --st-line: #E5D6C8;
+  --st-text: #281A12;
+  --st-muted: #786458;
+  --st-violet: #B5462A;
+  --st-purple: #B5462A;
+  background: var(--cider-bg);
+  color: var(--cider-text);
+  color-scheme: light;
+}
+
+.studio.cider-press-theme .st-sidebar {
+  background: #FFF9F2;
+  border-right: 1px solid #E5D6C8;
+}
+
+.studio.cider-press-theme .st-brand {
+  color: #281A12;
+}
+
+.studio.cider-press-theme .st-brand > svg,
+.studio.cider-press-theme .st-brand-dot {
+  color: #B5462A;
+}
+
+.studio.cider-press-theme .st-workspace-tag {
+  background: #F0E2D0;
+  border: 1px solid #E5D6C8;
+  border-radius: 12px;
+  padding: 8px 10px;
+  color: #281A12;
+}
+
+.studio.cider-press-theme .st-workspace-avatar {
+  background: #B5462A;
+  color: #FFFFFF;
+  border: none;
+  font-weight: 700;
+}
+
+.studio.cider-press-theme .st-workspace-tag strong {
+  color: #281A12;
+}
+
+.studio.cider-press-theme .st-workspace-tag small {
+  color: #786458;
+}
+
+.studio.cider-press-theme .st-nav-label {
+  color: #786458;
+}
+
+.studio.cider-press-theme .st-sidebar nav a,
+.studio.cider-press-theme .st-sidebar-bottom > a {
+  color: #69554A;
+  border-radius: 10px;
+}
+
+.studio.cider-press-theme .st-sidebar nav a:hover,
+.studio.cider-press-theme .st-sidebar-bottom > a:hover {
+  background: #F7EEE4;
+  color: #281A12;
+}
+
+.studio.cider-press-theme .st-sidebar nav a.active {
+  background: #E9C5B5;
+  color: #281A12;
+  font-weight: 600;
+  border-left: 3px solid #B5462A;
+}
+
+.studio.cider-press-theme .st-sidebar nav a.active svg {
+  color: #B5462A;
+}
+
+.studio.cider-press-theme .st-sidebar-note {
+  color: #786458;
+}
+
+.studio.cider-press-theme .st-sidebar-note .st-dot {
+  background: #B5462A;
+}
+
+.studio.cider-press-theme .st-topbar {
+  background: #FBF3E8;
+  border-bottom: 1px solid #E5D6C8;
+  color: #281A12;
+}
+
+.studio.cider-press-theme .st-crumbs {
+  color: #786458;
+}
+
+.studio.cider-press-theme .st-crumb-current {
+  color: #281A12;
+}
+
+.studio.cider-press-theme .st-main {
+  background: #FBF3E8;
+}
+
 .studio {
   --st-bg: #0b0b0e;
   --st-panel: #111114;
