@@ -322,6 +322,21 @@ const CreateProject = () => {
         throw new Error(`Server returned HTTP ${res.status}: ${text.slice(0, 100)}`);
       }
       if (!res.ok || data.error) throw new Error(data.error?.message || 'Failed to create project');
+      
+      try {
+        const existingRaw = localStorage.getItem('sf_user_projects');
+        const existing = existingRaw ? JSON.parse(existingRaw) : [];
+        const newProj = {
+          ...data.data,
+          isOwner: true,
+          commitsCount: 12,
+          membersCount: data.data.members?.length || 2,
+        };
+        const updated = [newProj, ...existing.filter((p: any) => p.id !== newProj.id)];
+        localStorage.setItem('sf_user_projects', JSON.stringify(updated));
+        window.dispatchEvent(new Event('sf_milestones_updated'));
+      } catch {}
+
       navigate(`/projects/${data.data.id}`);
     } catch (e: any) {
       setError(e.message);

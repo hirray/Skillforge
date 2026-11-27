@@ -27,10 +27,23 @@ const ProjectsList: React.FC = () => {
       })
       .then((d) => {
         const apiProjects: any[] = d?.data || [];
-        if (apiProjects.length > 0) {
+        let localUserProjects: any[] = [];
+        try {
+          const raw = localStorage.getItem('sf_user_projects');
+          if (raw) localUserProjects = JSON.parse(raw);
+        } catch {}
+
+        const combinedSources = [...apiProjects];
+        localUserProjects.forEach((lp) => {
+          if (!combinedSources.some((p) => p.id === lp.id || p.title?.toLowerCase() === lp.title?.toLowerCase())) {
+            combinedSources.unshift(lp);
+          }
+        });
+
+        if (combinedSources.length > 0) {
           // Merge database projects with canonical ones so user never sees an empty screen
           const merged = [...canonicalProjects];
-          apiProjects.forEach((apiProj) => {
+          combinedSources.forEach((apiProj) => {
             const existingIdx = merged.findIndex(
               (p) => p.id === apiProj.id || p.title.toLowerCase() === apiProj.title.toLowerCase()
             );
